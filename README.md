@@ -12,8 +12,8 @@ Integrantes:
    Cuenta Github: https://github.com/RaquelURJC
    
 3.Nombre y Apellidos:
-   Correo universidad:
-   Cuenta Github:
+   Correo universidad: c.gonzalezcr.2016@alumnos.urjc.es
+   Cuenta Github: https://github.com/CarlosGonzalezCruz
    
 4.Nombre y Apellidos:
    Correo universidad:
