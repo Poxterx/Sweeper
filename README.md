@@ -11,7 +11,7 @@ Integrantes:
    Correo universidad: r.pizarro.2016@alumnos.urjc.es   
    Cuenta Github: https://github.com/RaquelURJC  
    
-3. Nombre y Apellidos:  
+3. Nombre y Apellidos: Carlos González Cruz
    Correo universidad: c.gonzalezcr.2016@alumnos.urjc.es  
    Cuenta Github: https://github.com/CarlosGonzalezCruz  
      
