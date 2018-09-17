@@ -3,9 +3,9 @@ Descripción:
 Un juego estilo metroidvania cooperativo en vista cenital ambientado en un mundo contemporáneo. 
 
 Integrantes:
-1. Nombre y Apellidos:
-   Correo universidad:
-   Cuenta Github:
+1. Nombre y Apellidos:Pablo Alconchel Palma
+   Correo universidad: p.alconchel.2016@alumnos.urjc.es
+   Cuenta Github: https://github.com/Poxterx
    
 2.Nombre y Apellidos: Raquel Pizarro Expósito,
    Correo universidad: r.pizarro.2016@alumnos.urjc.es,
