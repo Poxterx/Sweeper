@@ -15,7 +15,7 @@ Integrantes:
    Correo universidad: c.gonzalezcr.2016@alumnos.urjc.es  
    Cuenta Github: https://github.com/CarlosGonzalezCruz  
      
-4.Nombre y Apellidos: Xabier Villanueva Loureiro  
+4. Nombre y Apellidos: Xabier Villanueva Loureiro  
    Correo universidad: x.villanueva.2016@alumnos.urjc.es  
    Cuenta Github: https://github.com/Voidtekvla  
   
