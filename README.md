@@ -7,9 +7,9 @@ Integrantes:
    Correo universidad:
    Cuenta Github:
    
-2.Nombre y Apellidos:
-   Correo universidad:
-   Cuenta Github:
+2.Nombre y Apellidos: Raquel Pizarro Expósito,
+   Correo universidad: r.pizarro.2016@alumnos.urjc.es,
+   Cuenta Github: RaquelURJC
    
 3.Nombre y Apellidos:
    Correo universidad:
