@@ -7,8 +7,8 @@ Integrantes:
    Correo universidad: p.alconchel.2016@alumnos.urjc.es  
    Cuenta Github: https://github.com/Poxterx  
    
-2. Nombre y Apellidos: Raquel Pizarro Expósito
-   Correo universidad: r.pizarro.2016@alumnos.urjc.es 
+2. Nombre y Apellidos: Raquel Pizarro Expósito  
+   Correo universidad: r.pizarro.2016@alumnos.urjc.es   
    Cuenta Github: https://github.com/RaquelURJC  
    
 3. Nombre y Apellidos:  
