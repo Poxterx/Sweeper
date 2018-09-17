@@ -1,6 +1,6 @@
 # "Nombre del Juego"
 Descripción:
-Un juego estilo metroidvania cooperativo en vista cenital ambientado en un mundo contemporáneo. 
+Se trata de un juego estilo mixto entre metroidvania y dungeon crawler cooperativo en vista cenital ambientado en un mundo contemporáneo. Donde los niveles son partes de una ciudad, las cuales deberán ser limpiadas de monstruos para poder desbloquear nuevas zonas y nuevos objetos. Los personajes podrán optar a diversas habilidades que les ayuden en el progreso. 
   
 Integrantes:  
 1. Nombre y Apellidos:Pablo Alconchel Palma  
