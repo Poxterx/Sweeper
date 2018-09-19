@@ -1,9 +1,9 @@
 # Sweeper
 
-[Gameplay](#gameplay)
-[Temática](#tematica)
-[Referencias](#referencias)
-[Integrantes](#integrantes)
+[Gameplay](#gameplay)  
+[Temática](#tematica)  
+[Referencias](#referencias)  
+[Integrantes](#integrantes)  
 
 ## Gameplay
 La partida consta de un mínimo de dos jugadores que explorarán el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar, recoger objetos, y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
