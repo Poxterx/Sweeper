@@ -1,11 +1,11 @@
 # Sweeper
-Se trata de un juego estilo mixto entre metroidvania y dungeon crawler cooperativo en vista cenital ambientado en un mundo contemporáneo donde los niveles son zonas de una ciudad, las cuales deberán ser superadas para poder desbloquear nuevas zonas y nuevos objetos.  
+Se trata de un juego estilo mixto entre metroidvania y dungeon crawler cooperativo en vista cenital ambientado en un mundo contemporáneo donde los niveles son zonas de una ciudad, las cuales deberán ser superadas para poder desbloquear nuevas zonas y nuevos objetos. El objetivo del jugador es limpiar las zonas de monstruos y llegar a la zona final. Para ello, se debe acabar con los bosses.
 
 Habrá una plaza desde la cual se accederá a la mayoría de las zonas del mapa (siempre que se tenga la herramienta adecuada), mientras que otras se accederá a partir de las zonas accedidas por la plaza. Algunas zonas que nos estamos planteando: alcantarillas, metro, supermercado... Hemos pensado en la posibilidad de que el jugador empiece en una especie de callejón que se pasará a modo de tutorial para habituarse a las mecánicas.  
 
 Dependiendo de los objetos que el jugador utilice en cada momento podrá realizar un tipo de acción u otra. A veces se necesitará que se usen varios objetos a la vez. Por ello los jugadores deberán cooperar para avanzar. Los personajes podrán optar a diversas habilidades que les ayuden a progresar.  
   
-Durante la partida, el jugador irá recogiendo distintos tipos de objetos que utilizará como armas o para abrir zonas. Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos.  
+Durante la partida, el jugador irá recogiendo distintos tipos de objetos que utilizará como armas o para abrir zonas. Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos. Habrá monstruos más debiles respawunean pero los más fuertes no. Los más fuertes serían bosses, si acabas con ellos los más débiles dejan de aparecer.  
   
 Integrantes:  
 1. Nombre y Apellidos:Pablo Alconchel Palma  
