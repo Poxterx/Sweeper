@@ -1,12 +1,11 @@
 # Sweeper
-Se trata de un juego estilo mixto entre metroidvania y dungeon crawler cooperativo en vista cenital ambientado en un mundo contemporáneo. Donde los niveles son partes de una ciudad, las cuales deberán ser limpiadas de monstruos para poder desbloquear nuevas zonas y nuevos objetos.  
+Se trata de un juego estilo mixto entre metroidvania y dungeon crawler cooperativo en vista cenital ambientado en un mundo contemporáneo donde los niveles son zonas de una ciudad, las cuales deberán ser superadas para poder desbloquear nuevas zonas y nuevos objetos.  
 
-Habrá una plaza desde la cual se accederá a la mayoría de las zonas del mapa. A otras se accederá a partir de las zonas accedidas por la plaza. Habría otras zonas entre las cuales nos estamos planteando: alcantarillas, metro, supermercado... Hemos pensado en la posibilidad de que el jugador empiece en una especie de callejón que se pasará a modo de tutorial para habitarse a las mecanicas.  
+Habrá una plaza desde la cual se accederá a la mayoría de las zonas del mapa (siempre que se tenga la herramienta adecuada), mientras que otras se accederá a partir de las zonas accedidas por la plaza. Algunas zonas que nos estamos planteando: alcantarillas, metro, supermercado... Hemos pensado en la posibilidad de que el jugador empiece en una especie de callejón que se pasará a modo de tutorial para habituarse a las mecánicas.  
 
-Dependiendo de los objetos que el jugador utilice en cada momento podrá realizar un tipo de acción u otra. A veces se necesitará que se usen varios objetos a la vez. Por ello los jugadores deberán cooperar para avanzar. Los personajes podrán optar a diversas habilidades que les ayuden en el progreso.  
+Dependiendo de los objetos que el jugador utilice en cada momento podrá realizar un tipo de acción u otra. A veces se necesitará que se usen varios objetos a la vez. Por ello los jugadores deberán cooperar para avanzar. Los personajes podrán optar a diversas habilidades que les ayuden a progresar.  
   
-Durante la partida, el jugador ira recogiendo distintos tipos de objetos que utilizará como arma.Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos. Habra monstruos genericos repartidos por el mapa y 2 o 3 específicos por cada zona.   
-
+Durante la partida, el jugador irá recogiendo distintos tipos de objetos que utilizará como armas o para abrir zonas. Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos.  
   
 Integrantes:  
 1. Nombre y Apellidos:Pablo Alconchel Palma  
