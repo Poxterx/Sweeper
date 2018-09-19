@@ -5,7 +5,7 @@ Habrá una plaza desde la cual se accederá a la mayoría de las zonas del mapa 
   
 Dependiendo de los objetos que el jugador utilice en cada momento podrá realizar un tipo de acción u otra. A veces se necesitará que se usen varios objetos a la vez. Por ello los jugadores deberán cooperar para avanzar. Los personajes podrán optar a diversas habilidades que les ayuden a progresar.  
   
-Durante la partida, el jugador irá recogiendo distintos tipos de objetos que utilizará como armas o para abrir zonas. Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos. Habrá monstruos más débiles que respawnearán mientras los "jefes" de cada zona sigan vivos. Al morir estos, dejarán de generarse enemigos en la zona.  
+Durante la partida, el jugador irá recogiendo distintos tipos de objetos que utilizará como armas o para abrir zonas. Algunos objetos estarán esparcidos por el mapa y otros los dejarán caer los monstruos. Habrá monstruos más débiles que reaparecerán mientras los "jefes" de cada zona sigan vivos. Al morir estos, dejarán de generarse enemigos en la zona.  
   
 Integrantes:  
 1. Nombre y Apellidos:Pablo Alconchel Palma  
