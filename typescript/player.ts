@@ -4,14 +4,39 @@ class Player extends Entity {
      */
     private arrowKeys :Phaser.Input.Keyboard.CursorKeys;
 
-    constructor(config :EntityConfig) {
-        super(config);
+    /**
+     * Clase jugador, que define una entidad controlable mediante teclado. Se puede asignar
+     * una configuración específica a cada instancia, pero si no se asigna, la instancia
+     * usará la configuración predeterminada de jugador
+     * @param scene Referencia a la escena donde se creará esta entidad
+     * @param config Opciones específicas para esta instancia en particular
+     */
+    constructor(scene :Phaser.Scene, config? :EntityConfig) {
+        // Si hay una configuración especificada se la pasamos, si no, le
+        // pasamos la configuración por defecto de esta clase
+        super(scene, config? config : {
+            name: "player",
+            path: "assets/testcharacter.png",
+            frameWidth: 84,
+            frameHeight: 120,
+            frameRate: 10,
+            animations: {
+                up: [0],
+                down: [1],
+                side: [3],
+            },
+            startingPosition: {
+                x: 400,
+                y: 300
+            },
+            speed: 300
+        });
     }
 
-    create(scene :Phaser.Scene) {
-        super.create(scene);
+    create() {
+        super.create();
         // Alguien tiene que inicializar al intermediario de input de Phaser
-        this.arrowKeys = scene.input.keyboard.createCursorKeys();
+        this.arrowKeys = this.scene.input.keyboard.createCursorKeys();
     }
 
     /**

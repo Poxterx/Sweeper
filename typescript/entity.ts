@@ -5,14 +5,33 @@ type EntityConfig = {
     frameHeight :integer, // Alto de los fotogramas
     frameRate :integer, // Velocidad de la animación
     animations? :{
-        up: integer[], // Animación cuando camina hacia arriba (espalda)
-        down: integer[], // Animación cuando camina hacia abajo (frente)
-        side: integer[] // Animacion cuando camina hacia la derecha, también usada para la izquierda
+        up :integer[], // Animación cuando camina hacia arriba (espalda)
+        down :integer[], // Animación cuando camina hacia abajo (frente)
+        side :integer[] // Animacion cuando camina hacia la derecha, también usada para la izquierda
+    },
+    startingPosition? :{ // Posición inicial de la entidad en la escena
+        x :integer,
+        y :integer
+    },
+    speed? :integer // Velocidad de desplazamiento en píxeles por segundo
+    collisionBox? :{ // Caja de colisiones de esta entidad
+        x :integer, // Posición de la caja de colisiones respecto al sprite, en píxeles
+        y :integer,
+        width :integer, // Tamaño de la caja de colisiones, en píxeles
+        height :integer
     }
 }
 
-abstract class Entity {
+abstract class Entity extends Phaser.GameObjects.GameObject {
     
+    /**
+     * Nombre que identifica a esta entidad
+     */
+    public name :string;
+    /**
+     * Sprite del sistema de físicas de Phaser que maneja esta entidad
+     */
+    public sprite :Phaser.Physics.Arcade.Sprite;
     /**
      * Referencia al objeto de gráficos de esta entidad, para dibujar el target
      */
@@ -21,65 +40,76 @@ abstract class Entity {
      * Última posición del target respecto a la posición de la entidad, para usar en animación
      */
     private oldTargetDelta :Phaser.Math.Vector2;
-
-    /**
-     * Nombre que identifica a esta entidad
-     */
-    protected name :string;
     /**
      * Objeto de configuración con el que se inicializó esta entidad
      */
     protected config :EntityConfig;
     /**
-     * Sprite del sistema de físicas de Phaser que maneja esta entidad
+     * Referencia a la escena a la que pertenece esta entidad
      */
-    protected sprite :Phaser.Physics.Arcade.Sprite;
+    protected scene :Phaser.Scene;
     /**
-     * Punto del mundo al que debe dirigirse esta entidad
+     * Punto de la escena al que debe dirigirse esta entidad
      */
     protected target :Phaser.Math.Vector2;
 
-
-    constructor(config :EntityConfig) {
+    /**
+     * Crea una entidad basada en las opciones pasadas como parámetro
+     * @param config Objeto que contiene dichas opciones
+     */
+    constructor(scene :Phaser.Scene, config :EntityConfig) {
+        super(scene, "entity");
         this.name = config.name;
         this.config = config;
+        this.scene = scene;
     }
 
     /**
-     * Prepara los recursos que necesite esta entidad para una escena
-     * @param scene Referencia a la escena en cuestión
+     * Prepara los recursos que necesite esta entidad
      */
-    preload(scene :Phaser.Scene) {
+    preload() {
         // Cargamos el sprite en la escena
-        scene.load.spritesheet(this.name, this.config.path, {
+        this.scene.load.spritesheet(this.name, this.config.path, {
             frameWidth: this.config.frameWidth, frameHeight: this.config.frameHeight});
     }
 
     /**
      * Inicializa los recursos preparados con preload()
-     * @param scene Referencia a la escena donde tiene preparados los recursos
      */
-    create(scene :Phaser.Scene) {
+    create() {
         // Introducimos el sprite en el sistema de físicas de Phaser
-        this.sprite = scene.physics.add.sprite(400, 300, this.name, 0);
+        this.sprite = this.scene.physics.add.sprite(
+            this.config.startingPosition.x,
+            this.config.startingPosition.y,
+            this.name, 0);
+
         // Le impedimos salirse del área jugable
         this.sprite.setCollideWorldBounds(true);
+
+        // Le damos valor a todas las propiedades opcionales que se podrían no haber especificado.
+        // No lo hacemos antes porque el valor por defecto de la caja de colisiones requiere que el
+        // sprite ya haya sido cargado y añadido al sistema de físicas, razón por la cual las
+        // propiedades relacionadas con el sprite no son opcionales.
+        this.setDefaultValues();
+
         // Cargamos las animaciones
-        this.loadAnimations(scene);
+        this.loadAnimations(this.scene);
+
+        // Le ponemos la caja de colisiones indicada en la configuración
+        this.setCollisionBox();
 
         // En principio, la entidad no debe dirigirse a ningún punto. Su target es su propia ubicación
-        this.target = this.sprite.body.position;
+        this.target = this.sprite.body.center;
         // Por tanto, ahora mismo el target respecto a su propia posición es el vector nulo
         this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
         // Inicializamos el objeto de gráficos
-        this.graphics = scene.make.graphics(this.target);
+        this.graphics = this.scene.make.graphics(this.target);
     }
 
     /**
      * Actualiza la entidad en cada fotograma de una escena
-     * @param scene Referencia a la escena en cuestión
      */
-    update(scene :Phaser.Scene) {
+    update() {
         // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
         this.controlTarget();
         // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
@@ -88,6 +118,48 @@ abstract class Entity {
         this.turnToTarget();
         // Finalmente, movemos la entidad hacia el target
         this.pursueTarget();
+
+        // Y ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
+        // renderice delante de lo que tiene detrás y viceversa
+        this.sprite.depth = this.sprite.body.center.y;
+    }
+
+    /**
+     * Asigna valores por defecto a las propiedades opcionales no especificadas en la configuración
+     */
+    private setDefaultValues() {
+        // Si no hay posición inicial, la posición inicial es (0, 0)
+        if(!this.config.startingPosition) {
+            this.config.startingPosition = {
+                x: 0,
+                y: 0
+            }
+        }
+        // Si no hay velocidad, la velocidad es 100 píxeles por segundo
+        if(!this.config.speed) {
+            this.config.speed = 100;
+        }
+        // Si no hay caja de colisiones, la caja de colisiones será
+        // una base cuadrada en la parte inferior del sprite
+        if(!this.config.collisionBox) {
+            this.config.collisionBox = {
+                x: 0,
+                y: this.sprite.height - this.config.frameWidth,
+                width: this.config.frameWidth,
+                height: this.config.frameWidth
+            }
+        }
+    }
+
+    /**
+     * Modifica la forma de la caja de colisiones en el sistema de Phaser de acuerdo con el objeto
+     * de configuración de esta entidad
+     */
+    private setCollisionBox() {
+        var body = this.sprite.body as Phaser.Physics.Arcade.Body;
+        var collider = this.config.collisionBox;
+        body.setSize(collider.width, collider.height);
+        body.setOffset(collider.x, collider.y)
     }
 
     /**
@@ -100,19 +172,40 @@ abstract class Entity {
      */
     private pursueTarget() {
         // Velocidad a la que se va a mover
-        var speed = 300;
+        var speed = this.config.speed;
         // Esto lo hacemos debido a que this.sprite.body podría ser un cuerpo dinámico o estático, y en
         // caso de que sea estático no podemos aplicarle un cambio de velocidad. Con este casting
         // garantizamos que es dinámico (Body) y no estático (StaticBody)
         var body = this.sprite.body as Phaser.Physics.Arcade.Body;
         // Dirección en la que se va a mover
-        var deltaVector = {
-            x: this.target.x - this.sprite.body.center.x,
-            y: this.target.y - this.sprite.body.center.y
+        var deltaVector = new Phaser.Math.Vector2(
+            this.target.x - this.sprite.body.center.x,
+            this.target.y - this.sprite.body.center.y
+        );
+
+        // Si el movimiento en cada eje se procesa por separado, entonces es posible que la entidad
+        // se mueva con más velocidad si camina en diagonal que si lo hace en ortogonal. Para evitar
+        // este problema, reducimos la velocidad en el caso de caminar en los dos ejes a la vez.
+        var modifier = {
+            x: deltaVector.y == 0? 1 : Math.cos(Math.PI * 0.25),
+            y: deltaVector.x == 0? 1 : Math.sin(Math.PI * 0.25)
+        }
+
+        // Desfase permitido entre el target y la posición de la entidad. La entidad no tiene que buscar
+        // estar en el píxel exacto que indica su target, basta con que se quede suficientemente cerca.
+        var tolerance = 5;
+
+        // Aplicamos dicho cálculo por separado en cada coordenada del vector modifier
+        for(let coordinate in modifier) {
+            if(Math.abs(deltaVector[coordinate]) < tolerance)
+                modifier[coordinate] = 0;
         }
 
         // Aplica a la entidad la velocidad y dirección seleccionados anteriormente
-        body.setVelocity(speed * Math.sign(deltaVector.x), speed * Math.sign(deltaVector.y));
+        body.setVelocity(
+            modifier.x * speed * Math.sign(deltaVector.x),
+            modifier.y * speed * Math.sign(deltaVector.y)
+        );
     }
 
     /**
@@ -123,6 +216,9 @@ abstract class Entity {
         // porque en Phaser, las operaciones de vectores como 'add' o 'subtract' modifican el vector
         // base en lugar de devolver el resultado sin modificar los operandos, que es lo que uno esperaría
         var targetDelta = this.target.clone().subtract(this.sprite.body.center);
+        // Este cálculo puede dar resultados imprecisos con muchos decimales, por ello conviene
+        // que redondeemos el vector y trabajemos sólo con enteros
+        targetDelta.set(Math.round(targetDelta.x), Math.round(targetDelta.y));
 
         // Si el target no se ha movido respecto a la entidad desde el frame anterior...
         if(targetDelta.equals(this.oldTargetDelta)) {
@@ -147,40 +243,45 @@ abstract class Entity {
             return;
         }
 
-        // Si se está moviendo a la izquierda en este frame, pero o no lo estaba haciendo en el frame
-        // anterior o ha dejado de moverse en vertical
-        if(targetDelta.x < 0 && (targetDelta.x != this.oldTargetDelta.x || targetDelta.y == 0)) {
-            // Ponemos la animación de moverse a la izquierda, que es la animación de moverse a la
-            // derecha pero volteada horizontalmente
-            this.sprite.flipX = true;
-            this.sprite.anims.play(this.name+"@side");
+        // Primero elegimos el eje en el que va a mirar la entidad. El eje elegido será el último eje donde
+        // el target se haya alejado de la entidad. Nótese que es posible que la entidad se gire hacia
+        // el eje que tiene menos desfase, por el hecho de ser el que ha cambiado más recientemente.
+        // Esto es intencional, y está pensado para que, en el caso del jugador, la entidad gire inmediatamente
+        // en cuanto el usuario pulse una tecla nueva. Alternativamente, cuando no hay desfase en un eje,
+        // se escoge automáticamente el otro. Esto es necesario comprobarlo por si, de nuevo en el caso
+        // del jugador, se estaba moviendo en diagonal y el usuario ha soltado una tecla.
+        if(Math.abs(targetDelta.x) > Math.abs(this.oldTargetDelta.x) ||
+        targetDelta.y == 0) {
+            // Aquí, el eje escogido es el eje X. Ignoramos el desfase del target en el eje Y
 
-        // Si se está moviendo a la derecha en este frame, pero o no lo estaba haciendo en el frame
-        // anterior o ha dejado de moverse en vertical
-        } else if(targetDelta.x > 0 && (targetDelta.x != this.oldTargetDelta.x || targetDelta.y == 0)) {
             // Ponemos la animación de moverse a la derecha
-            this.sprite.flipX = false;
             this.sprite.anims.play(this.name+"@side");
-        }
 
-        // Si se está moviendo hacia arriba en este frame, pero o no lo estaba haciendo en el frame
-        // anterior o ha dejado de moverse en horizontal
-        if(targetDelta.y < 0 && (targetDelta.y != this.oldTargetDelta.y || targetDelta.x == 0)) {
-            // Ponemos la animación de moverse hacia arriba
+            // Si el target queda a la izquierda
+            if(targetDelta.x < 0) {
+                // Entonces la animación está mirando hacia el lado contrario. La volteamos
+                this.sprite.flipX = true;
+            // Si el target queda a la derecha
+            } else if(targetDelta.x > 0) {
+                // Entonces la animación está mirando hacia el lado correcto
+                this.sprite.flipX = false;
+            }
+        } else if(Math.abs(targetDelta.y) > Math.abs(this.oldTargetDelta.y) ||
+        targetDelta.x == 0) {
+            // Aquí, el eje escogido es el eje Y. Ignoramos el desfase del target en el eje X
+
+            // Si el target queda hacia arriba
+            if(targetDelta.y < 0) {
+                // Ponemos la animación de moverse hacia arriba
+                this.sprite.anims.play(this.name+"@up");
+            // Si el target queda hacia abajo
+            } else if(targetDelta.y > 0) {
+                // Ponemos la animación de moverse hacia abajo
+                this.sprite.anims.play(this.name+"@down");
+            }
+            // Estas animaciones no necesitan volteo horizontal
             this.sprite.flipX = false;
-            this.sprite.anims.play(this.name+"@up");
-
-        // Si se está moviendo hacia abajo en este frame, pero o no lo estaba haciendo en el frame
-        // anterior o ha dejado de moverse en horizontal
-        } else if(targetDelta.y > 0 && (targetDelta.y != this.oldTargetDelta.y || targetDelta.x == 0)) {
-            // Ponemos la animación de moverse hacia abajo
-            this.sprite.flipX = false;
-            this.sprite.anims.play(this.name+"@down");
         }
-
-        // Estas comprobaciones están pensadas para garantizar que, cada vez que el target se mueva,
-        // el giro de la entidad refleje ese movimiento. Por ejemplo, el jugador siempre miraría a la
-        // derecha al pulsar el botón correspondiente, independientemente de su estado de movimiento
 
         // Indicamos al próximo frame el desfase actual entre el target y la posición
         this.oldTargetDelta = targetDelta;
@@ -195,6 +296,9 @@ abstract class Entity {
         this.graphics.clear();
         // Nos colocamos justo en el target
         this.graphics.setPosition(this.target.x, this.target.y);
+        // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
+        this.graphics.depth = Infinity;
+
         // Dibujamos una cruz blanca
         this.graphics.lineStyle(5, 0xFFFFFF);
         this.graphics.beginPath();
@@ -202,10 +306,10 @@ abstract class Entity {
         this.graphics.lineTo(5, 0);
         this.graphics.moveTo(0, -5);
         this.graphics.lineTo(0, 5);
-        this.graphics.lineStyle(3, 0xFFFFFF);
 
         // Dibujamos una línea entre el target actual y el target del frame anterior, para
         // apreciar los cambios visualmente
+        this.graphics.lineStyle(3, 0xFFFFFF);
         var targetDelta = this.target.clone().subtract(this.sprite.body.center);
         this.graphics.moveTo(0, 0);
         this.graphics.lineTo(

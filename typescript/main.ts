@@ -14,7 +14,7 @@ const game = new Phaser.Game({
 
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.0.0",
+    version: "0.0.1",
 
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos
@@ -26,7 +26,7 @@ const game = new Phaser.Game({
     },
 
     // Referencia a las escenas del juego. De momento sólo está la escena principal
-    scene: SceneOverworld
+    scene: new SceneOverworld(1500, 1500)
 });
 
 // Mostrar en la pestaña los datos del juego
