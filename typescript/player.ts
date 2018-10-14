@@ -16,7 +16,7 @@ class Player extends Entity {
         // pasamos la configuración por defecto de esta clase
         super(scene, config? config : {
             name: "player",
-            path: "assets/testcharacter.png",
+            path: "testcharacter.png",
             frameWidth: 84,
             frameHeight: 120,
             frameRate: 10,
@@ -27,7 +27,7 @@ class Player extends Entity {
             },
             startingPosition: {
                 x: 400,
-                y: 300
+                y: 550
             },
             speed: 300
         });

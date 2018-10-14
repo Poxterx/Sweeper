@@ -1,23 +1,71 @@
 type EntityConfig = {
-    path :string, // Ruta donde se almacena el sprite de la entidad
-    name :string, // Nombre con el que se identifica la identidad
-    frameWidth :integer, // Ancho de los fotogramas
-    frameHeight :integer, // Alto de los fotogramas
-    frameRate :integer, // Velocidad de la animación
+    /**
+     * Nombre que identifica a la entidad
+     */
+    name :string,
+    /**
+     * Nombre o dirección donde se almacena el sprite de la entidad (partiendo de assets/sprites)
+     */
+    path :string,
+    /**
+     * Ancho de los fotogramas de la animación
+     */
+    frameWidth :integer,
+    /**
+     * Alto de los fotogramas de la animación
+     */
+    frameHeight :integer,
+    /**
+     * Velocidad de la animación
+     */
+    frameRate :integer,
+    /**
+     * Animaciones de movimiento de la entidad
+     */
     animations? :{
-        up :integer[], // Animación cuando camina hacia arriba (espalda)
-        down :integer[], // Animación cuando camina hacia abajo (frente)
-        side :integer[] // Animacion cuando camina hacia la derecha, también usada para la izquierda
+        /**
+         * Animación cuando camina hacia arriba (espalda)
+         */
+        up :integer[], 
+        /**
+         * Animación cuando camina hacia abajo (frente)
+         */
+        down :integer[],
+        /**
+         * Animación cuando camina hacia la derecha, también usada para la izquierda
+         */
+        side :integer[]
     },
-    startingPosition? :{ // Posición inicial de la entidad en la escena
+    /**
+     * Posición inicial de la entidad en la escena
+     */
+    startingPosition? :{
         x :integer,
         y :integer
     },
-    speed? :integer // Velocidad de desplazamiento en píxeles por segundo
-    collisionBox? :{ // Caja de colisiones de esta entidad
-        x :integer, // Posición de la caja de colisiones respecto al sprite, en píxeles
+    /**
+     * Velocidad de desplazamiento al caminar en píxeles por segundo
+     */
+    speed? :integer
+    /**
+     * Dimensiones de la caja de colisiones de esta entidad
+     */
+    collisionBox? :{
+        /**
+         * Desfase en píxeles desde el lado izquierdo del sprite hasta el lado izquierdo de la caja de colisiones
+         */
+        x :integer,
+        /**
+         * Desfase en píxeles desde el lado superior del sprite hasta el lado superior de la caja de colisiones
+         */
         y :integer,
-        width :integer, // Tamaño de la caja de colisiones, en píxeles
+        /**
+         * Anchura en píxeles de la caja de colisiones
+         */
+        width :integer,
+        /**
+         * Altura en píxeles de la caja de colisiones
+         */
         height :integer
     }
 }
@@ -69,7 +117,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      */
     preload() {
         // Cargamos el sprite en la escena
-        this.scene.load.spritesheet(this.name, this.config.path, {
+        this.scene.load.spritesheet(this.name, "assets/sprites/"+this.config.path, {
             frameWidth: this.config.frameWidth, frameHeight: this.config.frameHeight});
     }
 

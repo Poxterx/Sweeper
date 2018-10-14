@@ -5,5 +5,9 @@
         "sourceMap": true, // Generar mapas de depuración. Los mapas generados
         // no deberían estar en el repositorio porque están excluidos en .gitignore
         "outDir": "javascript" // Carpeta para depositar los archivos generados
-    }
+    },
+    "exclude": [
+        "assets",
+        "tiled"
+    ]
 }

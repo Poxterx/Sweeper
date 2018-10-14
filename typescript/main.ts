@@ -9,15 +9,15 @@ const game = new Phaser.Game({
     // Referencia al lienzo
     canvas: document.getElementById("gameCanvas") as HTMLCanvasElement,
 
-    // Modo de renderizado de Phaser
-    type: Phaser.AUTO,
+    // Modo de renderizado de Phaser. Usamos el modo Canvas porque en modo WebGL los tiles provocan lag.
+    type: Phaser.CANVAS,
 
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.0.1",
+    version: "0.0.2",
 
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
-    // se ajusta a la idea de exploración en vista cenital que buscamos
+    // se ajusta a la idea de exploración en vista cenital que buscamos.
     physics: {
         default: "arcade",
         arcade: {
@@ -25,8 +25,14 @@ const game = new Phaser.Game({
         }
     },
 
-    // Referencia a las escenas del juego. De momento sólo está la escena principal
-    scene: new SceneOverworld(1500, 1500)
+    // Desactivamos el antialiasing por ahora
+    pixelArt: true,
+
+    // Referencia a las escenas del juego. De momento sólo está la escena principal.
+    scene: new SceneOverworld(new Room("mainroom", {
+        tilemap: "Test.json",
+        tileset: "test_tileset.png"
+    }))
 });
 
 // Mostrar en la pestaña los datos del juego

@@ -11,7 +11,7 @@ class Dummy extends Entity {
     constructor(scene :Phaser.Scene, config? :EntityConfig) {
         super(scene, config? config : {
             name: "dummy",
-            path: "assets/testcharacter.png",
+            path: "testcharacter.png",
             frameWidth: 84,
             frameHeight: 120,
             frameRate: 10,

@@ -1,25 +1,23 @@
 class SceneOverworld extends Phaser.Scene {
     
     /**
-     * Anchura (x) y altura (y) de la escena, en píxeles.
-     * IMPORTANTE: EN VERSIONES FUTURAS, ES PROBABLE QUE LAS UNIDADES DE ESTE VECTOR PASEN DE PÍXELES A TILES
-     */
-    public size :Phaser.Math.Vector2;
-    /**
      * Entidades de esta escena
      */
     private entities :Entity[];
+    /**
+     * Sala en la que tiene lugar esta escena
+     */
+    private room :Room;
 
     /**
-     * Crea una escena con las dimensiones indicadas.
-     * IMPORTANTE: EN VERSIONES FUTURAS, ES PROBABLE QUE LAS UNIDADES DE ESTOS PARÁMETROS PASEN DE PÍXELES A TILES
-     * @param width Anchura en píxeles de la escena
-     * @param height Altura en píxeles de la escena
+     * Nueva escena que tiene lugar en la sala indicada
+     * @param room La sala en cuestión
      */
-    constructor(width :integer, height :integer) {
+    constructor(room :Room) {
         super({key: "SceneOverworld"});
 
-        this.size = new Phaser.Math.Vector2(width, height);
+        this.room = room;
+        this.room.scene = this;
     }
 
     /**
@@ -31,34 +29,37 @@ class SceneOverworld extends Phaser.Scene {
             new Player(this),
             new Dummy(this)
         ];
-        // Cargamos todas las entidades y el fondo
+        // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
-        this.load.image("sky", "http://labs.phaser.io/assets/skies/space3.png");
+        this.room.preload();     
     }
 
     /**
      * Inicializa los recursos de la escena
      */
     create() {
-        // Dibujamos el fondo
-        this.add.image(400, 300, "sky");
-        // Indicamos los límites del área jugable
-        this.physics.world.setBounds(0, 0, this.size.x, this.size.y);
+        // Inicializamos la sala
+        this.room.create();
+
+        // Indicamos los límites del área jugable de acuerdo con la sala
+        this.physics.world.setBounds(0, 0, this.room.size.x, this.room.size.y);
 
         // Inicializamos todas las entidades
         this.entities.forEach(e => e.create());
 
-        // Activamos las colisiones entre todos los sprites de entidades de la escena
+        // Activamos las colisiones entre todos los sprites de entidades
+        // de la escena, así como con la propia sala
         var sprites = [];
         this.entities.forEach(e => sprites.push(e.sprite));
         this.physics.add.collider(sprites, sprites);
+        this.physics.add.collider(sprites, this.room.colliderLayer);
 
         // Centramos la cámara en el jugador (la primera entidad)
         (this.entities[0] as Player).lockCamera(this.cameras.main);
 
         // Indicamos límites del área renderizable para evitar que la cámara dibuje la zona negra
         // externa al área jugable
-        this.cameras.main.setBounds(0, 0, this.size.x, this.size.y);
+        this.cameras.main.setBounds(0, 0, this.room.size.x, this.room.size.y);
     }
 
     /**

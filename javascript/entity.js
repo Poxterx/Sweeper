@@ -14,7 +14,7 @@ class Entity extends Phaser.GameObjects.GameObject {
      */
     preload() {
         // Cargamos el sprite en la escena
-        this.scene.load.spritesheet(this.name, this.config.path, {
+        this.scene.load.spritesheet(this.name, "assets/sprites/" + this.config.path, {
             frameWidth: this.config.frameWidth, frameHeight: this.config.frameHeight
         });
     }

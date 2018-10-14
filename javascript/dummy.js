@@ -10,7 +10,7 @@ class Dummy extends Entity {
     constructor(scene, config) {
         super(scene, config ? config : {
             name: "dummy",
-            path: "assets/testcharacter.png",
+            path: "testcharacter.png",
             frameWidth: 84,
             frameHeight: 120,
             frameRate: 10,
