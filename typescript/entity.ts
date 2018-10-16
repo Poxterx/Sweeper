@@ -245,7 +245,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
 
         // Aplicamos dicho cálculo por separado en cada coordenada del vector modifier
         for(let coordinate in modifier) {
-            if(Math.abs(deltaVector[coordinate]) < tolerance)
+            if(Math.abs(deltaVector[coordinate]) <= tolerance)
                 modifier[coordinate] = 0;
         }
 
@@ -291,15 +291,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
             return;
         }
 
-        // Primero elegimos el eje en el que va a mirar la entidad. El eje elegido será el último eje donde
-        // el target se haya alejado de la entidad. Nótese que es posible que la entidad se gire hacia
-        // el eje que tiene menos desfase, por el hecho de ser el que ha cambiado más recientemente.
-        // Esto es intencional, y está pensado para que, en el caso del jugador, la entidad gire inmediatamente
-        // en cuanto el usuario pulse una tecla nueva. Alternativamente, cuando no hay desfase en un eje,
-        // se escoge automáticamente el otro. Esto es necesario comprobarlo por si, de nuevo en el caso
-        // del jugador, se estaba moviendo en diagonal y el usuario ha soltado una tecla.
-        if(Math.abs(targetDelta.x) > Math.abs(this.oldTargetDelta.x) ||
-        targetDelta.y == 0) {
+        // En las siguientes operaciones vamos a comprobar si la entidad comparte alguna coordenada con
+        // su target, pero no necesitamos que estén alineados al píxel. Por esta razón le añadimos tolerancia.
+        var tolerance = 5;
+
+        // Primero elegimos el eje en el que va a mirar la entidad
+        if(this.isPreferredAxis(targetDelta.x, targetDelta.y, this.oldTargetDelta.x, tolerance)) {
             // Aquí, el eje escogido es el eje X. Ignoramos el desfase del target en el eje Y
 
             // Ponemos la animación de moverse a la derecha
@@ -314,8 +311,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
                 // Entonces la animación está mirando hacia el lado correcto
                 this.sprite.flipX = false;
             }
-        } else if(Math.abs(targetDelta.y) > Math.abs(this.oldTargetDelta.y) ||
-        targetDelta.x == 0) {
+        } else if(this.isPreferredAxis(targetDelta.y, targetDelta.x, this.oldTargetDelta.y, tolerance)) {
             // Aquí, el eje escogido es el eje Y. Ignoramos el desfase del target en el eje X
 
             // Si el target queda hacia arriba
@@ -333,6 +329,31 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
 
         // Indicamos al próximo frame el desfase actual entre el target y la posición
         this.oldTargetDelta = targetDelta;
+    }
+
+    /**
+     * Indica si el eje al que corresponde el valor indicado sería el eje elegido para que la entidad
+     * mire en su dirección, teniendo en cuenta la posición actual del target (thisAxis, otherAxis) y
+     * el valor del eje seleccionado en el frame anterior (oldAxis).
+     * 
+     * El eje preferido será el último eje donde el target se haya alejado de la entidad. Nótese que
+     * es posible que la entidad se gire hacia el eje que tiene menos desfase, por el hecho de ser el que
+     * ha cambiado más recientemente. Esto es intencional, y está pensado para que, en el caso del jugador,
+     * la entidad gire inmediatamente en cuanto el usuario pulse una tecla nueva. Alternativamente,
+     * cuando no hay desfase en un eje, se escoge automáticamente el otro. Esto es necesario comprobarlo
+     * por si, de nuevo en el caso del jugador, se estaba moviendo en diagonal y el usuario ha soltado una tecla.
+     * 
+     * @param thisAxis La coordenada del target en el eje a comprobar
+     * @param otherAxis La coordenada del target en el otro eje
+     * @param oldAxis La coordenada del target en el eje a comprobar en el frame anterior
+     * @param tolerance Valor máximo permitido para considerarse como cero
+     */
+    private isPreferredAxis(thisAxis :number, otherAxis :number,
+    oldAxis :number, tolerance :number = 0) {
+        return Math.abs(thisAxis) > Math.abs(oldAxis)
+        || Math.abs(thisAxis) == Math.abs(oldAxis)
+            && Math.sign(thisAxis) != Math.sign(oldAxis)
+        || Math.abs(otherAxis) <= tolerance;
     }
 
     /**

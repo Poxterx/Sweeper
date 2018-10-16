@@ -42,6 +42,8 @@ class SceneOverworld extends Phaser.Scene {
         // Indicamos límites del área renderizable para evitar que la cámara dibuje la zona negra
         // externa al área jugable
         this.cameras.main.setBounds(0, 0, this.room.size.x, this.room.size.y);
+        // Iniciamos la escena encargada de manejar la interfaz
+        this.scene.launch("SceneGUI");
     }
     /**
      * Actualiza la escena en cada fotograma
