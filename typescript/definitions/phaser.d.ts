@@ -66458,10 +66458,12 @@ declare namespace Phaser {
              */
             pixelY: number;
 
+            // [CAMBIADO] properties era de tipo object, pero debe aceptar cualquier propiedad establecida
+            // en Tiled. Por esa razón se ha cambiado a any.
             /**
              * Tile specific properties. These usually come from Tiled.
              */
-            properties: object;
+            properties: any;
 
             /**
              * The rotation angle of this tile.

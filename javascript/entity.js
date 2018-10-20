@@ -59,9 +59,54 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.sprite.depth = this.sprite.body.center.y;
     }
     /**
+     * Devuelve la posición del centro del sprite de esta entidad
+     */
+    getPosition() {
+        return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y);
+    }
+    /**
+     * Devuelve un string que indica la dirección en la que está mirando la entidad
+     */
+    getDirection() {
+        if (!this.sprite.anims.currentAnim) {
+            return "up";
+        }
+        var key = this.sprite.anims.currentAnim.key.split("@")[1].toLowerCase();
+        var ret = null;
+        if (key == "side") {
+            if (this.sprite.flipX)
+                ret = "left";
+            else
+                ret = "right";
+        }
+        else {
+            ret = key;
+        }
+        return ret;
+    }
+    /**
+     * Devuelve la posición del fotograma actual en el array de la animación que tenga el sprite
+     * de la entidad en este momento
+     */
+    getAnimationFrame() {
+        if (!this.sprite.anims.currentFrame)
+            return 0;
+        else
+            return this.sprite.anims.currentFrame.index - 1;
+    }
+    /**
      * Asigna valores por defecto a las propiedades opcionales no especificadas en la configuración
      */
     setDefaultValues() {
+        // Si no hay información sobre las animaciones, entonces todas las animaciones muestran
+        // únicamente el primer fotograma
+        if (!this.config.animations) {
+            this.config.animations = {
+                up: [0],
+                down: [0],
+                side: [0]
+            };
+        }
         // Si no hay posición inicial, la posición inicial es (0, 0)
         if (!this.config.startingPosition) {
             this.config.startingPosition = {

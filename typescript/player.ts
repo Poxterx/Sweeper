@@ -3,7 +3,11 @@ class Player extends Entity {
      * Referencia al intermediario de input de Phaser
      */
     private arrowKeys :Phaser.Input.Keyboard.CursorKeys;
-
+    /**
+     * Arma que porta este jugador
+     */
+    private weapon :Weapon;
+    
     /**
      * Clase jugador, que define una entidad controlable mediante teclado. Se puede asignar
      * una configuración específica a cada instancia, pero si no se asigna, la instancia
@@ -21,9 +25,9 @@ class Player extends Entity {
             frameHeight: 120,
             frameRate: 10,
             animations: {
-                up: [0],
-                down: [1],
-                side: [3],
+                up: [0, 0, 0, 0],
+                down: [1, 1, 1, 1],
+                side: [3, 3, 3, 3],
             },
             startingPosition: {
                 x: 400,
@@ -31,12 +35,49 @@ class Player extends Entity {
             },
             speed: 300
         });
+
+        // Creamos el arma
+        this.weapon = new Weapon(this, {
+            name: "testweapon",
+            path: "testweapon.png",
+            frameWidth: 128,
+            frameHeight: 128,
+            frameRate: 10,
+            offset: {
+                up: {
+                    x: [40, 40, 40, 40],
+                    y: [-32, -28, -24, -28]
+                },
+                down: {
+                    x: [-40, -40, -40, -40],
+                    y: [-32, -28, -24, -28]
+                },
+                side: {
+                    x: [-40, -40, -40, -40],
+                    y: [-32, -28, -24, -28]
+                }
+            }
+        });
+    }
+
+    preload() {
+        super.preload();
+        // Hay que cargar los recursos el arma
+        this.weapon.preload();
     }
 
     create() {
         super.create();
         // Alguien tiene que inicializar al intermediario de input de Phaser
         this.arrowKeys = this.scene.input.keyboard.createCursorKeys();
+        // Y el arma
+        this.weapon.create();
+    }
+
+    update() {
+        super.update();
+        // Después de actualizar al jugador, actualizamos también el arma
+        this.weapon.update();
     }
 
     /**

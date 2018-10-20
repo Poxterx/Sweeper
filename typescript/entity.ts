@@ -4,7 +4,7 @@ type EntityConfig = {
      */
     name :string,
     /**
-     * Nombre o dirección donde se almacena el sprite de la entidad (partiendo de assets/sprites)
+     * Dirección donde se almacena el sprite de la entidad (partiendo de assets/sprites)
      */
     path :string,
     /**
@@ -81,6 +81,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      */
     public sprite :Phaser.Physics.Arcade.Sprite;
     /**
+     * Referencia a la escena a la que pertenece esta entidad
+     */
+    public scene :Phaser.Scene;
+    /**
      * Referencia al objeto de gráficos de esta entidad, para dibujar el target
      */
     private graphics :Phaser.GameObjects.Graphics;
@@ -92,10 +96,6 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Objeto de configuración con el que se inicializó esta entidad
      */
     protected config :EntityConfig;
-    /**
-     * Referencia a la escena a la que pertenece esta entidad
-     */
-    protected scene :Phaser.Scene;
     /**
      * Punto de la escena al que debe dirigirse esta entidad
      */
@@ -173,9 +173,71 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     }
 
     /**
+     * Devuelve la posición del centro del sprite de esta entidad
+     */
+    public getPosition() {
+        return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y);
+    }
+
+    /**
+     * Devuelve un string que indica la dirección en la que está mirando la entidad
+     */
+    public getDirection() : "up" | "down" | "left" | "right" {
+        // La dirección se saca de la animación, pero si no hay animación...
+        if(!this.sprite.anims.currentAnim) {
+            // ... devolvemos que está mirando hacia arriba por defecto
+            return "up";
+        }
+        // Las animaciones están convenientemente etiquetadas en el formato "nombre@dirección".
+        // Para sacar la dirección, obtenemos la clave de la animación actual y dividimos el string
+        // por la arroba. Luego cogemos la segunda parte y la pasamos a minúsculas, y ya tenemos
+        // nuestra dirección.
+        var key = this.sprite.anims.currentAnim.key.split("@")[1].toLowerCase();
+        var ret = null;
+        // Salvo si la dirección es hacia el lado, en cuyo caso tenemos que hacer una comprobación más
+        if(key == "side") {
+            // Si el sprite está volteado es porque está mirando a la izquierda
+            if(this.sprite.flipX)
+                ret = "left";
+            // Y si no, es porque está mirando a la derecha
+            else
+                ret = "right";
+        } else {
+            // Pero si está mirando hacia arriba o abajo, con eso es suficiente
+            ret = key;
+        }
+        // Devolvemos el resultado
+        return ret;
+    }
+
+    /**
+     * Devuelve la posición del fotograma actual en el array de la animación que tenga el sprite
+     * de la entidad en este momento
+     */
+    public getAnimationFrame() {
+        // Si no hay animación devolvemos 0 por defecto
+        if(!this.sprite.anims.currentFrame)
+            return 0;
+        // Y si la hay, hay que tener en cuenta que el índice de la animación en Phaser está
+        // desfasado una unidad de más, por lo que el primer fotograma es el número 1.
+        // Le restamos uno para tener la posición que le correspondería en un array.
+        else
+            return this.sprite.anims.currentFrame.index - 1;
+    }
+
+    /**
      * Asigna valores por defecto a las propiedades opcionales no especificadas en la configuración
      */
     private setDefaultValues() {
+        // Si no hay información sobre las animaciones, entonces todas las animaciones muestran
+        // únicamente el primer fotograma
+        if(!this.config.animations) {
+            this.config.animations = {
+                up: [0],
+                down: [0],
+                side: [0]
+            }
+        }
         // Si no hay posición inicial, la posición inicial es (0, 0)
         if(!this.config.startingPosition) {
             this.config.startingPosition = {

@@ -26,19 +26,6 @@
          "width":19,
          "x":0,
          "y":0
-        }, 
-        {
-         "data":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAMAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAMAAAADAAAAAwAAAAMAAAAEAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-         "encoding":"base64",
-         "height":12,
-         "id":5,
-         "name":"Wall above player",
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":true,
-         "width":19,
-         "x":0,
-         "y":0
         }],
  "nextlayerid":6,
  "nextobjectid":1,
@@ -50,7 +37,7 @@
         {
          "columns":6,
          "firstgid":1,
-         "image":"test_tileset.png",
+         "image":"..\/..\/tiled\/test_tileset.png",
          "imageheight":384,
          "imagewidth":768,
          "margin":0,
@@ -71,6 +58,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }]
                 }, 
                 {
@@ -78,6 +70,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":false
                         }],
@@ -90,6 +87,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[-1, -1, 0, 0]
                 }, 
@@ -98,6 +100,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":false
                         }],
@@ -110,6 +117,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[0, 0, 0, -1]
                 }, 
@@ -120,6 +132,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[0, 0, -1, 0]
                 }, 
@@ -128,6 +145,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":false
                         }]
@@ -139,6 +161,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[-1, 0, -1, 0]
                 }, 
@@ -149,6 +176,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[0, 0, 0, 0]
                 }, 
@@ -159,6 +191,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[0, -1, 0, -1]
                 }, 
@@ -169,6 +206,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[0, -1, 0, 0]
                 }, 
@@ -201,6 +243,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }],
                  "terrain":[-1, 0, 0, 0]
                 }, 
@@ -211,6 +258,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }]
                 }, 
                 {
@@ -218,6 +270,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":true
                         }],
@@ -230,6 +287,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":true
                         }],
                  "terrain":[0, 0, -1, -1]
                 }, 
@@ -238,6 +300,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":true
                         }],
@@ -250,6 +317,11 @@
                          "name":"Solid",
                          "type":"bool",
                          "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
+                         "type":"bool",
+                         "value":false
                         }]
                 }, 
                 {
@@ -257,6 +329,11 @@
                  "properties":[
                         {
                          "name":"Solid",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
+                         "name":"Vertical",
                          "type":"bool",
                          "value":false
                         }]
