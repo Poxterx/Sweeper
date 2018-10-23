@@ -8,6 +8,7 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.name = config.name;
         this.config = config;
         this.scene = scene;
+        this.mode = AnimationInfo.default().mode;
     }
     /**
      * Prepara los recursos que necesite esta entidad
@@ -32,7 +33,7 @@ class Entity extends Phaser.GameObjects.GameObject {
         // propiedades relacionadas con el sprite no son opcionales.
         this.setDefaultValues();
         // Cargamos las animaciones
-        this.loadAnimations(this.scene);
+        this.loadAnimations();
         // Le ponemos la caja de colisiones indicada en la configuración
         this.setCollisionBox();
         // En principio, la entidad no debe dirigirse a ningún punto. Su target es su propia ubicación
@@ -46,15 +47,23 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Actualiza la entidad en cada fotograma de una escena
      */
     update() {
-        // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
-        this.controlTarget();
-        // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
-        this.drawTarget();
-        // Elegimos la animación correspondiente para que la entidad mire hacia el target
-        this.turnToTarget();
-        // Finalmente, movemos la entidad hacia el target
-        this.pursueTarget();
-        // Y ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
+        // Elegimos lo que hacer a continuación en base al modo de la entidad
+        switch (this.mode) {
+            case "walk":
+                // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
+                this.controlTarget();
+                // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
+                this.drawTarget();
+                // Elegimos la animación correspondiente para que la entidad mire hacia el target
+                this.turnToTarget();
+                // Finalmente, movemos la entidad hacia el target
+                this.pursueTarget();
+                break;
+            case "attack":
+                // Todavía nada
+                break;
+        }
+        // Ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
         // renderice delante de lo que tiene detrás y viceversa
         this.sprite.depth = this.sprite.body.center.y;
     }
@@ -68,31 +77,29 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Devuelve un string que indica la dirección en la que está mirando la entidad
      */
     getDirection() {
-        if (!this.sprite.anims.currentAnim) {
-            return "up";
-        }
-        var key = this.sprite.anims.currentAnim.key.split("@")[1].toLowerCase();
-        var ret = null;
-        if (key == "side") {
+        // Obtenemos la información de la animación actual, de la que podemos deducir la dirección
+        var info = AnimationInfo.current(this.sprite.anims);
+        // Hay que tener en cuenta que las animaciones no distinguen explícitamente entre
+        // derecha e izquierda, por eso debemos hacer una comprobación extra
+        var direction = info.direction;
+        // En caso de que la entidad esté mirando hacia "el lado"
+        if (direction == "side") {
+            // Comprobamos si está volteado horizontalmente o no
             if (this.sprite.flipX)
-                ret = "left";
+                // Si lo está, es que está mirando a la izquierda 
+                direction = "left";
             else
-                ret = "right";
+                // Y si no, está mirando a la derecha
+                direction = "right";
         }
-        else {
-            ret = key;
-        }
-        return ret;
+        // Ya podemos devolver el string correcto que indica la dirección
+        return direction;
     }
     /**
-     * Devuelve la posición del fotograma actual en el array de la animación que tenga el sprite
-     * de la entidad en este momento
+     * Devuelve la información de la animación que la entidad está usando en este momento
      */
-    getAnimationFrame() {
-        if (!this.sprite.anims.currentFrame)
-            return 0;
-        else
-            return this.sprite.anims.currentFrame.index - 1;
+    currentAnimationInfo() {
+        return AnimationInfo.current(this.sprite.anims);
     }
     /**
      * Asigna valores por defecto a las propiedades opcionales no especificadas en la configuración
@@ -102,10 +109,17 @@ class Entity extends Phaser.GameObjects.GameObject {
         // únicamente el primer fotograma
         if (!this.config.animations) {
             this.config.animations = {
-                up: [0],
-                down: [0],
-                side: [0]
+                walk: {
+                    up: [0],
+                    down: [0],
+                    side: [0]
+                }
             };
+        }
+        // Si no hay información sobre las animaciones de ataque, copiamos las animaciones
+        // de caminar a modo de apaño
+        if (!this.config.animations.attack) {
+            this.config.animations.attack = clone(this.config.animations.walk);
         }
         // Si no hay posición inicial, la posición inicial es (0, 0)
         if (!this.config.startingPosition) {
@@ -206,7 +220,7 @@ class Entity extends Phaser.GameObjects.GameObject {
         if (this.isPreferredAxis(targetDelta.x, targetDelta.y, this.oldTargetDelta.x, tolerance)) {
             // Aquí, el eje escogido es el eje X. Ignoramos el desfase del target en el eje Y
             // Ponemos la animación de moverse a la derecha
-            this.sprite.anims.play(this.name + "@side");
+            this.sprite.anims.play(this.name + "@" + this.mode + "@side");
             // Si el target queda a la izquierda
             if (targetDelta.x < 0) {
                 // Entonces la animación está mirando hacia el lado contrario. La volteamos
@@ -223,12 +237,12 @@ class Entity extends Phaser.GameObjects.GameObject {
             // Si el target queda hacia arriba
             if (targetDelta.y < 0) {
                 // Ponemos la animación de moverse hacia arriba
-                this.sprite.anims.play(this.name + "@up");
+                this.sprite.anims.play(this.name + "@" + this.mode + "@up");
                 // Si el target queda hacia abajo
             }
             else if (targetDelta.y > 0) {
                 // Ponemos la animación de moverse hacia abajo
-                this.sprite.anims.play(this.name + "@down");
+                this.sprite.anims.play(this.name + "@" + this.mode + "@down");
             }
             // Estas animaciones no necesitan volteo horizontal
             this.sprite.flipX = false;
@@ -291,33 +305,22 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Carga las animaciones indicadas en la configuración de esta entidad en una escena
      * @param scene Referencia a la escena en cuestión
      */
-    loadAnimations(scene) {
+    loadAnimations() {
         // Si no hay datos de animación en la configuración
         if (!this.config.animations) {
             // No podemos hacer nada
             return;
         }
-        // Caminar hacia arriba
-        scene.anims.create({
-            key: this.name + "@up",
-            frames: scene.anims.generateFrameNumbers(this.name, { frames: this.config.animations.up }),
-            frameRate: this.config.frameRate,
-            repeat: -1
-        });
-        // Caminar hacia abajo
-        scene.anims.create({
-            key: this.name + "@down",
-            frames: scene.anims.generateFrameNumbers(this.name, { frames: this.config.animations.down }),
-            frameRate: this.config.frameRate,
-            repeat: -1
-        });
-        // Caminar hacia el lado (hacia la derecha en particular, pero se usa también para la izquierda)
-        scene.anims.create({
-            key: this.name + "@side",
-            frames: scene.anims.generateFrameNumbers(this.name, { frames: this.config.animations.side }),
-            frameRate: this.config.frameRate,
-            repeat: -1
-        });
+        // Atajo conveniente para referirnos a las animaciones especificadas en la configuración
+        var anims = this.config.animations;
+        // Animaciones de caminar
+        addAnimation(this.scene, this.name, "walk", "up", anims.walk.up, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "walk", "down", anims.walk.down, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "walk", "side", anims.walk.side, this.config.frameRate, true);
+        // Animaciones de atacar
+        addAnimation(this.scene, this.name, "attack", "up", anims.attack.up, this.config.frameRate);
+        addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate);
+        addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate);
     }
 }
 //# sourceMappingURL=entity.js.map

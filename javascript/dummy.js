@@ -15,9 +15,11 @@ class Dummy extends Entity {
             frameHeight: 120,
             frameRate: 10,
             animations: {
-                up: [0],
-                down: [1],
-                side: [3]
+                walk: {
+                    up: [0],
+                    down: [1],
+                    side: [3]
+                }
             },
             speed: 200,
             startingPosition: {
