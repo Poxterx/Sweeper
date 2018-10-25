@@ -100,7 +100,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Modo de comportamiento de la entidad. Describe lo que está haciendo ahora y afecta a
      * la animación que está reproduciendo.
      */
-    protected mode :AnimationModeString;
+    private mode :AnimationModeString;
 
     /**
      * Crea una entidad basada en las opciones pasadas como parámetro
@@ -154,6 +154,8 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
         // Inicializamos el objeto de gráficos
         this.graphics = this.scene.make.graphics(this.target);
+        //Creamos el evento necesario para cuando se ataque.
+        this.sprite.on("animationrepeat", () => this.onAnimationLoop.call(this));
     }
 
     /**
@@ -174,6 +176,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
                 break;
             case "attack":
                 // Todavía nada
+                console.log("Yupi");
+                var info = AnimationInfo.current(this.sprite.anims);
+                if (info.mode === "walk"){
+                    this.sprite.anims.play(info.name + "@attack@" + info.direction);
+                }
+
                 break;
         }
 
@@ -211,6 +219,20 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
 
         // Ya podemos devolver el string correcto que indica la dirección
         return direction;
+    }
+
+    //Devuelve el mode actual
+    public getMode() {
+        
+        return this.mode;
+    }
+
+    //Actualiza el nuevo mode y reproduce la animacion.
+    public setMode(newMode :AnimationModeString) {
+        this.mode = newMode;
+        var info = AnimationInfo.current(this.sprite.anims);
+        this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
+        
     }
 
     /**
@@ -474,8 +496,19 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         addAnimation(this.scene, this.name, "walk", "side", anims.walk.side, this.config.frameRate, true);
 
         // Animaciones de atacar
-        addAnimation(this.scene, this.name, "attack", "up", anims.attack.up, this.config.frameRate);
-        addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate);
-        addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate);
+        addAnimation(this.scene, this.name, "attack", "up", anims.attack.up, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate, true);
     }
+
+    //Funcion encargada del bucle de animacion. Por ahora solo cambia el modo si estamos atacando.
+    protected onAnimationLoop(){
+        console.log("Funsiona el loopy");
+        if(this.getMode() ===  "attack"){
+            this.setMode("walk");
+        }
+    }
+
 }
+
+   

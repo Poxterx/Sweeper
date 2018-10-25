@@ -119,6 +119,10 @@ class Player extends Entity {
         super.update();
         // Después de actualizar al jugador, actualizamos también el arma
         this.weapon.update();
+        //Comprobamos si el jugador pulsa la techa de atacar (Espacio)
+        if (Phaser.Input.Keyboard.JustDown(this.arrowKeys.space)){
+            this.setMode("attack");
+        }
     }
 
     /**
