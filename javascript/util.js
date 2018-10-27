@@ -1,5 +1,13 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
 /**
+ * Tamaño de cada tile en píxeles
+ */
+const TILE_SIZE = 128;
+/**
+ * Indica si estamos en una sesión de depuración para dibujar la información extra de las entidades
+ */
+var DEBUG = false;
+/**
  * Registra una animación en el administrador de animaciones de Phaser
  * @param scene La escena a través de la cual se accederá al administrador de animaciones
  * @param thisName Nombre único e identificativo de la entidad que usará estas animaciones
@@ -102,5 +110,25 @@ function clone(base) {
     }
     // Devolvemos el objeto ya copiado en su totalidad
     return ret;
+}
+/**
+ * Devuelve la posición en tiles en la que se encuentra la posición especificada en píxeles
+ * @param pixel La posición en cuestión, en píxeles
+ */
+function pixelToTilePosition(pixel) {
+    return {
+        x: Math.floor(pixel.x / TILE_SIZE),
+        y: Math.floor(pixel.y / TILE_SIZE)
+    };
+}
+/**
+ * Devuelve la posición del centro del tile especificado, en píxeles
+ * @param tile El tile en cuestión
+ */
+function tileToPixelPosition(tile) {
+    return {
+        x: (tile.x + 0.5) * TILE_SIZE,
+        y: (tile.y + 0.5) * TILE_SIZE
+    };
 }
 //# sourceMappingURL=util.js.map

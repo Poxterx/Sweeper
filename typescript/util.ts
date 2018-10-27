@@ -1,6 +1,33 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
 
 /**
+ * Tamaño de cada tile en píxeles
+ */
+const TILE_SIZE = 128;
+
+/**
+ * Indica si estamos en una sesión de depuración para dibujar la información extra de las entidades
+ */
+var DEBUG = false;
+
+/**
+ * Objeto con una coordenada X y una coordenada Y
+ */
+type Vector2 = {
+    x :number,
+    y :number
+}
+
+/**
+ * Objeto con una coordenada X, una coordenada Y y una coordenada Z
+ */
+type Vector3 = {
+    x :number,
+    y :number,
+    z :number
+}
+
+/**
  * Direcciones posibles en las que puede mirar una entidad
  */
 type DirectionString = "up" | "down" | "left" | "right";
@@ -35,18 +62,9 @@ namespace DirectionalAnimation {
      * contemplada en el tipo AnimationDirectionString
      */
     export type TwoCoords = {
-        up: {
-            x :number,
-            y :number
-        }[],
-        down :{
-            x :number,
-            y :number
-        }[],
-        side :{
-            x :number,
-            y :number
-        }[]
+        up :Vector2[],
+        down :Vector2[],
+        side :Vector2[]
     }
 
     /**
@@ -54,21 +72,9 @@ namespace DirectionalAnimation {
      * contemplada en el tipo AnimationDirectionString
      */
     export type ThreeCoords = {
-        up: {
-            x :number,
-            y :number,
-            z :number
-        }[],
-        down :{
-            x :number,
-            y :number,
-            z :number
-        }[],
-        side :{
-            x :number,
-            y :number,
-            z :number
-        }[]
+        up :Vector3[],
+        down :Vector3[],
+        side :Vector3[]
     }
 }
 
@@ -200,4 +206,26 @@ function clone(base :any) :any {
 
     // Devolvemos el objeto ya copiado en su totalidad
     return ret;
+}
+
+/**
+ * Devuelve la posición en tiles en la que se encuentra la posición especificada en píxeles
+ * @param pixel La posición en cuestión, en píxeles
+ */
+function pixelToTilePosition(pixel :Vector2) :Vector2 {
+    return {
+        x: Math.floor(pixel.x / TILE_SIZE),
+        y: Math.floor(pixel.y / TILE_SIZE)
+    }
+}
+
+/**
+ * Devuelve la posición del centro del tile especificado, en píxeles
+ * @param tile El tile en cuestión
+ */
+function tileToPixelPosition(tile :Vector2) :Vector2 {
+    return {
+        x: (tile.x + 0.5) * TILE_SIZE,
+        y: (tile.y + 0.5) * TILE_SIZE
+    }
 }

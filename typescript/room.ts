@@ -136,4 +136,13 @@ class Room {
         // un poco de rendimiento extra
         this.layers[1].visible = false;
     }
+
+    /**
+     * Devuelve el tile de Phaser que se encuentra en la posición indicada en la capa de colisiones
+     * de esta sala
+     * @param tile La posición del tile que queremos
+     */
+    public getColliderTileAt(tile :Vector2) {
+        return this.colliderLayer.getTileAt(tile.x, tile.y, true);
+    }
 }

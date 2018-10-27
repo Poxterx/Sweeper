@@ -3,11 +3,11 @@ class SceneOverworld extends Phaser.Scene {
     /**
      * Entidades de esta escena
      */
-    private entities :Entity[];
+    public entities :Entity[];
     /**
      * Sala en la que tiene lugar esta escena
      */
-    private room :Room;
+    public room :Room;
 
     /**
      * Nueva escena que tiene lugar en la sala indicada
@@ -27,7 +27,8 @@ class SceneOverworld extends Phaser.Scene {
         // Creamos el array de las entidades
         this.entities = [
             new Player(this),
-            new Dummy(this)
+            new Dummy(this),
+            new DummyAI(this)
         ];
         // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
@@ -63,6 +64,9 @@ class SceneOverworld extends Phaser.Scene {
 
         // Iniciamos la escena encargada de manejar la interfaz
         this.scene.launch("SceneGUI");
+
+        // Damos la opción de alternar el modo debug en esta escena pulsando F2
+        this.input.keyboard.on("keydown_F2", () => DEBUG = !DEBUG);
     }
 
     /**
