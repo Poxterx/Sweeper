@@ -50,9 +50,10 @@ class SceneTitle extends Phaser.Scene {
         );
 
         // Ponemos un evento al pulsar cualquier tecla que haga que empiece la siguiente escena
-        this.input.keyboard.on("keydown", () => this.scene.start("SceneOverworld"));
+        
+        this.input.keyboard.on("keydown", () => this.scene.start("SceneMenu"));
         // También ponemos la misma función en caso de que se reciba un evento de clic (o toque)
-        this.input.addDownCallback(() => this.scene.start("SceneOverworld"));
+        this.input.addDownCallback(() => this.scene.start("SceneMenu"));
     }
 
 }

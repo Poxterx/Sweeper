@@ -29,9 +29,9 @@ class SceneTitle extends Phaser.Scene {
         // Colocamos el texto verticalmente en el centro y horizontalmente a un 25% desde abajo
         this.start.setPosition(screen.width * 0.5 - this.start.width * 0.5, screen.height * 0.75 - this.start.height * 0.5);
         // Ponemos un evento al pulsar cualquier tecla que haga que empiece la siguiente escena
-        this.input.keyboard.on("keydown", () => this.scene.start("SceneOverworld"));
+        this.input.keyboard.on("keydown", () => this.scene.start("SceneMenu"));
         // También ponemos la misma función en caso de que se reciba un evento de clic (o toque)
-        this.input.addDownCallback(() => this.scene.start("SceneOverworld"));
+        this.input.addDownCallback(() => this.scene.start("SceneMenu"));
     }
 }
 //# sourceMappingURL=title.js.map

@@ -30,6 +30,7 @@ const game = new Phaser.Game({
 
     // Referencia a las escenas del juego
     scene: [new SceneTitle(),
+            new SceneMenu(),
             new SceneOverworld(new Room("mainroom", {
                 tilemap: "Test.json",
                 tileset: "test_tileset.png"
