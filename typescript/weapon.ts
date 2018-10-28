@@ -100,7 +100,7 @@ class Weapon {
 
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
-        //
+        //Añadimos el overlap para las colisiones del arma
         this.scene.physics.add.overlap;
     }
 
@@ -227,5 +227,9 @@ class Weapon {
         addAnimation(this.scene, this.name, "attack", "up", anims.attack.up);
         addAnimation(this.scene, this.name, "attack", "down", anims.attack.down);
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side);
+    }
+    //Metodo que salta al entrar en contacto el arma con algo.
+    protected onHit(victim){
+        
     }
 }

@@ -9,6 +9,8 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.config = config;
         this.scene = scene;
         this.mode = AnimationInfo.default().mode;
+        this.life = 100;
+        this.maxLife = 100;
     }
     /**
      * Prepara los recursos que necesite esta entidad
@@ -44,6 +46,9 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.graphics = this.scene.make.graphics(this.target);
         //Creamos el evento necesario para cuando se ataque.
         this.sprite.on("animationrepeat", () => this.onAnimationLoop.call(this));
+        //Metemos una animación por defecto
+        this.sprite.anims.play(AnimationInfo.default().toString(this.name));
+        this.sprite.anims.stop();
     }
     /**
      * Actualiza la entidad en cada fotograma de una escena
@@ -110,6 +115,20 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.mode = newMode;
         var info = AnimationInfo.current(this.sprite.anims);
         this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
+    }
+    //Devuelve la vida/vida maxima actual
+    getLife() {
+        return this.life;
+    }
+    getMaxLife() {
+        return this.maxLife;
+    }
+    //Cambia la vida/vida maxima de la entidad
+    setLife(newLife) {
+        this.life = newLife;
+    }
+    setMaxLife(newMaxLife) {
+        this.maxLife = newMaxLife;
     }
     /**
      * Devuelve la información de la animación que la entidad está usando en este momento
@@ -210,11 +229,6 @@ class Entity extends Phaser.GameObjects.GameObject {
         // Este cálculo puede dar resultados imprecisos con muchos decimales, por ello conviene
         // que redondeemos el vector y trabajemos sólo con enteros
         targetDelta.set(Math.round(targetDelta.x), Math.round(targetDelta.y));
-        // Si el target no se ha movido respecto a la entidad desde el frame anterior...
-        if (targetDelta.equals(this.oldTargetDelta)) {
-            // Aquí no pintamos nada
-            return;
-        }
         // Si el target es justamente el punto donde ya se encuentra la entidad...
         if (targetDelta.equals(Phaser.Math.Vector2.ZERO)) {
             // La entidad no tiene que ir a ningún sitio y puede pararse
@@ -227,6 +241,11 @@ class Entity extends Phaser.GameObjects.GameObject {
             // Indicamos al siguiente frame que no hay desfase entre la posición de la entidad y su target
             this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
             // Eso es todo
+            return;
+        }
+        // Si el target no se ha movido respecto a la entidad desde el frame anterior...
+        if (targetDelta.equals(this.oldTargetDelta)) {
+            // Aquí no pintamos nada
             return;
         }
         // En las siguientes operaciones vamos a comprobar si la entidad comparte alguna coordenada con

@@ -27,7 +27,7 @@ class Player extends Entity {
             animations: {
                 walk: {
                     up: [5, 6, 7, 8,1],
-                    down: [1, 1, 1, 1,1],
+                    down: [7, 8, 9, 10, 11, 12],
                     side: [6, 2, 3, 4, 5],
                 }
             },
@@ -47,12 +47,12 @@ class Player extends Entity {
             animations: {
                 walk: {
                     up: [0, 0, 0, 0, 0],
-                    down: [0, 0, 0, 0, 0],
+                    down: [0, 0, 0, 0, 0, 0],
                     side: [0, 0, 0, 0, 0]
                 },
                 attack: {
                     up: [0, 3, 4, 3, 0],
-                    down: [0, 3, 4, 3, 0],
+                    down: [0, 3, 4, 3, 0, 0],
                     side: [0, 1, 2, 1, 0]
                 }
             },
@@ -70,6 +70,7 @@ class Player extends Entity {
                         {x: -40, y: -28, z: -1},
                         {x: -40, y: -24, z: -1},
                         {x: -40, y: -28, z: -1},
+                        {x: -40, y: -32, z: -1},
                         {x: -40, y: -32, z: -1}
                     ],
                     side: [
@@ -93,6 +94,7 @@ class Player extends Entity {
                         {x: -40, y: -12, z: 2},
                         {x: -40, y: 2, z: 5},
                         {x: -40, y: -12, z: 2},
+                        {x: -40, y: -32, z: -1},
                         {x: -40, y: -32, z: -1}
                     ],
                     side: [

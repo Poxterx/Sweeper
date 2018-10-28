@@ -102,6 +102,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      */
     private mode :AnimationModeString;
 
+    //Vida que tiene la entidad y vida maxima
+    private life :Number;
+    private maxLife :Number;
+
     /**
      * Crea una entidad basada en las opciones pasadas como parámetro
      * @param config Objeto que contiene dichas opciones
@@ -112,6 +116,8 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.config = config;
         this.scene = scene;
         this.mode = AnimationInfo.default().mode;
+        this.life = 100;
+        this.maxLife = 100;
     }
 
     /**
@@ -156,6 +162,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.graphics = this.scene.make.graphics(this.target);
         //Creamos el evento necesario para cuando se ataque.
         this.sprite.on("animationrepeat", () => this.onAnimationLoop.call(this));
+        //Metemos una animación por defecto
+        this.sprite.anims.play(AnimationInfo.default().toString(this.name));
+        this.sprite.anims.stop();
     }
 
     /**
@@ -232,6 +241,24 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         var info = AnimationInfo.current(this.sprite.anims);
         this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
         
+    }
+
+    //Devuelve la vida/vida maxima actual
+    public getLife() {
+        
+        return this.life;
+    }
+    public getMaxLife() {
+        
+        return this.maxLife;
+    }
+
+    //Cambia la vida/vida maxima de la entidad
+    public setLife(newLife :Number) {
+        this.life = newLife;
+    }
+    public setMaxLife(newMaxLife :Number) {
+        this.maxLife = newMaxLife;
     }
 
     /**
@@ -353,12 +380,6 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // que redondeemos el vector y trabajemos sólo con enteros
         targetDelta.set(Math.round(targetDelta.x), Math.round(targetDelta.y));
 
-        // Si el target no se ha movido respecto a la entidad desde el frame anterior...
-        if(targetDelta.equals(this.oldTargetDelta)) {
-            // Aquí no pintamos nada
-            return;
-        }
-
         // Si el target es justamente el punto donde ya se encuentra la entidad...
         if(targetDelta.equals(Phaser.Math.Vector2.ZERO)) {
             // La entidad no tiene que ir a ningún sitio y puede pararse
@@ -373,6 +394,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
             // Indicamos al siguiente frame que no hay desfase entre la posición de la entidad y su target
             this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
             // Eso es todo
+            return;
+        }
+
+        // Si el target no se ha movido respecto a la entidad desde el frame anterior...
+        if(targetDelta.equals(this.oldTargetDelta)) {
+            // Aquí no pintamos nada
             return;
         }
 
@@ -505,6 +532,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         if(this.getMode() ===  "attack"){
             this.setMode("walk");
         }
+            
     }
 
 }
