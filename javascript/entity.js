@@ -63,7 +63,6 @@ class Entity extends Phaser.GameObjects.GameObject {
                 break;
             case "attack":
                 // Todavía nada
-                console.log("Yupi");
                 var info = AnimationInfo.current(this.sprite.anims);
                 if (info.mode === "walk") {
                     this.sprite.anims.play(info.name + "@attack@" + info.direction);
@@ -341,7 +340,6 @@ class Entity extends Phaser.GameObjects.GameObject {
     }
     //Funcion encargada del bucle de animacion. Por ahora solo cambia el modo si estamos atacando.
     onAnimationLoop() {
-        console.log("Funsiona el loopy");
         if (this.getMode() === "attack") {
             this.setMode("walk");
         }

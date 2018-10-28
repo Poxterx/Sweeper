@@ -93,13 +93,15 @@ class Weapon {
         // Introducimos el sprite en el sistema de físicas de Phaser. La posición
         // es irrelevante porque se modificará en update().
         this.sprite = this.scene.physics.add.sprite(0, 0, this.name, 0);
-
+        
         // Nos aseguramos de que todos los parámetros opcionales tienen valor
         // aunque no hayan sido especificados desde fuera
         this.setDefaultValues();
 
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
+        //
+        this.scene.physics.add.overlap;
     }
 
     /**
@@ -127,6 +129,7 @@ class Weapon {
             case "right":
                 this.sprite.flipX = false;
                 offset = this.config.offset[mode].side[this.player.currentAnimationInfo().frame];
+
                 break;
 
             case "up":

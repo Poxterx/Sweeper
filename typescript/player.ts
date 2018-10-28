@@ -20,15 +20,15 @@ class Player extends Entity {
         // pasamos la configuración por defecto de esta clase
         super(scene, config? config : {
             name: "player",
-            path: "testcharacter.png",
-            frameWidth: 84,
-            frameHeight: 120,
+            path: "SweeperPlayer_Anim_Tile.png",
+            frameWidth: 87,
+            frameHeight: 128,
             frameRate: 10,
             animations: {
                 walk: {
-                    up: [0, 0, 0, 0],
-                    down: [1, 1, 1, 1],
-                    side: [3, 3, 3, 3],
+                    up: [5, 6, 7, 8,1],
+                    down: [1, 1, 1, 1,1],
+                    side: [6, 2, 3, 4, 5],
                 }
             },
             startingPosition: {
@@ -46,14 +46,14 @@ class Player extends Entity {
             frameHeight: 128,
             animations: {
                 walk: {
-                    up: [0, 0, 0, 0],
-                    down: [0, 0, 0, 0],
-                    side: [0, 0, 0, 0]
+                    up: [0, 0, 0, 0, 0],
+                    down: [0, 0, 0, 0, 0],
+                    side: [0, 0, 0, 0, 0]
                 },
                 attack: {
-                    up: [0, 3, 4, 3],
-                    down: [0, 3, 4, 3],
-                    side: [0, 1, 2, 1]
+                    up: [0, 3, 4, 3, 0],
+                    down: [0, 3, 4, 3, 0],
+                    side: [0, 1, 2, 1, 0]
                 }
             },
             offset: {
@@ -62,19 +62,22 @@ class Player extends Entity {
                         {x: 40, y: -32, z: 1},
                         {x: 40, y: -28, z: 1},
                         {x: 40, y: -24, z: 1},
-                        {x: 40, y: -28, z: 1}
+                        {x: 40, y: -28, z: 1},
+                        {x: 40, y: -32, z: 1}
                     ],
                     down: [
                         {x: -40, y: -32, z: -1},
                         {x: -40, y: -28, z: -1},
                         {x: -40, y: -24, z: -1},
-                        {x: -40, y: -28, z: -1}
+                        {x: -40, y: -28, z: -1},
+                        {x: -40, y: -32, z: -1}
                     ],
                     side: [
                         {x: -40, y: -32, z: -1},
                         {x: -40, y: -28, z: -1},
                         {x: -40, y: -24, z: -1},
-                        {x: -40, y: -28, z: -1}
+                        {x: -40, y: -28, z: -1},
+                        {x: -40, y: -32, z: -1}
                     ]
                 },
                 attack: {
@@ -82,19 +85,22 @@ class Player extends Entity {
                         {x: 40, y: -32, z: 1},
                         {x: 40, y: -52, z: -2},
                         {x: 40, y: -72, z: -5},
-                        {x: 40, y: -52, z: -2}
+                        {x: 40, y: -52, z: -2},
+                        {x: 40, y: -32, z: 1}
                     ],
                     down: [
                         {x: -40, y: -32, z: -1},
                         {x: -40, y: -12, z: 2},
                         {x: -40, y: 2, z: 5},
-                        {x: -40, y: -12, z: 2}
+                        {x: -40, y: -12, z: 2},
+                        {x: -40, y: -32, z: -1}
                     ],
                     side: [
                         {x: -40, y: -32, z: -1},
                         {x: 10, y: -28, z: -1},
                         {x: 60, y: -24, z: -1},
-                        {x: 10, y: -28, z: -1}
+                        {x: 10, y: -28, z: -1},
+                        {x: -40, y: -32, z: -1}
                     ]
                 }
             }
@@ -120,7 +126,7 @@ class Player extends Entity {
         // Después de actualizar al jugador, actualizamos también el arma
         this.weapon.update();
         //Comprobamos si el jugador pulsa la techa de atacar (Espacio)
-        if (Phaser.Input.Keyboard.JustDown(this.arrowKeys.space)){
+        if (Phaser.Input.Keyboard.JustDown(this.arrowKeys.space)&&(this.getMode()!="attack")){
             this.setMode("attack");
         }
     }
