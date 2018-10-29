@@ -42,6 +42,8 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
         // Inicializamos el objeto de gráficos
         this.graphics = this.scene.make.graphics(this.target);
+        //Creamos el evento necesario para cuando se ataque.
+        this.sprite.on("animationrepeat", () => this.onAnimationLoop.call(this));
     }
     /**
      * Actualiza la entidad en cada fotograma de una escena
@@ -60,7 +62,10 @@ class Entity extends Phaser.GameObjects.GameObject {
                 this.pursueTarget();
                 break;
             case "attack":
-                // Todavía nada
+                var info = AnimationInfo.current(this.sprite.anims);
+                if (info.mode === "walk") {
+                    this.sprite.anims.play(info.name + "@attack" + info.direction);
+                }
                 break;
         }
         // Ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
@@ -94,6 +99,16 @@ class Entity extends Phaser.GameObjects.GameObject {
         }
         // Ya podemos devolver el string correcto que indica la dirección
         return direction;
+    }
+    //Devuelve el mode actual
+    getMode() {
+        return this.mode;
+    }
+    //Actualiza el nuevo mode y reproduce la animacion.
+    setMode(newMode) {
+        this.mode = newMode;
+        var info = AnimationInfo.current(this.sprite.anims);
+        this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
     }
     /**
      * Devuelve la información de la animación que la entidad está usando en este momento
@@ -318,9 +333,15 @@ class Entity extends Phaser.GameObjects.GameObject {
         addAnimation(this.scene, this.name, "walk", "down", anims.walk.down, this.config.frameRate, true);
         addAnimation(this.scene, this.name, "walk", "side", anims.walk.side, this.config.frameRate, true);
         // Animaciones de atacar
-        addAnimation(this.scene, this.name, "attack", "up", anims.attack.up, this.config.frameRate);
-        addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate);
-        addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate);
+        addAnimation(this.scene, this.name, "attack", "up", anims.attack.up, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate, true);
+        addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate, true);
+    }
+    //Funcion encargada del bucle de animacion. Por ahora solo cambia el modo si estamos atacando.
+    onAnimationLoop() {
+        if (this.getMode() === "attack") {
+            this.setMode("walk");
+        }
     }
 }
 //# sourceMappingURL=entity.js.map

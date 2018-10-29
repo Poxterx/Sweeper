@@ -100,6 +100,7 @@ class Weapon {
 
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
+        this.scene.physics.add.overlap;
     }
 
     /**

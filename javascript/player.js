@@ -4,9 +4,12 @@ class Player extends Entity {
      * una configuración específica a cada instancia, pero si no se asigna, la instancia
      * usará la configuración predeterminada de jugador
      * @param scene Referencia a la escena donde se creará esta entidad
+     * @param control Objeto con los nombres de los eventos asociados a la direccion, al ataque y el nombre del jugador
+     * @param xPos Posición en x del Player
+     * @param yPos Posición en y del Player
      * @param config Opciones específicas para esta instancia en particular
      */
-    constructor(scene, config) {
+    constructor(scene, control, xPos, yPos, config) {
         // Si hay una configuración especificada se la pasamos, si no, le
         // pasamos la configuración por defecto de esta clase
         super(scene, config ? config : {
@@ -23,14 +26,18 @@ class Player extends Entity {
                 }
             },
             startingPosition: {
-                x: 400,
-                y: 550
+                x: xPos,
+                y: yPos
             },
             speed: 300
         });
+        this.control = control;
+        this.name = control.name;
+        //se inicializa el array, al principio ninguna tecla esta pulsada
+        this.arrayKeys = [false, false, false, false];
         // Creamos el arma
         this.weapon = new Weapon(this, {
-            name: "testweapon",
+            name: control.weaponName,
             path: "testweapon.png",
             frameWidth: 128,
             frameHeight: 128,
@@ -97,9 +104,45 @@ class Player extends Entity {
     }
     create() {
         super.create();
-        // Alguien tiene que inicializar al intermediario de input de Phaser
-        this.arrowKeys = this.scene.input.keyboard.createCursorKeys();
-        // Y el arma
+        //Se guarda al Player en that
+        var that = this;
+        /**
+        * Cuando se pulsa una tecla, se pone a true el elemento del array al que va asociado.
+        */
+        this.scene.input.keyboard.on("keydown_" + this.control.up, function (event) {
+            that.arrayKeys[0] = true;
+        });
+        this.scene.input.keyboard.on("keydown_" + this.control.right, function (event) {
+            that.arrayKeys[1] = true;
+        });
+        this.scene.input.keyboard.on("keydown_" + this.control.down, function (event) {
+            that.arrayKeys[2] = true;
+        });
+        this.scene.input.keyboard.on("keydown_" + this.control.left, function (event) {
+            that.arrayKeys[3] = true;
+        });
+        this.scene.input.keyboard.on("keydown_" + this.control.attack, function (event) {
+            //Comprobamos si el jugador no estaba en modo ataque 
+            if ((that.getMode() != "attack")) {
+                that.setMode("attack");
+            }
+        });
+        /**
+        * Cuando se deja de pulsar la tecla, se pone a false el elemento del array al que va asociado.
+        */
+        this.scene.input.keyboard.on("keyup_" + this.control.up, function (event) {
+            that.arrayKeys[0] = false;
+        });
+        this.scene.input.keyboard.on("keyup_" + this.control.right, function (event) {
+            that.arrayKeys[1] = false;
+        });
+        this.scene.input.keyboard.on("keyup_" + this.control.down, function (event) {
+            that.arrayKeys[2] = false;
+        });
+        this.scene.input.keyboard.on("keyup_" + this.control.left, function (event) {
+            that.arrayKeys[3] = false;
+        });
+        //Se crea el arma
         this.weapon.create();
     }
     update() {
@@ -125,13 +168,14 @@ class Player extends Entity {
         var delta = 100;
         // El siguiente código debería ser autoexplicativo. Nótese que cada coordenada se procesa por
         // separado para permitir movimiento diagonal
-        if (this.arrowKeys.left.isDown)
+        //Se actualiza el vector desplazamiento del target dependiendo de si se a pulsado una tecla u otra
+        if (this.arrayKeys[3])
             vector.x = -delta;
-        else if (this.arrowKeys.right.isDown)
+        else if (this.arrayKeys[1])
             vector.x = delta;
-        if (this.arrowKeys.up.isDown)
+        if (this.arrayKeys[0])
             vector.y = -delta;
-        else if (this.arrowKeys.down.isDown)
+        else if (this.arrayKeys[2])
             vector.y = delta;
         // Movemos al target a la posición del jugador y le sumamos el vector calculado anteriormente
         this.target = this.sprite.body.center.clone();

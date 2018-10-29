@@ -14,7 +14,24 @@ class SceneOverworld extends Phaser.Scene {
     preload() {
         // Creamos el array de las entidades
         this.entities = [
-            new Player(this),
+            new Player(this, {
+                name: "player1",
+                weaponName: "weapon1",
+                up: "W",
+                down: "S",
+                left: "A",
+                right: "D",
+                attack: "R"
+            }, 400, 500),
+            new Player(this, {
+                name: "player2",
+                weaponName: "weapon2",
+                up: "I",
+                down: "K",
+                left: "J",
+                right: "L",
+                attack: "P"
+            }, 400, 650),
             new Dummy(this)
         ];
         // Cargamos todas las entidades y la sala
