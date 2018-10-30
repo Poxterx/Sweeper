@@ -81,6 +81,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      */
     public scene :SceneOverworld;
     /**
+     * Si la entidad está muerta o no
+     */
+    public dead :boolean;
+    /**
      * Referencia al objeto de gráficos de esta entidad, para dibujar el target
      */
     private graphics :Phaser.GameObjects.Graphics;
@@ -88,6 +92,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Última posición del target respecto a la posición de la entidad, para usar en animación
      */
     private oldTargetDelta :Phaser.Math.Vector2;
+    /**
+     * Arma que porta esta entidad
+     */
+    protected weapon :Weapon;
     /**
      * Objeto de configuración con el que se inicializó esta entidad
      */
@@ -109,10 +117,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Vida máxima de la entidad
      */
     private maxLife :number;
-    /**
-     * Si la entidad está muerta o no
-     */
-    public dead :boolean;
+
 
     /**
      * Crea una entidad basada en las opciones pasadas como parámetro
@@ -127,6 +132,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.life = 100;
         this.maxLife = 100;
         this.dead = false;
+        this.weapon = null;
     }
 
     /**
@@ -136,6 +142,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // Cargamos el sprite en la escena
         this.scene.load.spritesheet(this.name, "assets/sprites/"+this.config.path, {
             frameWidth: this.config.frameWidth, frameHeight: this.config.frameHeight});
+        // Y los recursos del arma
+        if(this.weapon) {
+            this.weapon.preload();
+        }
     }
 
     /**
@@ -169,6 +179,10 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.oldTargetDelta = Phaser.Math.Vector2.ZERO;
         // Inicializamos el objeto de gráficos
         this.graphics = this.scene.make.graphics(this.target);
+        // Inicializamos el arma
+        if(this.weapon) {
+            this.weapon.create();
+        }
         //Creamos el evento necesario para cuando se ataque.
         this.sprite.on("animationrepeat", () => this.onAnimationLoop.call(this));
         //Metemos una animación por defecto
@@ -210,14 +224,25 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // renderice delante de lo que tiene detrás y viceversa
         this.sprite.depth = this.sprite.body.center.y;
 
-        //Por ultimo miramos si la entidad ha muerto para borrar el sprite.
-        //La entidad se borrará en el update de overworld a continuación.
+        // Miramos si la entidad ha muerto para borrar el sprite.
+        // La entidad se borrará en el update de overworld a continuación.
         if(this.dead === true){
             //this.graphics.clear();
             this.graphics.destroy();
             this.sprite.destroy();
+            // Si tiene arma la destruimos también
+            if(this.weapon) {
+                this.weapon.sprite.destroy();
+            }
         }
+        
+        // Dibujamos la barra de vida
         this.drawLife();
+
+        // Y actualizamos el arma
+        if(this.weapon) {
+            this.weapon.update();
+        }
     }
 
     /**
@@ -266,8 +291,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     public setMode(newMode :AnimationModeString) {
         this.mode = newMode;
         var info = AnimationInfo.current(this.sprite.anims);
-        this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
-        
+        if(!this.dead) {
+            this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
+        }
     }
 
     /**

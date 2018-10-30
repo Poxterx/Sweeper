@@ -1,5 +1,9 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
 /**
+ * Indica si el juego está siendo jugado por una o varias personas
+ */
+var multiplayer = false;
+/**
  * Registra una animación en el administrador de animaciones de Phaser
  * @param scene La escena a través de la cual se accederá al administrador de animaciones
  * @param thisName Nombre único e identificativo de la entidad que usará estas animaciones
@@ -34,7 +38,7 @@ class AnimationInfo {
      */
     static current(animationController) {
         // Si el controlador no está reproduciendo ninguna animación...
-        if (!animationController.currentAnim) {
+        if (!animationController || !animationController.currentAnim) {
             // ... no hay nada que hacer, devuelve la información predeterminada
             return this.default();
         }

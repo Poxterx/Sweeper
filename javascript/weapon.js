@@ -1,16 +1,16 @@
 class Weapon {
     /**
      * Crea un arma con las opciones pasadas como parámetro
-     * @param player Jugador que porta el arma
+     * @param entity Entidad que porta el arma
      * @param config Objeto que contiene las opciones mencionadas
      */
-    constructor(player, config) {
+    constructor(entity, config) {
         this.name = config.name;
         this.damage = config.damage;
         this.cooldown = false;
         this.config = config;
-        this.scene = player.scene;
-        this.entity = player;
+        this.scene = entity.scene;
+        this.entity = entity;
     }
     /**
      * Carga los recursos necesarios para el arma
@@ -33,11 +33,16 @@ class Weapon {
         this.setDefaultValues();
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
+        this.scene.physics.add.overlap;
     }
     /**
      * Actualizamos el arma en cada fotograma
      */
     update() {
+        // Si la entidad que tiene este arma está muerta no hay nada que hacer
+        if (this.entity.dead) {
+            return;
+        }
         // Vamos a calcular el desfase que hay entre la posición del arma y el jugador que la porta
         // en este fotograma, teniendo en cuenta su dirección y su animación. Empezamos partiendo
         // de que no hay desfase (y, por tanto, el arma está en el mismo punto que el jugador).

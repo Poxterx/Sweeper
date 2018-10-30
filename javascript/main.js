@@ -9,7 +9,7 @@ const game = new Phaser.Game({
     type: Phaser.CANVAS,
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.0.8p",
+    version: "0.1.0",
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
     physics: {
@@ -22,6 +22,7 @@ const game = new Phaser.Game({
     pixelArt: true,
     // Referencia a las escenas del juego
     scene: [new SceneTitle(),
+        new SceneMenu(),
         new SceneOverworld(new Room("mainroom", {
             tilemap: "Test.json",
             tileset: "test_tileset.png"

@@ -114,12 +114,17 @@ class Weapon {
 
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
+        this.scene.physics.add.overlap;
     }
 
     /**
      * Actualizamos el arma en cada fotograma
      */
     update() {
+        // Si la entidad que tiene este arma está muerta no hay nada que hacer
+        if(this.entity.dead) {
+            return;
+        }
         // Vamos a calcular el desfase que hay entre la posición del arma y el jugador que la porta
         // en este fotograma, teniendo en cuenta su dirección y su animación. Empezamos partiendo
         // de que no hay desfase (y, por tanto, el arma está en el mismo punto que el jugador).

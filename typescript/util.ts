@@ -1,6 +1,11 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
 
 /**
+ * Indica si el juego está siendo jugado por una o varias personas
+ */
+var multiplayer = false;
+
+/**
  * Direcciones posibles en las que puede mirar una entidad
  */
 type DirectionString = "up" | "down" | "left" | "right";
@@ -129,7 +134,7 @@ class AnimationInfo {
      */
     public static current(animationController :Phaser.GameObjects.Components.Animation) {
         // Si el controlador no está reproduciendo ninguna animación...
-        if(!animationController.currentAnim) {
+        if(!animationController || !animationController.currentAnim) {
             // ... no hay nada que hacer, devuelve la información predeterminada
             return this.default();
         }
