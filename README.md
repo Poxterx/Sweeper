@@ -38,7 +38,10 @@ Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compe
 
 ## Páginas principales
 ![title](https://user-images.githubusercontent.com/43203588/47756077-f6e6d080-dca0-11e8-854e-f089d00369b9.jpg)
-Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para empezar
+Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para empezar.
+
+![menu](https://user-images.githubusercontent.com/43203588/47756118-2d245000-dca1-11e8-83db-1bdebcec8e1e.jpg)
+Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos deja elegir el modo de juego. Options no esta implementada.
 
 ## Integrantes  
 
