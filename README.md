@@ -36,6 +36,10 @@ Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compe
 ## Diagrama de navegación de la página
 ![paginasnav](https://user-images.githubusercontent.com/43203588/47755781-dec28180-dc9f-11e8-907e-7fe23b231389.jpg)
 
+## Páginas principales
+![title](https://user-images.githubusercontent.com/43203588/47756077-f6e6d080-dca0-11e8-854e-f089d00369b9.jpg)
+Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para empezar
+
 ## Integrantes  
 
 1. **Nombre y Apellidos:** Pablo Alconchel Palma  
