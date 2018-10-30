@@ -5,6 +5,11 @@
  */
 var multiplayer = false;
 
+type Vector2 = {
+    x :number,
+    y :number
+}
+
 /**
  * Direcciones posibles en las que puede mirar una entidad
  */

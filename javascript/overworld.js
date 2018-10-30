@@ -22,7 +22,7 @@ class SceneOverworld extends Phaser.Scene {
                 left: "A",
                 right: "D",
                 attack: "R"
-            }, 400, 500)
+            }, 384, 1576)
         ];
         if (multiplayer)
             this.entities.push(new Player(this, {
@@ -33,7 +33,7 @@ class SceneOverworld extends Phaser.Scene {
                 left: "J",
                 right: "L",
                 attack: "P"
-            }, 400, 650));
+            }, 384, 1704));
         this.entities.push(new Dummy(this));
         // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
@@ -54,7 +54,7 @@ class SceneOverworld extends Phaser.Scene {
         var sprites = [];
         this.entities.forEach(e => sprites.push(e.sprite));
         this.physics.add.collider(sprites, sprites);
-        this.physics.add.collider(sprites, this.room.colliderLayer);
+        this.physics.add.collider(sprites, this.room.colliderLayers);
         // Centramos la cámara en el jugador (la primera entidad)
         this.entities[0].lockCamera(this.cameras.main);
         // Indicamos límites del área renderizable para evitar que la cámara dibuje la zona negra

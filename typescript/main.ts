@@ -32,8 +32,8 @@ const game = new Phaser.Game({
     scene: [new SceneTitle(),
             new SceneMenu(),
             new SceneOverworld(new Room("mainroom", {
-                tilemap: "Test.json",
-                tileset: "test_tileset.png"
+                tilemap: "Mapa.json",
+                tileset: "tileset.png"
             })),
             new SceneGUI()]
 });
