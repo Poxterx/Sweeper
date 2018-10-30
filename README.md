@@ -43,6 +43,11 @@ Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para e
 ![menu](https://user-images.githubusercontent.com/43203588/47756118-2d245000-dca1-11e8-83db-1bdebcec8e1e.jpg)
 Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos deja elegir el modo de juego. Options no esta implementada.
 
+
+
+![game over](https://user-images.githubusercontent.com/43203588/47756216-88564280-dca1-11e8-8e26-b81e531c5268.jpg)
+Al morir el jugador 1 se acaba la partida y te lleva a la pantalla Game Over.
+
 ## Integrantes  
 
 1. **Nombre y Apellidos:** Pablo Alconchel Palma  
