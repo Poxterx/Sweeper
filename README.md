@@ -44,7 +44,7 @@ Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos de
 ![menu](https://user-images.githubusercontent.com/43203588/47756118-2d245000-dca1-11e8-83db-1bdebcec8e1e.jpg)
 
 Si en el menú eliges Single Player, se inicia una partida con un solo jugador:
-![juega1](https://user-images.githubusercontent.com/43203588/47756352-00bd0380-dca2-11e8-8ef6-f914463fe733.JPG)
+![singlep](https://user-images.githubusercontent.com/43203588/47756469-7923c480-dca2-11e8-8a9a-092261c7646d.jpg)
 
 
 
