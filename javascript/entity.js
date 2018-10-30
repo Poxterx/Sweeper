@@ -84,8 +84,13 @@ class Entity extends Phaser.GameObjects.GameObject {
                 }
                 break;
         }
-        // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
-        this.drawTarget();
+        // Luego lo dibujamos si estamos en modo debug. Si no, borramos lo dibujado
+        if (DEBUG)
+            this.drawTarget();
+        else
+            this.graphics.clear();
+        // Revisamos las colisiones
+        this.checkCollisions();
         // Ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
         // renderice delante de lo que tiene detrás y viceversa
         this.sprite.depth = this.sprite.body.center.y;
@@ -108,10 +113,16 @@ class Entity extends Phaser.GameObjects.GameObject {
         }
     }
     /**
-     * Devuelve la posición del centro del sprite de esta entidad
+     * Devuelve la posición del centro del sprite de esta entidad en píxeles
      */
     getPosition() {
         return new Phaser.Math.Vector2(this.sprite.x, this.sprite.y);
+    }
+    /**
+     * Devuelve la posición de esta entidad en tiles
+     */
+    getTilePosition() {
+        return pixelToTilePosition(this.getPosition());
     }
     /**
      * Devuelve un string que indica la dirección en la que está mirando la entidad
@@ -429,6 +440,50 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.graphics.fillRect(-27, -92, (54 * this.getMaxLife()) / this.getMaxLife(), 14);
         this.graphics.fillStyle(0xFF0000, 1);
         this.graphics.fillRect(-25, -90, (50 * this.getLife()) / this.getMaxLife(), 10);
+    }
+    /**
+     * Comprueba que las colisiones están funcionando correctamente para solventar las deficiencias
+     * de Arcade. Impide que, si más de dos cuerpos sólidos se tocan simultáneamente, alguno
+     * acabe siendo atravesado por otro ignorando las colisiones.
+     */
+    checkCollisions() {
+        // El cuerpo de un sprite podría ser estático o dinámico, pero en las entidades siempre
+        // es dinámico. Lo indicamos con este casting.
+        var body = this.sprite.body;
+        // Si el cuerpo está en contacto con otro cuerpo sólido a uno de sus lados
+        // La velocidad en ese sentido sólo puede ser, como mucho, cero
+        if (body.touching.left) {
+            body.setVelocityX(Math.max(body.velocity.x, 0));
+        }
+        if (body.touching.right) {
+            body.setVelocityX(Math.min(body.velocity.x, 0));
+        }
+        if (body.touching.up) {
+            body.setVelocityY(Math.max(body.velocity.y, 0));
+        }
+        if (body.touching.down) {
+            body.setVelocityY(Math.min(body.velocity.y, 0));
+        }
+        // También es posible que los sprites estén solapándose, en cuyo caso Arcade deja de
+        // comprobar las colisiones entre ambos. Nosotros vamos a buscar casos donde se da esto
+        // y separarlos para que las colisiones sigan funcionando.
+        for (let entity of this.scene.entities) {
+            // Si este sprite se está solapando con el de la otra entidad
+            if (this.scene.physics.overlap(this.sprite, entity.sprite)) {
+                // Lo empujamos hacia afuera tanta distancia como lo separe del centro. Es decir,
+                // duplicamos su distancia del centro. Por supuesto puede pasar que esta distancia
+                // no sea suficiente para separarlos, pero hay que tener en cuenta que esta función
+                // se ejecuta en cada fotograma.
+                var distanceToCenter = {
+                    x: entity.sprite.body.center.x - this.sprite.body.center.x,
+                    y: entity.sprite.body.center.y - this.sprite.body.center.y
+                };
+                // La distancia se ha calculado *hacia* el centro, así que para empujar hacia
+                // afuera tendríamos que invertirla, de ahí la negación
+                this.sprite.body
+                    .setVelocity(-distanceToCenter.x, -distanceToCenter.y);
+            }
+        }
     }
 }
 //# sourceMappingURL=entity.js.map

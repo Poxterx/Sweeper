@@ -208,6 +208,10 @@ class Player extends Entity {
         // interpolación lineal, permitiendo un movimiento suave pero sutil de la cámara
     }
 
+    /**
+     * Mueve el target de manera que la entidad se desplazará de acuerdo con las pulsaciones
+     * de teclas del usuario
+     */
     protected controlTarget() {
         // Vector para almacenar el desplazamiento del target
         var vector = {x: 0, y: 0};

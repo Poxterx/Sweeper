@@ -179,10 +179,8 @@ class Room {
                 // Le asignamos a la capa la profundidad correspondiente a su posición. El factor "(row + 2)"
                 // está pensado para que esta asignación de profundidad tenga en cuenta que la pared está
                 // elevada. Si pusiéramos "row" a secas, quedaría visualmente a la altura del suelo.
-                this.layers[current].depth = (row + 2) * this.map.tileHeight;
-                console.log("Row %d: Depth %d", row, this.layers[current].depth);
+                this.layers[current].depth = (row + 2) * TILE_SIZE;
             }
-
         }
         
         // Capa de superposición, para elementos decorativos

@@ -28,6 +28,9 @@ class Dummy extends Entity {
             }
         });
     }
+    /**
+     * Intenta mantener el target en su posición original
+     */
     controlTarget() {
         // Intentamos que el dummy se quede en su posición inicial
         this.target = new Phaser.Math.Vector2(this.config.startingPosition);

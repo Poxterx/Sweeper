@@ -46,6 +46,7 @@ class SceneOverworld extends Phaser.Scene {
                 attack:"P"
             }, 384, 1704));
         this.entities.push(new Dummy(this));
+        this.entities.push(new DummyAI(this));
         // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
         this.room.preload();     
@@ -80,6 +81,9 @@ class SceneOverworld extends Phaser.Scene {
 
         // Iniciamos la escena encargada de manejar la interfaz
         this.scene.launch("SceneGUI");
+
+        // Damos la opción de alternar el modo debug en esta escena pulsando F2
+        this.input.keyboard.on("keydown_F2", () => DEBUG = !DEBUG);
     }
 
     /**
