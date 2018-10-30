@@ -81,8 +81,9 @@ class Entity extends Phaser.GameObjects.GameObject {
         //Por ultimo miramos si la entidad ha muerto para borrar el sprite.
         //La entidad se borrará en el update de overworld a continuación.
         if (this.dead === true) {
+            //this.graphics.clear();
+            this.graphics.destroy();
             this.sprite.destroy();
-            this.graphics.clear();
         }
         this.drawLife();
     }
@@ -374,6 +375,8 @@ class Entity extends Phaser.GameObjects.GameObject {
         }
     }
     drawLife() {
+        this.graphics.fillStyle(0x000000, 1);
+        this.graphics.fillRect(-27, -92, (54 * this.getMaxLife()) / this.getMaxLife(), 14);
         this.graphics.fillStyle(0xFF0000, 1);
         this.graphics.fillRect(-25, -90, (50 * this.getLife()) / this.getMaxLife(), 10);
     }
