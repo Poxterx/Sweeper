@@ -55,6 +55,8 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Actualiza la entidad en cada fotograma de una escena
      */
     update() {
+        // Reseteamos los gráficos del fotograma anterior para poder dibujar en este
+        this.prepareGraphics();
         // Elegimos lo que hacer a continuación en base al modo de la entidad
         switch (this.mode) {
             case "walk":
@@ -66,7 +68,7 @@ class Entity extends Phaser.GameObjects.GameObject {
                 this.pursueTarget();
                 break;
             case "attack":
-                // Todavía nada
+                // Ponemos animación de ataque si todavía no está atacando
                 var info = AnimationInfo.current(this.sprite.anims);
                 if (info.mode === "walk") {
                     this.sprite.anims.play(info.name + "@attack@" + info.direction);
@@ -115,24 +117,37 @@ class Entity extends Phaser.GameObjects.GameObject {
         // Ya podemos devolver el string correcto que indica la dirección
         return direction;
     }
-    //Devuelve el mode actual
+    /**
+     * Devuelve el modo actual de la entidad
+     */
     getMode() {
         return this.mode;
     }
-    //Actualiza el nuevo mode y reproduce la animacion.
+    /**
+     * Actualiza el nuevo mode y reproduce la animación
+     * @param newMode Modo al que hay que cambiar
+     */
     setMode(newMode) {
         this.mode = newMode;
         var info = AnimationInfo.current(this.sprite.anims);
         this.sprite.anims.play(info.name + "@" + newMode + "@" + info.direction);
     }
-    //Devuelve la vida/vida maxima actual
+    /**
+     * Devuelve la vida actual de la entidad
+     */
     getLife() {
         return this.life;
     }
+    /**
+     * Devuelve la vida máxima de la entidad
+     */
     getMaxLife() {
         return this.maxLife;
     }
-    //Cambia la vida/vida maxima de la entidad
+    /**
+     * Cambia la vida de la entidad
+     * @param newLife La nueva cantidad de vida
+     */
     setLife(newLife) {
         if ((newLife <= this.maxLife)) {
             this.life = newLife;
@@ -141,6 +156,10 @@ class Entity extends Phaser.GameObjects.GameObject {
             }
         }
     }
+    /**
+     * Cambia la vida máxima de la entidad
+     * @param newMaxLife La nueva cantidad de vida máxima
+     */
     setMaxLife(newMaxLife) {
         if (newMaxLife > 0) {
             this.maxLife = newMaxLife;
@@ -325,16 +344,21 @@ class Entity extends Phaser.GameObjects.GameObject {
             || Math.abs(otherAxis) <= tolerance;
     }
     /**
+     * Prepara el objeto gráficos para dibujar lo que corresponda a este fotograma
+     */
+    prepareGraphics() {
+        // Borramos todo lo dibujado en el frame anterior
+        this.graphics.clear();
+        // Nos colocamos justo en el target
+        this.graphics.setPosition(this.getPosition().x, this.getPosition().y);
+        // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
+        this.graphics.depth = Infinity;
+    }
+    /**
      * Dibuja una cruz en la posición del target. Esta función está pensada únicamente para usarse por
      * razones de depuración y no debe usarse en la versión final del juego
      */
     drawTarget() {
-        // Borramos todo lo dibujado en el frame anterior
-        this.graphics.clear();
-        // Nos colocamos justo en el target
-        this.graphics.setPosition(this.sprite.body.center.x, this.sprite.body.center.y);
-        // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
-        this.graphics.depth = Infinity;
         var targetDelta = this.target.clone().subtract(this.sprite.body.center);
         // Dibujamos una cruz blanca
         this.graphics.lineStyle(5, 0xFFFFFF);
@@ -368,12 +392,18 @@ class Entity extends Phaser.GameObjects.GameObject {
         addAnimation(this.scene, this.name, "attack", "down", anims.attack.down, this.config.frameRate, true);
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate, true);
     }
-    //Funcion encargada del bucle de animacion. Por ahora solo cambia el modo si estamos atacando.
+    /**
+     * Función que se ejecuta al terminar un ciclo de la animación
+     */
     onAnimationLoop() {
+        // Por ahora sólo necesitamos que cambie a modo caminar si estaba atacando
         if (this.getMode() === "attack") {
             this.setMode("walk");
         }
     }
+    /**
+     * Dibuja una barra de vida sobre el sprite de la entidad
+     */
     drawLife() {
         this.graphics.fillStyle(0x000000, 1);
         this.graphics.fillRect(-27, -92, (54 * this.getMaxLife()) / this.getMaxLife(), 14);

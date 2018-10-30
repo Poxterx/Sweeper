@@ -8,7 +8,7 @@ class Dummy extends Entity {
      * @param scene Referencia a la escena donde se creará esta entidad
      * @param config Opciones específicas para esta instancia en particular
      */
-    constructor(scene :Phaser.Scene, config? :EntityConfig) {
+    constructor(scene :SceneOverworld, config? :EntityConfig) {
         super(scene, config? config : {
             name: "dummy",
             path: "testcharacter.png",

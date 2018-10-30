@@ -101,10 +101,17 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * la animación que está reproduciendo.
      */
     private mode :AnimationModeString;
-
-    //Vida que tiene la entidad y vida maxima
+    /**
+     * Vida de la entidad
+     */
     private life :number;
+    /**
+     * Vida máxima de la entidad
+     */
     private maxLife :number;
+    /**
+     * Si la entidad está muerta o no
+     */
     public dead :boolean;
 
     /**
@@ -173,6 +180,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Actualiza la entidad en cada fotograma de una escena
      */
     update() {
+        // Reseteamos los gráficos del fotograma anterior para poder dibujar en este
+        this.prepareGraphics();
+        
         // Elegimos lo que hacer a continuación en base al modo de la entidad
         switch(this.mode) {
             case "walk":
@@ -185,7 +195,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
                 this.pursueTarget();
                 break;
             case "attack":
-                // Todavía nada
+                // Ponemos animación de ataque si todavía no está atacando
                 var info = AnimationInfo.current(this.sprite.anims);
                 if (info.mode === "walk"){
                     this.sprite.anims.play(info.name + "@attack@" + info.direction);
@@ -241,13 +251,18 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         return direction;
     }
 
-    //Devuelve el mode actual
+    /**
+     * Devuelve el modo actual de la entidad
+     */
     public getMode() {
         
         return this.mode;
     }
 
-    //Actualiza el nuevo mode y reproduce la animacion.
+    /**
+     * Actualiza el nuevo mode y reproduce la animación
+     * @param newMode Modo al que hay que cambiar
+     */
     public setMode(newMode :AnimationModeString) {
         this.mode = newMode;
         var info = AnimationInfo.current(this.sprite.anims);
@@ -255,24 +270,37 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         
     }
 
-    //Devuelve la vida/vida maxima actual
+    /**
+     * Devuelve la vida actual de la entidad
+     */
     public getLife() {
         
         return this.life;
     }
+
+    /**
+     * Devuelve la vida máxima de la entidad
+     */
     public getMaxLife() {
         
         return this.maxLife;
     }
 
-    //Cambia la vida/vida maxima de la entidad
+    /**
+     * Cambia la vida de la entidad
+     * @param newLife La nueva cantidad de vida
+     */
     public setLife(newLife :number) {
         if((newLife<=this.maxLife)){
             this.life = newLife;
             if(this.life <= 0){this.dead =true;}
-        }
-        
+        }    
     }
+
+    /**
+     * Cambia la vida máxima de la entidad
+     * @param newMaxLife La nueva cantidad de vida máxima
+     */
     public setMaxLife(newMaxLife :number) {
         if(newMaxLife>0){
             this.maxLife = newMaxLife;
@@ -487,16 +515,23 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     }
 
     /**
+     * Prepara el objeto gráficos para dibujar lo que corresponda a este fotograma
+     */
+    private prepareGraphics() {
+        // Borramos todo lo dibujado en el frame anterior
+        this.graphics.clear();
+        // Nos colocamos justo en el target
+        this.graphics.setPosition(this.getPosition().x, this.getPosition().y);
+        // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
+        this.graphics.depth = Infinity;
+    }
+
+    /**
      * Dibuja una cruz en la posición del target. Esta función está pensada únicamente para usarse por
      * razones de depuración y no debe usarse en la versión final del juego
      */
     private drawTarget() {
-        // Borramos todo lo dibujado en el frame anterior
-        this.graphics.clear();
-        // Nos colocamos justo en el target
-        this.graphics.setPosition(this.sprite.body.center.x, this.sprite.body.center.y);
-        // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
-        this.graphics.depth = Infinity;
+        
         var targetDelta = this.target.clone().subtract(this.sprite.body.center);
         // Dibujamos una cruz blanca
         this.graphics.lineStyle(5, 0xFFFFFF);
@@ -536,14 +571,20 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side, this.config.frameRate, true);
     }
 
-    //Funcion encargada del bucle de animacion. Por ahora solo cambia el modo si estamos atacando.
+    /**
+     * Función que se ejecuta al terminar un ciclo de la animación
+     */
     protected onAnimationLoop(){
+        // Por ahora sólo necesitamos que cambie a modo caminar si estaba atacando
         if(this.getMode() ===  "attack"){
             this.setMode("walk");
         }
             
     }
 
+    /**
+     * Dibuja una barra de vida sobre el sprite de la entidad
+     */
     private drawLife(){
         this.graphics.fillStyle(0x000000,1);
         this.graphics.fillRect(-27,-92,(54*this.getMaxLife())/this.getMaxLife(),14);

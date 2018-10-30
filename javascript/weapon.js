@@ -10,7 +10,7 @@ class Weapon {
         this.cooldown = false;
         this.config = config;
         this.scene = player.scene;
-        this.player = player;
+        this.entity = player;
     }
     /**
      * Carga los recursos necesarios para el arma
@@ -33,8 +33,6 @@ class Weapon {
         this.setDefaultValues();
         // Ahora que tenemos todos los parámetros de configuración podemos cargar las animaciones
         this.loadAnimations();
-        //Añadimos el overlap para las colisiones del arma
-        this.scene.physics.add.overlap;
     }
     /**
      * Actualizamos el arma en cada fotograma
@@ -45,31 +43,31 @@ class Weapon {
         // de que no hay desfase (y, por tanto, el arma está en el mismo punto que el jugador).
         var offset = { x: 0, y: 0, z: 0 };
         // Para saber qué animación poner al arma tenemos que saber también el modo del jugador
-        var mode = this.player.currentAnimationInfo().mode;
+        var mode = this.entity.currentAnimationInfo().mode;
         // Comprobamos en qué dirección está mirando el jugador
-        switch (this.player.getDirection()) {
+        switch (this.entity.getDirection()) {
             // Si está mirando en cierta dirección:
             // Indicamos si el sprite del arma debe estar volteado;
             // Le asignamos el desfase que indique la configuración.
             case "left":
                 this.sprite.flipX = true;
-                offset = this.config.offset[mode].side[this.player.currentAnimationInfo().frame];
+                offset = this.config.offset[mode].side[this.entity.currentAnimationInfo().frame];
                 break;
             case "right":
                 this.sprite.flipX = false;
-                offset = this.config.offset[mode].side[this.player.currentAnimationInfo().frame];
+                offset = this.config.offset[mode].side[this.entity.currentAnimationInfo().frame];
                 break;
             case "up":
                 this.sprite.flipX = false;
-                offset = this.config.offset[mode].up[this.player.currentAnimationInfo().frame];
+                offset = this.config.offset[mode].up[this.entity.currentAnimationInfo().frame];
                 break;
             case "down":
                 this.sprite.flipX = false;
-                offset = this.config.offset[mode].down[this.player.currentAnimationInfo().frame];
+                offset = this.config.offset[mode].down[this.entity.currentAnimationInfo().frame];
                 break;
         }
         // Ponemos la misma animación que tiene el jugador en el arma
-        this.sprite.anims.play(this.player.currentAnimationInfo().toString(this.name), false, this.player.currentAnimationInfo().frame);
+        this.sprite.anims.play(this.entity.currentAnimationInfo().toString(this.name), false, this.entity.currentAnimationInfo().frame);
         // A partir de aquí vamos a modificar las coordenadas del desplazamiento. Como la variable
         // offset representa parte de la información de las animaciones, al modificarla también
         // podemos modificar dicha información. Para evitar esto, hacemos una copia del desfase
@@ -85,10 +83,10 @@ class Weapon {
             offset.z *= -1;
         }
         // Por último, colocamos el arma junto al jugador atendiendo a todos los cálculos previos
-        this.sprite.setPosition(this.player.getPosition().x + offset.x, this.player.getPosition().y + offset.y);
-        this.sprite.depth = this.player.sprite.depth + offset.z;
+        this.sprite.setPosition(this.entity.getPosition().x + offset.x, this.entity.getPosition().y + offset.y);
+        this.sprite.depth = this.entity.sprite.depth + offset.z;
         //Se comprueba si el arma está en ataque para ejecutar las funciones correspondientes.
-        if (this.player.getMode() === "attack") {
+        if (this.entity.getMode() === "attack") {
             this.auxOnHit();
         }
         else {
@@ -151,23 +149,29 @@ class Weapon {
         addAnimation(this.scene, this.name, "attack", "down", anims.attack.down);
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side);
     }
-    //Metodo que se encarga de comprobar si el arma choca con alguna de las entidades.
-    //Mira si las entiodades hacen overlap, si el modo del player es atacando y si
-    //el cooldown de ataque no esta activo
+    /**
+     * Función auxiliar que se encarga de comprobar si el arma choca con alguna de las entidades
+     * de la escena. Comprueba si las entidades hacen overlap, si la entidad que porta el arma
+     * está atacando, y si el cooldown del ataque no está activo
+     */
     auxOnHit() {
         for (let entity of this.scene.entities) {
             if (this.scene.physics.overlap(this.sprite, entity.sprite) &&
-                (this.player.getMode() === "attack") &&
+                (this.entity.getMode() === "attack") &&
                 (this.cooldown === false)) {
-                if (entity.sprite != this.player.sprite) {
+                if (entity.sprite != this.entity.sprite) {
                     this.onHit(entity);
                 }
             }
         }
     }
-    //Metodo que salta al entrar en contacto el arma con algo.
+    /**
+     * Función que se ejecuta cuando el arma golpea a una entidad
+     * @param victim La entidad golpeada con el arma
+     */
     onHit(victim) {
-        if (AnimationInfo.current(this.sprite.anims).frame = 2) {
+        // Solo activamos el ataque durante un fotograma en concreto
+        if (AnimationInfo.current(this.sprite.anims).frame == 2) {
             victim.setLife(victim.getLife() - this.damage);
             this.cooldown = true;
         }
