@@ -6,6 +6,8 @@ class Weapon {
      */
     constructor(player, config) {
         this.name = config.name;
+        this.damage = config.damage;
+        this.cooldown = false;
         this.config = config;
         this.scene = player.scene;
         this.player = player;
@@ -85,6 +87,13 @@ class Weapon {
         // Por último, colocamos el arma junto al jugador atendiendo a todos los cálculos previos
         this.sprite.setPosition(this.player.getPosition().x + offset.x, this.player.getPosition().y + offset.y);
         this.sprite.depth = this.player.sprite.depth + offset.z;
+        //Se comprueba si el arma está en ataque para ejecutar las funciones correspondientes.
+        if (this.player.getMode() === "attack") {
+            this.auxOnHit();
+        }
+        else {
+            this.cooldown = false;
+        }
     }
     /**
      * Asigna valores predeterminados a los parámetros opcionales de la configuración
@@ -142,8 +151,26 @@ class Weapon {
         addAnimation(this.scene, this.name, "attack", "down", anims.attack.down);
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side);
     }
+    //Metodo que se encarga de comprobar si el arma choca con alguna de las entidades.
+    //Mira si las entiodades hacen overlap, si el modo del player es atacando y si
+    //el cooldown de ataque no esta activo
+    auxOnHit() {
+        for (let entity of this.scene.entities) {
+            if (this.scene.physics.overlap(this.sprite, entity.sprite) &&
+                (this.player.getMode() === "attack") &&
+                (this.cooldown === false)) {
+                if (entity.sprite != this.player.sprite) {
+                    this.onHit(entity);
+                }
+            }
+        }
+    }
     //Metodo que salta al entrar en contacto el arma con algo.
     onHit(victim) {
+        if (AnimationInfo.current(this.sprite.anims).frame = 2) {
+            victim.setLife(victim.getLife() - this.damage);
+            this.cooldown = true;
+        }
     }
 }
 //# sourceMappingURL=weapon.js.map

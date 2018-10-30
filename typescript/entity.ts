@@ -79,7 +79,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     /**
      * Referencia a la escena a la que pertenece esta entidad
      */
-    public scene :Phaser.Scene;
+    public scene :SceneOverworld;
     /**
      * Referencia al objeto de gráficos de esta entidad, para dibujar el target
      */
@@ -103,14 +103,15 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     private mode :AnimationModeString;
 
     //Vida que tiene la entidad y vida maxima
-    private life :Number;
-    private maxLife :Number;
+    private life :number;
+    private maxLife :number;
+    public dead :boolean;
 
     /**
      * Crea una entidad basada en las opciones pasadas como parámetro
      * @param config Objeto que contiene dichas opciones
      */
-    constructor(scene :Phaser.Scene, config :EntityConfig) {
+    constructor(scene :SceneOverworld, config :EntityConfig) {
         super(scene, "entity");
         this.name = config.name;
         this.config = config;
@@ -118,6 +119,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.mode = AnimationInfo.default().mode;
         this.life = 100;
         this.maxLife = 100;
+        this.dead = false;
     }
 
     /**
@@ -176,8 +178,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
             case "walk":
                 // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
                 this.controlTarget();
-                // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
-                this.drawTarget();
+                
                 // Elegimos la animación correspondiente para que la entidad mire hacia el target
                 this.turnToTarget();
                 // Finalmente, movemos la entidad hacia el target
@@ -192,10 +193,20 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
 
                 break;
         }
+        // Luego lo dibujamos por razones de depuración. En la versión final esta llamada se eliminará
+        this.drawTarget();
 
         // Ahora que la entidad se ha movido le ponemos la profundidad adecuada para que se
         // renderice delante de lo que tiene detrás y viceversa
         this.sprite.depth = this.sprite.body.center.y;
+
+        //Por ultimo miramos si la entidad ha muerto para borrar el sprite.
+        //La entidad se borrará en el update de overworld a continuación.
+        if(this.dead === true){
+            this.sprite.destroy();
+            this.graphics.clear();
+        }
+        this.drawLife();
     }
 
     /**
@@ -254,11 +265,17 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     }
 
     //Cambia la vida/vida maxima de la entidad
-    public setLife(newLife :Number) {
-        this.life = newLife;
+    public setLife(newLife :number) {
+        if((newLife<=this.maxLife)){
+            this.life = newLife;
+            if(this.life <= 0){this.dead =true;}
+        }
+        
     }
-    public setMaxLife(newMaxLife :Number) {
-        this.maxLife = newMaxLife;
+    public setMaxLife(newMaxLife :number) {
+        if(newMaxLife>0){
+            this.maxLife = newMaxLife;
+        }
     }
 
     /**
@@ -476,26 +493,17 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // Borramos todo lo dibujado en el frame anterior
         this.graphics.clear();
         // Nos colocamos justo en el target
-        this.graphics.setPosition(this.target.x, this.target.y);
+        this.graphics.setPosition(this.sprite.body.center.x, this.sprite.body.center.y);
         // Garantizamos que lo que vayamos a dibujar se dibuje delante de lo que ya hay dibujado
         this.graphics.depth = Infinity;
-
+        var targetDelta = this.target.clone().subtract(this.sprite.body.center);
         // Dibujamos una cruz blanca
         this.graphics.lineStyle(5, 0xFFFFFF);
         this.graphics.beginPath();
-        this.graphics.moveTo(-5, 0);
-        this.graphics.lineTo(5, 0);
-        this.graphics.moveTo(0, -5);
-        this.graphics.lineTo(0, 5);
-
-        // Dibujamos una línea entre el target actual y el target del frame anterior, para
-        // apreciar los cambios visualmente
-        this.graphics.lineStyle(3, 0xFFFFFF);
-        var targetDelta = this.target.clone().subtract(this.sprite.body.center);
-        this.graphics.moveTo(0, 0);
-        this.graphics.lineTo(
-            this.oldTargetDelta.x - targetDelta.x,
-            this.oldTargetDelta.y - targetDelta.y);
+        this.graphics.moveTo(targetDelta.x-5, targetDelta.y);
+        this.graphics.lineTo(targetDelta.x+5, targetDelta.y);
+        this.graphics.moveTo(targetDelta.x, targetDelta.y-5);
+        this.graphics.lineTo(targetDelta.x, targetDelta.y+5);        
 
         // Terminamos el dibujo y lo enviamos al lienzo
         this.graphics.closePath();
@@ -533,6 +541,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
             this.setMode("walk");
         }
             
+    }
+
+    private drawLife(){
+        this.graphics.fillStyle(0xFF0000,1);
+        this.graphics.fillRect(-25,-90,(50*this.getLife())/this.getMaxLife(),10);
+        
     }
 
 }

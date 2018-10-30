@@ -15,7 +15,7 @@ class Player extends Entity {
      * @param scene Referencia a la escena donde se creará esta entidad
      * @param config Opciones específicas para esta instancia en particular
      */
-    constructor(scene :Phaser.Scene, config? :EntityConfig) {
+    constructor(scene :SceneOverworld, config? :EntityConfig) {
         // Si hay una configuración especificada se la pasamos, si no, le
         // pasamos la configuración por defecto de esta clase
         super(scene, config? config : {
@@ -41,6 +41,7 @@ class Player extends Entity {
         // Creamos el arma
         this.weapon = new Weapon(this, {
             name: "testweapon",
+            damage: 20,
             path: "testweapon.png",
             frameWidth: 128,
             frameHeight: 128,

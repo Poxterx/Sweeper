@@ -3,6 +3,10 @@ type WeaponConfig = {
      * Nombre que identifica esta arma
      */
     name :string,
+    /*
+    * Daño del arma
+    */
+    damage :number;
     /**
      * Dirección donde se almacena el spritesheet de esta arma (partiendo de assets/sprites)
      */
@@ -59,11 +63,19 @@ class Weapon {
     /**
      * Escena a la que pertenece el arma
      */
-    private scene :Phaser.Scene;
+    private scene :SceneOverworld;
     /** 
     * Jugador que porta el arma
     */
     private player :Player;
+    /*
+    * Daño del arma
+    */
+   private damage :number;
+    /*
+    * Enfriamiento del ataque
+    */
+   private cooldown :boolean;
 
     /**
      * Crea un arma con las opciones pasadas como parámetro
@@ -72,6 +84,8 @@ class Weapon {
      */
     constructor(player :Player, config :WeaponConfig) {
         this.name = config.name;
+        this.damage = config.damage;
+        this.cooldown = false;
         this.config = config;
         this.scene = player.scene;
         this.player = player;
@@ -166,6 +180,14 @@ class Weapon {
         this.sprite.setPosition(this.player.getPosition().x + offset.x,
                                 this.player.getPosition().y + offset.y);
         this.sprite.depth = this.player.sprite.depth + offset.z;
+
+        //Se comprueba si el arma está en ataque para ejecutar las funciones correspondientes.
+        if(this.player.getMode() === "attack"){
+            this.auxOnHit();
+        }else{
+            this.cooldown = false;
+        }
+        
     }
 
     /**
@@ -228,8 +250,27 @@ class Weapon {
         addAnimation(this.scene, this.name, "attack", "down", anims.attack.down);
         addAnimation(this.scene, this.name, "attack", "side", anims.attack.side);
     }
+    //Metodo que se encarga de comprobar si el arma choca con alguna de las entidades.
+    //Mira si las entiodades hacen overlap, si el modo del player es atacando y si
+    //el cooldown de ataque no esta activo
+    
+    private auxOnHit(){
+        for (let entity of this.scene.entities){
+            if(this.scene.physics.overlap(this.sprite, entity.sprite)&&
+            (this.player.getMode() === "attack")&&
+            (this.cooldown === false)){
+                if(entity.sprite != this.player.sprite){
+                    this.onHit(entity);
+                }
+            }
+        }
+    }
     //Metodo que salta al entrar en contacto el arma con algo.
-    protected onHit(victim){
+    protected onHit(victim :Entity){
+        if(AnimationInfo.current(this.sprite.anims).frame = 2){
+            victim.setLife( victim.getLife() -  this.damage) ;
+            this.cooldown = true;
+        }
         
     }
 }

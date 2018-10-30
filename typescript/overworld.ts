@@ -3,11 +3,11 @@ class SceneOverworld extends Phaser.Scene {
     /**
      * Entidades de esta escena
      */
-    private entities :Entity[];
+    public entities :Entity[];
     /**
      * Sala en la que tiene lugar esta escena
      */
-    private room :Room;
+    public room :Room;
 
     /**
      * Nueva escena que tiene lugar en la sala indicada
@@ -67,8 +67,18 @@ class SceneOverworld extends Phaser.Scene {
 
     /**
      * Actualiza la escena en cada fotograma
+     * A continuación mira si hay entidades muertas y las borra.
      */
     update() {
-        this.entities.forEach(e => e.update());
+        var toDelete = [];
+        for(let e of this.entities){
+            e.update();
+            if(e.dead === true){
+                toDelete.push(e);
+            }
+        }
+        for(let e of toDelete){
+            this.entities.splice(this.entities.indexOf(e),1);
+        }
     }
 }

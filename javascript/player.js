@@ -31,6 +31,7 @@ class Player extends Entity {
         // Creamos el arma
         this.weapon = new Weapon(this, {
             name: "testweapon",
+            damage: 20,
             path: "testweapon.png",
             frameWidth: 128,
             frameHeight: 128,
