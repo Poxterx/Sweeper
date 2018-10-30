@@ -46,7 +46,8 @@ Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos de
 Si en el menú eliges Single Player, se inicia una partida con un solo jugador:
 ![singlep](https://user-images.githubusercontent.com/43203588/47756469-7923c480-dca2-11e8-8a9a-092261c7646d.jpg)
 
-
+Si en el menú eliges Multiplayer, se inicia una partida con un dos jugadores:
+![multip](https://user-images.githubusercontent.com/43203588/47756508-acfeea00-dca2-11e8-9ffa-871745f7bae0.jpg)
 
 Al morir el jugador 1 se acaba la partida y te lleva a la pantalla Game Over:
 ![game over](https://user-images.githubusercontent.com/43203588/47756216-88564280-dca1-11e8-8e26-b81e531c5268.jpg)
