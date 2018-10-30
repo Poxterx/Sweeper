@@ -33,6 +33,9 @@ El planteamiento del diseño de nivel para las distintas zonas del juego estarí
 ![Mario & Luigi: Superstar Saga](https://i.ytimg.com/vi/FyB2U2lIaLI/hqdefault.jpg "Mario & Luigi: Superstar Saga")  
 Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compenetración por parte de los jugadores. Estarían planteados de forma similar a la saga Mario & Luigi, pero en multijugador y a tiempo real.  
 
+## Diagrama de navegación de la página
+![paginasnav](https://user-images.githubusercontent.com/43203588/47755781-dec28180-dc9f-11e8-907e-7fe23b231389.jpg)
+
 ## Integrantes  
 
 1. **Nombre y Apellidos:** Pablo Alconchel Palma  
