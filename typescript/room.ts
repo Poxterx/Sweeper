@@ -65,6 +65,20 @@ class Room {
         return this.colliderLayers[this.colliderLayers.length - 1].getTileAt(tile.x, tile.y, true);
     }
 
+    public findRandomFreePosition(maxAttempts = 1000) {
+        var ret :Vector2 = null;
+        for(let i = 0; i < maxAttempts; i++) {
+            var x = Math.random() * this.size.x;
+            var y = Math.random() * this.size.y;
+
+            if(!this.getColliderTileAt(pixelToTilePosition({x: x, y: y})).properties.Solid) {
+                ret = {x: x, y: y};
+                break;
+            }
+        }
+        return ret;
+    }
+
     /**
      * Carga los recursos necesarios para esta sala
      */

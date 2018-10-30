@@ -78,6 +78,13 @@ class Weapon {
         // podemos modificar dicha información. Para evitar esto, hacemos una copia del desfase
         // calculado que podemos modificar libremente.
         offset = clone(offset);
+        if (!offset) {
+            offset = {
+                x: 0,
+                y: 0,
+                z: 0
+            };
+        }
         // Si el arma tiene que estar volteada horizontalmente...
         if (this.sprite.flipX) {
             // Es porque el personaje está mirando hacia la izquierda. Como nuestros cálculos

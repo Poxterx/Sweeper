@@ -149,6 +149,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Inicializa los recursos preparados con preload()
      */
     create() {
+        if(!this.config.startingPosition) {
+            this.config.startingPosition = this.scene.room.findRandomFreePosition();
+        }
         // Introducimos el sprite en el sistema de físicas de Phaser
         this.sprite = this.scene.physics.add.sprite(
             this.config.startingPosition.x,
@@ -371,13 +374,6 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // de caminar a modo de apaño
         if(!this.config.animations.attack) {
             this.config.animations.attack = clone(this.config.animations.walk);
-        }
-        // Si no hay posición inicial, la posición inicial es (0, 0)
-        if(!this.config.startingPosition) {
-            this.config.startingPosition = {
-                x: 0,
-                y: 0
-            }
         }
         // Si no hay velocidad, la velocidad es 100 píxeles por segundo
         if(!this.config.speed) {

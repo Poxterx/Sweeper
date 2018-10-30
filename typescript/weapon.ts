@@ -161,13 +161,21 @@ class Weapon {
 
         // Ponemos la misma animación que tiene el jugador en el arma
         this.sprite.anims.play(this.entity.currentAnimationInfo().toString(this.name), false,
-                               this.entity.currentAnimationInfo().frame);
+            this.entity.currentAnimationInfo().frame);
 
         // A partir de aquí vamos a modificar las coordenadas del desplazamiento. Como la variable
         // offset representa parte de la información de las animaciones, al modificarla también
         // podemos modificar dicha información. Para evitar esto, hacemos una copia del desfase
         // calculado que podemos modificar libremente.
         offset = clone(offset);
+
+        if(!offset) {
+            offset = {
+                x: 0,
+                y: 0,
+                z: 0
+            }
+        }
 
         // Si el arma tiene que estar volteada horizontalmente...
         if(this.sprite.flipX) {

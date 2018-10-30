@@ -46,10 +46,11 @@ class SceneOverworld extends Phaser.Scene {
                 attack:"P"
             }, 384, 1704));
         this.entities.push(new Dummy(this));
-        this.entities.push(new DummyAI(this));
+        // this.entities.push(new DummyAI(this));
+        this.entities.push(new Enemy(this));
         // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
-        this.room.preload();     
+        this.room.preload();
     }
 
     /**
@@ -92,6 +93,7 @@ class SceneOverworld extends Phaser.Scene {
      */
     update() {
         var toDelete = [];
+        var mainPlayer = this.entities[0];
         for(let e of this.entities){
             e.update();
             if(e.dead === true){
@@ -100,6 +102,11 @@ class SceneOverworld extends Phaser.Scene {
         }
         for(let e of toDelete){
             this.entities.splice(this.entities.indexOf(e),1);
+        }
+        if(this.entities.indexOf(mainPlayer) == -1) {
+            this.scene.stop("SceneOverworld");
+            this.scene.stop("SceneGUI");
+            this.scene.start("SceneGameOver");
         }
     }
 }

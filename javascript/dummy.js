@@ -24,7 +24,7 @@ class Dummy extends Entity {
             speed: 200,
             startingPosition: {
                 x: 2176,
-                y: 1280
+                y: 1200
             }
         });
     }

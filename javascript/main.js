@@ -27,7 +27,8 @@ const game = new Phaser.Game({
             tilemap: "Mapa.json",
             tileset: "tileset.png"
         })),
-        new SceneGUI()]
+        new SceneGUI(),
+        new SceneGameOver()]
 });
 // Mostrar en la pestaña los datos del juego
 document.title = game.config.gameTitle + " " + game.config.gameVersion;
