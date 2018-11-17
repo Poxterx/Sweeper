@@ -14,7 +14,7 @@ const game = new Phaser.Game({
 
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.1.0",
+    version: "0.1.1",
 
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
@@ -29,7 +29,8 @@ const game = new Phaser.Game({
     pixelArt: true,
 
     // Referencia a las escenas del juego
-    scene: [new SceneTitle(),
+    scene: [new SceneServer(),
+            new SceneTitle(),
             new SceneMenu(),
             new SceneOverworld(new Room("mainroom", {
                 tilemap: "Mapa.json",
@@ -41,3 +42,8 @@ const game = new Phaser.Game({
 
 // Mostrar en la pestaña los datos del juego
 document.title = game.config.gameTitle + " " + game.config.gameVersion;
+
+// Indicar en la pestaña si es un server
+if(SERVER) {
+    document.title += " (SERVER)";
+}
