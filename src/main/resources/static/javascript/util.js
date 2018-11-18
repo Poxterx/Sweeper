@@ -1,8 +1,14 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
-/*
+/**
  * Tamaño de cada tile en píxeles
  */
 const TILE_SIZE = 128;
+/**
+ * Indica si esta distancia de Sweeper se está ejecutando como servidor. Para ejecutar como
+ * servidor, debe accederse al juego desde el mismo dispositivo donde se aloja el servidor
+ * de Spring Boot, y es necesario entrar en localhost desde el navegador.
+ */
+const SERVER = (location.hostname == "localhost");
 /**
  * Indica si estamos en una sesión de depuración para dibujar la información extra de las entidades
  */

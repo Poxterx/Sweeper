@@ -1,88 +1,22 @@
 // UTILIDADES VARIAS CON PROPÓSITO GENERAL
-
-/*
+/**
  * Tamaño de cada tile en píxeles
  */
 const TILE_SIZE = 128;
-
+/**
+ * Indica si esta distancia de Sweeper se está ejecutando como servidor. Para ejecutar como
+ * servidor, debe accederse al juego desde el mismo dispositivo donde se aloja el servidor
+ * de Spring Boot, y es necesario entrar en localhost desde el navegador.
+ */
+const SERVER = (location.hostname == "localhost");
 /**
  * Indica si estamos en una sesión de depuración para dibujar la información extra de las entidades
  */
 var DEBUG = false;
-
 /**
  * Indica si el juego está siendo jugado por una o varias personas
  */
 var multiplayer = false;
-
-/**
- * Objeto con una coordenada X y una coordenada Y
- */
-type Vector2 = {
-    x :number,
-    y :number
-}
-
-/**
- * Objeto con una coordenada X, una coordenada Y y una coordenada Z
- */
-type Vector3 = {
-    x :number,
-    y :number,
-    z :number
-}
-
-/**
- * Direcciones posibles en las que puede mirar una entidad
- */
-type DirectionString = "up" | "down" | "left" | "right";
-
-/**
- * Direcciones posibles para una animación
- */
-type AnimationDirectionString = "up" | "down" | "side";
-
-/**
- * Modos posibles para una animación
- */
-type AnimationModeString = "walk" | "attack";
-
-/**
- * Objeto que relaciona una serie de fotogramas con cada dirección contemplada en el tipo
- * AnimationDirectionString
- */
-namespace DirectionalAnimation {
-    /**
-     * Objeto que relaciona una serie de fotogramas con cada dirección contemplada en el
-     * tipo AnimationDirectionString
-     */
-    export type OneCoord = {
-        up :number[],
-        down :number[],
-        side :number[]
-    }
-
-    /**
-     * Objeto que relaciona un vector bidimensional con cada fotograma asociado a cada dirección
-     * contemplada en el tipo AnimationDirectionString
-     */
-    export type TwoCoords = {
-        up :Vector2[],
-        down :Vector2[],
-        side :Vector2[]
-    }
-
-    /**
-     * Objeto que relaciona un vector tridimensional con cada fotograma asociado a cada dirección
-     * contemplada en el tipo AnimationDirectionString
-     */
-    export type ThreeCoords = {
-        up :Vector3[],
-        down :Vector3[],
-        side :Vector3[]
-    }
-}
-
 /**
  * Registra una animación en el administrador de animaciones de Phaser
  * @param scene La escena a través de la cual se accederá al administrador de animaciones
@@ -93,54 +27,32 @@ namespace DirectionalAnimation {
  * @param frameRate Velocidad a la que se reproducirá la animación
  * @param repeat Si la animación debe reproducirse una vez (false) o continuamente (true)
  */
-function addAnimation(scene :Phaser.Scene, thisName :string,
-mode :AnimationModeString, direction :AnimationDirectionString,
-frames :number[], frameRate? :number, repeat? :boolean) {
-    
+function addAnimation(scene, thisName, mode, direction, frames, frameRate, repeat) {
     scene.anims.create({
         key: thisName + "@" + mode + "@" + direction,
-        frames: scene.anims.generateFrameNumbers(thisName, {frames: frames}),
+        frames: scene.anims.generateFrameNumbers(thisName, { frames: frames }),
         frameRate: frameRate,
         repeat: repeat ? -1 : 0
     });
 }
-
 /**
  * Permite acceder de manera conveniente a datos útiles sobre la animación de una entidad
  */
 class AnimationInfo {
-    /**
-     * Nombre de la entidad que está reproduciendo esta animación
-     */
-    public name :string;
-    /**
-     * Modo de la entidad que está reproduciendo esta animación
-     */
-    public mode :AnimationModeString;
-    /**
-     * Dirección de la entidad que está reproduciendo esta animación
-     */
-    public direction :AnimationDirectionString;
-    /**
-     * Índice del fotograma actual dentro del array de esta animación
-     */
-    public frame :integer;
-
-    private constructor(name :string, mode :string, direction :string, frame :integer) {
+    constructor(name, mode, direction, frame) {
         this.name = name;
-        this.mode = mode as AnimationModeString;
-        this.direction = direction as AnimationDirectionString;
+        this.mode = mode;
+        this.direction = direction;
         this.frame = frame;
     }
-
     /**
      * Obtiene la información de la animación que un controlador de animaciones tenga
      * en reproducción actualmente
      * @param animationController El controlador de animaciones en cuestión
      */
-    public static current(animationController :Phaser.GameObjects.Components.Animation) {
+    static current(animationController) {
         // Si el controlador no está reproduciendo ninguna animación...
-        if(!animationController || !animationController.currentAnim) {
+        if (!animationController || !animationController.currentAnim) {
             // ... no hay nada que hacer, devuelve la información predeterminada
             return this.default();
         }
@@ -153,15 +65,13 @@ class AnimationInfo {
         // Devolvemos la información con los datos obtenidos
         return new AnimationInfo(split[0], split[1], split[2], frame);
     }
-
     /**
      * Devuelve información predeterminada para usar en caso de que las animaciones que hay
      * que leer no se hayan iniciado todavía
      */
-    public static default() {
+    static default() {
         return new AnimationInfo("", "walk", "up", 0);
     }
-
     /**
      * Devuelve una representación textual de esta información, en un formato que se puede
      * usar directamente como clave en el adminsitrador de animaciones de Phaser. Probablemente
@@ -169,11 +79,10 @@ class AnimationInfo {
      * @param name Nombre de la entidad para la que se va a generar esta nueva representación
      * textual. Si no se especifica, se usará el nombre original.
      */
-    public toString(name? :string) {
+    toString(name) {
         return (name ? name : this.name) + "@" + this.mode + "@" + this.direction;
     }
 }
-
 /**
  * Al asignar a una variable un objeto ya asignado a otra variable, sólo se copia la referencia.
  * Eso significa que cualquier cambio realizado sobre una variable afectará irremediablemente a la
@@ -181,56 +90,55 @@ class AnimationInfo {
  * al completo, de manera que puede ser modificado sin problemas y sin afectar al original.
  * @param base El objeto a copiar
  */
-function clone(base :any) :any {
+function clone(base) {
     // Hay que tener en cuenta que los datos que estamos copiando pueden ser cualquier cosa
-    var ret :any;
-
+    var ret;
     // Si el objeto es un array
-    if(base instanceof Array) {
+    if (base instanceof Array) {
         // Empezamos creando otro array
         ret = [];
         // Iteramos por todo su *contenido* (for-of)
-        for(let element of base) {
+        for (let element of base) {
             // Y copiamos, a su vez, cada elemento del array por separado
             ret.push(clone(element));
         }
-    // Si es un objeto pero no un array
-    } else if(base instanceof Object) {
+        // Si es un objeto pero no un array
+    }
+    else if (base instanceof Object) {
         // Empezamos creando un objeto vacío
         ret = {};
         // Iteramos por todos sus *miembros* (for-in)
-        for(let member in base) {
+        for (let member in base) {
             // Y copiamos, a su vez, cada miembro del objeto por separado
             ret[member] = clone(base[member]);
         }
-    // Si no es un objeto (por ejemplo, un string, un número o un valor booleano)
-    } else {
+        // Si no es un objeto (por ejemplo, un string, un número o un valor booleano)
+    }
+    else {
         // Lo podemos pasar tal cual. Estos valores sólo se pasan por copia.
         ret = base;
     }
-
     // Devolvemos el objeto ya copiado en su totalidad
     return ret;
 }
-
 /**
  * Devuelve la posición en tiles en la que se encuentra la posición especificada en píxeles
  * @param pixel La posición en cuestión, en píxeles
  */
-function pixelToTilePosition(pixel :Vector2) :Vector2 {
+function pixelToTilePosition(pixel) {
     return {
         x: Math.floor(pixel.x / TILE_SIZE),
         y: Math.floor(pixel.y / TILE_SIZE)
-    }
+    };
 }
-
 /**
  * Devuelve la posición del centro del tile especificado, en píxeles
  * @param tile El tile en cuestión
  */
-function tileToPixelPosition(tile :Vector2) :Vector2 {
+function tileToPixelPosition(tile) {
     return {
         x: (tile.x + 0.5) * TILE_SIZE,
         y: (tile.y + 0.5) * TILE_SIZE
-    }
+    };
 }
+//# sourceMappingURL=util.js.map

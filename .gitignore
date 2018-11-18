@@ -1,3 +1,4 @@
 .vscode
-javascript/*.js.map
+.settings
+**/*.js.map
 tiled
