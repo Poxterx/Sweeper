@@ -14,6 +14,7 @@ class SceneServer extends Phaser.Scene {
         // Si no es un servidor, entonces ir al título para poder jugar.
         if (!SERVER) {
             this.scene.start("SceneTitle");
+            return;
         }
         // Centrar el texto
         var screen = {
@@ -25,6 +26,11 @@ class SceneServer extends Phaser.Scene {
             fontSize: 10
         });
         this.text.setPosition(screen.width * 0.5 - this.text.width * 0.5, screen.height * 0.5 - this.text.height * 0.5);
+        // Cuando la conexión haya cargado, se puede añadir también la dirección del host
+        var that = this;
+        Connection.onInitialized(function () {
+            that.text.text += "\n\nDisponible en " + Connection.getHostAddress();
+        });
     }
 }
 //# sourceMappingURL=server.js.map

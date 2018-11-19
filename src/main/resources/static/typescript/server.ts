@@ -21,6 +21,7 @@ class SceneServer extends Phaser.Scene {
         // Si no es un servidor, entonces ir al título para poder jugar.
         if(!SERVER) {
             this.scene.start("SceneTitle");
+            return;
         }
 
         // Centrar el texto
@@ -40,7 +41,7 @@ class SceneServer extends Phaser.Scene {
         // Cuando la conexión haya cargado, se puede añadir también la dirección del host
         var that = this;
         Connection.onInitialized(function() {
-            that.text.text += "\n\nDisponible en " + Connection.getFullHost();
+            that.text.text += "\n\nDisponible en " + Connection.getHostAddress();
         });
     }
 

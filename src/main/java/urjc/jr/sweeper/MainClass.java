@@ -19,5 +19,8 @@ public class MainClass
         // Crear el archivo host.txt para que el programa implementado en Phaser sepa en qué
         // dirección está alojado el servidor.
         HostManager.createHostFile();
+
+        // Inicializamos las tareas periódicas
+        TaskScheduler.initialize();
     }
 }

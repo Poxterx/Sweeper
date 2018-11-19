@@ -1,3 +1,12 @@
+// BORRAR EN EL MERGE
+type Message = any;
+
+type User = {
+    id :number,
+    username :string,
+    ready :boolean
+}
+
 /**
  * Clase estática que maneja la conexión con el servidor.
  */
@@ -18,18 +27,19 @@ class Connection {
     private host :string;
 
     /**
-     * Puerto al que se debe conectar otro terminal
+     * 
      */
-    private port :string;
+    private user :User;
+
+    private updateInterval :number;
 
     /**
      * Esta clase sigue el patrón singleton y no es instanciable.
-     * @param hostaddress Dirección del host y su puerto, recibido desde el archivo host.txt
+     * @param host Dirección del host y su puerto, recibido desde el archivo host.txt
      */
-    private constructor(hostaddress :string) {
-        // La dirección y el puerto quedan separados por el carácter ":"
-        this.host = hostaddress.split(":")[0];
-        this.port = hostaddress.split(":")[1];
+    private constructor(host :string) {
+        // La dirección y el puerto vienen incluidos
+        this.host = host;
     }
 
     /**
@@ -64,6 +74,11 @@ class Connection {
                 listener();
             }
 
+            // Vaciamos la cola de funciones que estaban esperando
+            Connection.listeners = [];
+
+            Connection.instance.updateInterval = setInterval(Connection.update, 500);
+
         }).fail(function(content) {
             // En este caso la petición GET no ha tenido éxito, lo cual puede ocurrir si
             // el programa del servidor ha fallado al crear el archivo host.txt.
@@ -74,8 +89,18 @@ class Connection {
     /**
      * Devuelve la dirección completa (dirección + puerto) del host.
      */
-    public static getFullHost() {
-        return Connection.instance.host + ":" + Connection.instance.port;
+    public static getHostAddress() {
+        return Connection.instance.host;
+    }
+    
+    public static getUser() {
+       var ret :User;
+       if(Connection.instance && Connection.instance.user) {
+           ret = Connection.instance.user
+       } else {
+           ret = null;
+       }
+       return ret;
     }
 
     /**
@@ -98,5 +123,108 @@ class Connection {
         } else {
             listener();
         }
+    }
+
+    public static readChatMessages(listener :(messages :Message[]) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxGet("/chat")
+            .done(function(messages) {
+                listener(messages);
+            }).fail(function() {
+                console.error("No se ha podido conectar al chat.");
+            });
+        });
+    }
+
+    public static sendChatMessage(message :Message, listener? :() => void) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxPost("/chat", message)
+            .done(function() {
+                if(listener)
+                    listener();
+            }).fail(function() {
+                console.error("No se ha podido enviar el mensaje al servidor.");
+            })
+        } else {
+            console.error("No se puede mandar un mensaje al chat porque no hay " +
+            "ningún usuario asociado a este cliente.");
+        }
+    } 
+
+    public static readConnectedUsers(listener :(users :User[]) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxGet("/users")
+            .done(function(users) {
+                listener(users);
+            }).fail(function() {
+                console.error("No se ha podido obtener los jugadores conectados.");
+            })
+        });
+    }
+
+    public static createUser(username :string) {
+        Connection.onInitialized(function() {
+            Connection.ajaxPost("/users", {
+                username: username
+            }).done(function(user) {
+                if(!user) {
+                    console.error("Ya hay otro usuario con el mismo nombre.");
+                } else {
+                    Connection.instance.user = user;
+                }
+            }).fail(function() {
+                console.error("No se ha podido crear un usuario en el servidor.");
+            })
+        });
+    }
+
+    public static dropUser() {
+        if(Connection.instance) {
+            Connection.instance.user = null;
+        }
+    }
+
+    public static changeUsername(newName :string) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxPost("/users/" + Connection.instance.user.id, {username: newName})
+            .done(function(user) {
+                if(!user) {
+                    console.error("Ya hay otro usuario con el mismo nombre.");
+                } else {
+                    Connection.instance.user = user;
+                }
+            }).fail(function() {
+                console.error("No se ha podido solicitar al servidor un cambio de nombre.");
+            });
+        }
+    }
+
+    private static update() {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxGet("/users/" + Connection.instance.user.id)
+            .fail(function() {
+                console.error("Se ha perdido la conexión con el servidor.");
+                Connection.dropUser();
+            });
+        }
+    }
+
+    private static ajaxGet(url :string) {
+        return $.ajax({
+            method: "GET",
+            url: "http://" + Connection.getHostAddress() + url
+        });
+    }
+
+    private static ajaxPost(url :string, data :object) {
+        return $.ajax({
+            method: "POST",
+            url: "http://" + Connection.getHostAddress() + url,
+            data: JSON.stringify(data),
+            processData: false,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
     }
 }

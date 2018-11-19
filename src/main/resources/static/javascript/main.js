@@ -9,7 +9,7 @@ const game = new Phaser.Game({
     type: Phaser.CANVAS,
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.1.1",
+    version: "0.1.2",
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
     physics: {
