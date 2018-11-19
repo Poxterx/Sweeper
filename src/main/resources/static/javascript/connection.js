@@ -3,7 +3,7 @@
  */
 class Connection {
     /**
-     * Esta clase sigue el patrón singleton y no es instanciable
+     * Esta clase sigue el patrón singleton y no es instanciable.
      * @param hostaddress Dirección del host y su puerto, recibido desde el archivo host.txt
      */
     constructor(hostaddress) {

@@ -1,16 +1,21 @@
 class SceneServer extends Phaser.Scene {
 
     /**
-     * Contenido placeholder
+     * Objeto de texto que guarda el nombre del host de la partida
      */
-    private text :Phaser.GameObjects.Text;
-
+    private host :Phaser.GameObjects.Text;
+    /**
+     * Pinta en una escena los nombres de los usuarios
+     */
+    private us:UsersList;
     /**
      * Escena del servidor. Esta escena es la interfaz gráfica que tendrá la instancia
      * del juego ejecutándose como servidor, al menos hasta que empiece la partida.
      */
     constructor() {
         super({key: "SceneServer"});
+        // Le pasamos la propia escena del servidor para que pinte en ella los nombres de los usuarios
+        this.us = new UsersList(this);
     }
 
     /**
@@ -22,26 +27,33 @@ class SceneServer extends Phaser.Scene {
         if(!SERVER) {
             this.scene.start("SceneTitle");
         }
-
-        // Centrar el texto
+        
+        // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
         var screen = {
             width: this.game.config.width as number,
             height: this.game.config.height as number
         }
-
-        this.text = this.add.text(0, 0, "Esta es la pantalla\nque sale en el server.", {
+        // Creamos el texto del nombre del host
+        this.host = this.add.text(0, 0, "Host", {
             fontFamily: "Arial",
-            fontSize: 10
+            fontSize: 40
         });
 
-        this.text.setPosition(screen.width * 0.5 - this.text.width * 0.5,
-                            screen.height * 0.5 - this.text.height * 0.5);
-
+        // Colocamos el nombre del host arriba a la izquierda, para dejar espacio para su direccion y puerto
+        this.host.setPosition(screen.width * 0.15 - this.host.width * 0.5,
+                            screen.height * 0.15 - this.host.height * 0.5);
+        
         // Cuando la conexión haya cargado, se puede añadir también la dirección del host
         var that = this;
         Connection.onInitialized(function() {
-            that.text.text += "\n\nDisponible en " + Connection.getFullHost();
+            that.host.text += " Disponible en " + Connection.getFullHost();
         });
+    }
+    /**
+     * Actualiza el array de usuarios conectados
+     */
+    update(){
+        this.us.update();
     }
 
 }

@@ -6,7 +6,7 @@
 const TILE_SIZE = 128;
 
 /**
- * Indica si esta instancia de Sweeper se está ejecutando como servidor. Para ejecutar como
+ * Indica si esta distancia de Sweeper se está ejecutando como servidor. Para ejecutar como
  * servidor, debe accederse al juego desde el mismo dispositivo donde se aloja el servidor
  * de Spring Boot, y es necesario entrar en localhost desde el navegador.
  */
@@ -173,7 +173,6 @@ function tileToPixelPosition(tile :Vector2) :Vector2 {
         y: (tile.y + 0.5) * TILE_SIZE
     }
 }
-
 // Inicializamos la conexión cuando cargue el documento
 $(document).ready(function() {
     Connection.initialize();

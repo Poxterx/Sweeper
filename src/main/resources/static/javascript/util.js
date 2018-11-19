@@ -4,7 +4,7 @@
  */
 const TILE_SIZE = 128;
 /**
- * Indica si esta instancia de Sweeper se está ejecutando como servidor. Para ejecutar como
+ * Indica si esta distancia de Sweeper se está ejecutando como servidor. Para ejecutar como
  * servidor, debe accederse al juego desde el mismo dispositivo donde se aloja el servidor
  * de Spring Boot, y es necesario entrar en localhost desde el navegador.
  */
