@@ -36,6 +36,12 @@ class SceneServer extends Phaser.Scene {
 
         this.text.setPosition(screen.width * 0.5 - this.text.width * 0.5,
                             screen.height * 0.5 - this.text.height * 0.5);
+
+        // Cuando la conexión haya cargado, se puede añadir también la dirección del host
+        var that = this;
+        Connection.onInitialized(function() {
+            that.text.text += "\n\nDisponible en " + Connection.getFullHost();
+        });
     }
 
 }
