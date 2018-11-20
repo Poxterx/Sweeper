@@ -29,7 +29,10 @@ class UsersList {
             fontFamily: "Arial",
             fontSize: 20
         });
-        this.text.setPosition(screen.width * 0.5 - this.text.width * 0.5, screen.height * 0.25);
+        this.text.setPosition(screen.width * 0.25, SERVER ? screen.height * 0.25 : screen.height * 0.1);
+    }
+    getUsers() {
+        return clone(this.usersArray);
     }
     /**
      * Actualiza la escena del servidor poniendo los usuarios conectados en el momento
@@ -40,12 +43,16 @@ class UsersList {
             // Aqui se rellenaria el array con lo que llega del backend
             that.usersArray.splice(0, that.usersArray.length);
             for (let user of users) {
-                that.usersArray.push(user.username);
+                that.usersArray.push(user);
             }
             that.text.text = "";
             // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
-            for (let element of that.usersArray) {
-                that.text.text += element + "\n";
+            for (let user of that.usersArray) {
+                that.text.text += user.username;
+                if (user.ready) {
+                    that.text.text += " ✔️";
+                }
+                that.text.text += "\n";
             }
         });
     }

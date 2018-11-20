@@ -37,7 +37,9 @@ public class UserController {
             + user.getUsername() + ", que ya estaba cogido. Se le ha rechazado el usuario.");
             return null;
         }
-
+        if(user.getUsername() == null || user.getUsername().isEmpty()) {
+            return null;
+        }
         user.setId(currentId);
         users.put(currentId, user);
         user.resetIdle();
@@ -53,6 +55,9 @@ public class UserController {
         if(currentUser == null) {
             return null;
         }
+        if(user.getUsername() == null || user.getUsername().isEmpty()) {
+            return currentUser;
+        }
         currentUser.resetIdle();
         if(takenUsernames.contains(user.getUsername())) {
             ChatMessageController.postServerMessage(currentUser.getUsername()
@@ -62,7 +67,7 @@ public class UserController {
         }
         takenUsernames.remove(currentUser.getUsername());
         takenUsernames.add(user.getUsername());
-        System.out.println(currentUser.getUsername() + " se ha cambiado el nombre a " + user.getUsername() + ".");
+        ChatMessageController.postServerMessage(currentUser.getUsername() + " se ha cambiado el nombre a " + user.getUsername() + ".");
         currentUser.setUsername(user.getUsername());
         return currentUser;
     }

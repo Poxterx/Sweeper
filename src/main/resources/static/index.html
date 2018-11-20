@@ -1,5 +1,6 @@
 <head>
     <title>Sweeper</title>
+    <meta charset="UTF-8"/>
     <!-- Phaser se importa y carga en este script -->
     <script src="//cdn.jsdelivr.net/npm/phaser@3.14.0/dist/phaser.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -9,12 +10,19 @@
     <!-- Div centrado para situar el canvas -->
     <div style="text-align: center">
         <canvas id="gameCanvas"></canvas>
+        <input type="text" id="name" required hidden="true" style="
+            position: absolute;
+            top: 100px;
+            width: 200px;
+            text-align: center;">
     </div>
 
     <!-- Archivos ejecutables de los que se compone el juego.
         Estos son los archivos generados mediante el compilador de TypeScript -->
     <script src="javascript/connection.js"></script>
     <script src="javascript/util.js"></script>
+    <script src="javascript/userslist.js"></script>
+    <script src="javascript/menumultijugador.js"></script>
     <script src="javascript/menu.js"></script>
     <script src="javascript/entity.js"></script>
     <script src="javascript/path.js"></script>
@@ -29,8 +37,5 @@
     <script src="javascript/title.js"></script>
     <script src="javascript/overworld.js"></script>
     <script src="javascript/server.js"></script>
-    <script src="javascript/userslist.js"></script>
     <script src="javascript/main.js"></script>
-    
-    
 </body>
