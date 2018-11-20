@@ -63,10 +63,9 @@ declare namespace DirectionalAnimation {
         up :Vector3[],
         down :Vector3[],
         side :Vector3[]
-    }    
+    }
+    
 }
-
-
 // JQUERY
 // A falta de archivos de definición adecuados para la versión actual de jQuery, hemos añadido
 // algunas definiciones que permitan usarlo sin errores de compilación.
@@ -137,3 +136,4 @@ declare namespace $ {
      */
     function ajax(petition :ajaxPetition) :ajaxReponse;
 }
+

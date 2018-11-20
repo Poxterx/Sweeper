@@ -1,9 +1,21 @@
 // BORRAR EN EL MERGE
 type Message = any;
 
+/**
+ * Tipo que representa a un usuario del juego
+ */
 type User = {
+    /**
+     * Id que identifica únicamente a cada usuario en el servidor
+     */
     id :number,
+    /**
+     * Nombre del usuario
+     */
     username :string,
+    /**
+     * Indica si el usuario considera que está listo para comenzar la partida
+     */
     ready :boolean
 }
 
@@ -27,10 +39,13 @@ class Connection {
     private host :string;
 
     /**
-     * 
+     * Usuario asociado a este cliente
      */
     private user :User;
 
+    /**
+     * Identificador del intervalo que actualiza la conexión cada poco tiempo
+     */
     private updateInterval :number;
 
     /**
@@ -70,8 +85,10 @@ class Connection {
 
             // Con la clase ya inicializada, ya podemos ejecutar las funciones que estaban
             // esperando a que cargara
-            for(let listener of Connection.listeners) {
-                listener();
+            if(Connection.listeners) {
+                for(let listener of Connection.listeners) {
+                    listener();
+                }
             }
 
             // Vaciamos la cola de funciones que estaban esperando

@@ -37,7 +37,4 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if (SERVER) {
     document.title += " (SERVER)";
 }
-Connection.onInitialized(function () {
-    Connection.createUser();
-});
 //# sourceMappingURL=main.js.map

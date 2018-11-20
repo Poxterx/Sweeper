@@ -26,7 +26,7 @@ public class UserController {
         User ret = users.get(id);
         if(ret != null) {
             ret.resetIdle();
-            
+        }
         return ret;
     }
 

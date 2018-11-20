@@ -173,7 +173,6 @@ function tileToPixelPosition(tile :Vector2) :Vector2 {
         y: (tile.y + 0.5) * TILE_SIZE
     }
 }
-
 // Inicializamos la conexión cuando cargue el documento
 $(document).ready(function() {
     Connection.initialize();

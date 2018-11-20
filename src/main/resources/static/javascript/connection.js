@@ -34,8 +34,10 @@ class Connection {
             Connection.instance = new Connection(content);
             // Con la clase ya inicializada, ya podemos ejecutar las funciones que estaban
             // esperando a que cargara
-            for (let listener of Connection.listeners) {
-                listener();
+            if (Connection.listeners) {
+                for (let listener of Connection.listeners) {
+                    listener();
+                }
             }
             // Vaciamos la cola de funciones que estaban esperando
             Connection.listeners = [];
