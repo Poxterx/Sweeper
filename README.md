@@ -35,7 +35,7 @@ Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compe
 
 ## Diagrama de navegación de la página
 ![diagramaestados](https://user-images.githubusercontent.com/43203588/48800662-b829c080-ed0a-11e8-995f-5384f5624463.PNG)
-Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos enten listos se empieza la partida.
+Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos estén listos se empieza la partida.
 
 ## Diagrama de clases de la aplicación
 ![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
