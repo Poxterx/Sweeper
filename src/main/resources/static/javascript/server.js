@@ -28,8 +28,6 @@ class SceneServer extends Phaser.Scene {
             fontFamily: "Arial",
             fontSize: 40
         });
-        // Colocamos el nombre del host arriba a la izquierda, para dejar espacio para su direccion y puerto
-        this.host.setPosition(screen.width * 0.15 - this.host.width * 0.5, screen.height * 0.15 - this.host.height * 0.5);
         // Creamos la lista de usuarios
         this.us.create();
         // Cuando la conexión haya cargado, se puede añadir también la dirección del host
@@ -37,6 +35,8 @@ class SceneServer extends Phaser.Scene {
         Connection.onInitialized(function () {
             that.host.text = "Host disponible en " + Connection.getHostAddress();
             that.us.startUpdating();
+            // Colocamos el nombre del host arriba
+            that.host.setPosition(screen.width * 0.5 - that.host.width * 0.5, screen.height * 0.15 - that.host.height * 0.5);
         });
     }
 }

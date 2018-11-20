@@ -60,6 +60,8 @@ public class TaskScheduler {
             while(!disconnect.empty()) {
                 UserController.removeUser(disconnect.pop());
             }
+
+            ChatMessageController.updateSavedFile();
         },
         updateWaitTime, updateWaitTime, TimeUnit.MILLISECONDS);
     }

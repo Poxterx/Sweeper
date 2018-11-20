@@ -14,13 +14,10 @@ public class MainClass
     {
         // Abrir el servidor y avisar
         SpringApplication.run(MainClass.class, args);
-        System.out.println("¡SERVIDOR DE SWEEPER INICIADO! " +
-            "Disponible en " + HostManager.getAddress());
+        System.out.println("======== ¡SERVIDOR DE SWEEPER INICIADO! " +
+            "| Disponible en " + HostManager.getAddress() + " ========");
 
-        // Crear el archivo host.txt para que el programa implementado en Phaser sepa en qué
-        // dirección está alojado el servidor
-        HostManager.createHostFile();
-
+        ChatMessageController.loadMessagesFromFile();
         // Inicializamos las tareas periódicas
         TaskScheduler.initialize();
     }

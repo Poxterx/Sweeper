@@ -33,8 +33,8 @@ public class UserController {
     @PostMapping
     public static User addUser(@RequestBody User user) {
         if(takenUsernames.contains(user.getUsername())) {
-            System.out.println("Otro usuario ha intentado usar el nombre " + user.getUsername()
-                + ", que ya estaba cogido. Se le ha rechazado la conexión.");
+            ChatMessageController.postServerMessage("Otro usuario ha intentado usar el nombre "
+            + user.getUsername() + ", que ya estaba cogido. Se le ha rechazado el usuario.");
             return null;
         }
 
@@ -42,7 +42,7 @@ public class UserController {
         users.put(currentId, user);
         user.resetIdle();
         takenUsernames.add(user.getUsername());
-        System.out.println(user.getUsername() + " se ha conectado.");
+        ChatMessageController.postServerMessage(user.getUsername() + " se ha conectado.");
         currentId++;
         return user;
     }
@@ -55,8 +55,9 @@ public class UserController {
         }
         currentUser.resetIdle();
         if(takenUsernames.contains(user.getUsername())) {
-            System.out.println(currentUser.getUsername() + " ha intentado cambiarse el nombre a "
-                + user.getUsername() + ", pero no ha podido porque ese nombre ya está cogido.");
+            ChatMessageController.postServerMessage(currentUser.getUsername()
+            + " ha intentado cambiarse el nombre a " + user.getUsername()
+            + ", pero no ha podido porque ese nombre ya está cogido.");
             return null;
         }
         takenUsernames.remove(currentUser.getUsername());
@@ -66,9 +67,18 @@ public class UserController {
         return currentUser;
     }
 
+    @PostMapping("/{id}/ready")
+    public static User setReadyState(@PathVariable int id, @RequestBody User user) {
+        User currentUser = users.get(id);
+        if(currentUser != null) {
+            currentUser.setReady(user.isReady());
+        }
+        return currentUser;
+    }
+
     public static void removeUser(User user) {
         users.remove(user.getId());
         takenUsernames.remove(user.getUsername());
-        System.out.println(user.getUsername() + " se ha desconectado.");
+        ChatMessageController.postServerMessage(user.getUsername() +  " se ha desconectado.");
     }
 }
