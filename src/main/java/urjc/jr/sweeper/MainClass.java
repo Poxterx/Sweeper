@@ -14,11 +14,6 @@ public class MainClass
     {
         // Abrir el servidor y avisar
         SpringApplication.run(MainClass.class, args);
-        System.out.println("======== ¡SERVIDOR DE SWEEPER INICIADO! " +
-            "| Disponible en " + HostManager.getAddress() + " ========");
-
-        ChatMessageController.loadMessagesFromFile();
-        // Inicializamos las tareas periódicas
-        TaskScheduler.initialize();
+        System.out.println("¡SERVIDOR DE SWEEPER INICIADO!");
     }
 }
