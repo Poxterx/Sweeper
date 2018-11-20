@@ -34,7 +34,8 @@ El planteamiento del diseño de nivel para las distintas zonas del juego estarí
 Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compenetración por parte de los jugadores. Estarían planteados de forma similar a la saga Mario & Luigi, pero en multijugador y a tiempo real.  
 
 ## Diagrama de navegación de la página
-![paginasnav](https://user-images.githubusercontent.com/43203588/47755781-dec28180-dc9f-11e8-907e-7fe23b231389.jpg)
+![diagramaestados](https://user-images.githubusercontent.com/43203588/48800662-b829c080-ed0a-11e8-995f-5384f5624463.PNG)
+Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos enten listos se empieza la partida.
 
 ## Diagrama de clases de la aplicación
 ![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
