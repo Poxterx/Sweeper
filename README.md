@@ -36,6 +36,9 @@ Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compe
 ## Diagrama de navegación de la página
 ![paginasnav](https://user-images.githubusercontent.com/43203588/47755781-dec28180-dc9f-11e8-907e-7fe23b231389.jpg)
 
+## Diagrama de clases de la aplicación
+![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
+
 ## Páginas principales
 Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para empezar:
 ![title](https://user-images.githubusercontent.com/43203588/47756077-f6e6d080-dca0-11e8-854e-f089d00369b9.jpg)
