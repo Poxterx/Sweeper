@@ -1,3 +1,22 @@
+// BORRAR EN EL MERGE
+/**
+ * Tipo que representa a un usuario del juego
+ */
+type User = {
+    /**
+     * Id que identifica únicamente a cada usuario en el servidor
+     */
+    id :number,
+    /**
+     * Nombre del usuario
+     */
+    username :string,
+    /**
+     * Indica si el usuario considera que está listo para comenzar la partida
+     */
+    ready :boolean
+}
+
 /**
  * Clase estática que maneja la conexión con el servidor.
  */
@@ -7,6 +26,7 @@ class Connection {
      * Instancia singleton de esta clase
      */
     private static instance :Connection;
+    
     /**
      * Funciones a ejecutar cuando la conexión se inicie
      */
@@ -18,18 +38,22 @@ class Connection {
     private host :string;
 
     /**
-     * Puerto al que se debe conectar otro terminal
+     * Usuario asociado a este cliente
      */
-    private port :string;
+    private user :User;
+
+    /**
+     * Identificador del intervalo que actualiza la conexión cada poco tiempo
+     */
+    private updateInterval :number;
 
     /**
      * Esta clase sigue el patrón singleton y no es instanciable.
-     * @param hostaddress Dirección del host y su puerto, recibido desde el archivo host.txt
+     * @param host Dirección del host y su puerto, recibido desde el archivo host.txt
      */
-    private constructor(hostaddress :string) {
-        // La dirección y el puerto quedan separados por el carácter ":"
-        this.host = hostaddress.split(":")[0];
-        this.port = hostaddress.split(":")[1];
+    private constructor(host :string) {
+        // La dirección y el puerto vienen incluidos
+        this.host = host;
     }
 
     /**
@@ -47,12 +71,12 @@ class Connection {
         // contenido del archivo host.txt. El resto del contenido de esta función se
         // encuentra en callbacks, que esperan a que la petición termine.
         $.ajax({
-            url: "host.txt"
+            url: "http://" + location.host + "/address"
 
         }).done(function(content) {
             // Al leerlo, si el archivo resulta está vacío es que ha habido un problema
             if(!content) {
-                throw Error("Ha habido un problema al leer el host.");
+                throw Error("Ha habido un problema al leer la dirección.");
             }
 
             // Si no ha habido ningún problema, podemos crear la instancia
@@ -60,22 +84,43 @@ class Connection {
 
             // Con la clase ya inicializada, ya podemos ejecutar las funciones que estaban
             // esperando a que cargara
-            for(let listener of Connection.listeners) {
-                listener();
+            if(Connection.listeners) {
+                for(let listener of Connection.listeners) {
+                    listener();
+                }
             }
+
+            // Vaciamos la cola de funciones que estaban esperando
+            Connection.listeners = [];
+
+            // Iniciamos las actualizaciones
+            Connection.instance.updateInterval = setInterval(Connection.update, 500);
 
         }).fail(function(content) {
             // En este caso la petición GET no ha tenido éxito, lo cual puede ocurrir si
             // el programa del servidor ha fallado al crear el archivo host.txt.
-            throw Error("El archivo del host no se ha creado o no se ha podido leer.");
+            throw Error("No se ha podido establecer la conexión con el servidor.");
         });
     }
 
     /**
      * Devuelve la dirección completa (dirección + puerto) del host.
      */
-    public static getFullHost() {
-        return Connection.instance.host + ":" + Connection.instance.port;
+    public static getHostAddress() {
+        return Connection.instance.host;
+    }
+    
+    /**
+     * Devuelve el usuario asociado a este cliente
+     */
+    public static getUser() {
+       var ret :User;
+       if(Connection.instance && Connection.instance.user) {
+           ret = Connection.instance.user
+       } else {
+           ret = null;
+       }
+       return ret;
     }
 
     /**
@@ -98,5 +143,187 @@ class Connection {
         } else {
             listener();
         }
+    }
+
+    /**
+     * Pide al servidor los mensajes del chat y ejecuta una función cuando los recibe
+     * @param listener La función en cuestión. Recibe un array de mensajes como parámetro
+     */
+    public static readChatMessages(listener :(messages :Message[]) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxGet("/chat")
+            .done(function(messages) {
+                listener(messages);
+            }).fail(function() {
+                console.error("No se ha podido conectar al chat.");
+            });
+        });
+    }
+
+    /**
+     * Envía un mensaje al chat
+     * @param message Mensaje a enviar
+     * @param listener Función a ejecutar si el mensaje se envía
+     */
+    public static sendChatMessage(message :Message, listener? :() => void) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxPost("/chat", message)
+            .done(function() {
+                if(listener)
+                    listener();
+            }).fail(function() {
+                console.error("No se ha podido enviar el mensaje al servidor.");
+            })
+        } else {
+            console.error("No se puede mandar un mensaje al chat porque no hay " +
+            "ningún usuario asociado a este cliente.");
+        }
+    } 
+
+    /**
+     * Solicita al servidor una lista con los usuarios conectados y ejecuta una función al recibirla
+     * @param listener La función en cuestión. Recibe un array de usuarios como parámetro
+     */
+    public static readConnectedUsers(listener :(users :User[]) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxGet("/users")
+            .done(function(users) {
+                listener(users);
+            }).fail(function() {
+                console.error("No se ha podido obtener los usuarios conectados.");
+            })
+        });
+    }
+
+    /**
+     * Solicita un nuevo usuario que se asociará a este cliente, y ejecuta una función al
+     * recibir la confirmación de que se ha creado con éxito. Es posible que el usuario no
+     * se cree porque ya exista otro con el mismo nombre.
+     * @param username El nombre de usuario deseado
+     * @param listener La función a ejecutar una vez el servidor confirme el usuario nuevo,
+     * recibe por parámetro dicho usuario
+     */
+    public static createUser(username :string, listener? :(user :User) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxPost("/users", {
+                username: username
+            }).done(function(user) {
+                if(!user) {
+                    console.error("Ya hay otro usuario con el mismo nombre.");
+                } else {
+                    Connection.instance.user = user;
+                    if(listener)
+                        listener(user);
+                }
+            }).fail(function() {
+                console.error("No se ha podido crear un usuario en el servidor.");
+            })
+        });
+    }
+
+    /**
+     * Se desconecta del servidor y descarta el usuario que estaba asociado a este cliente
+     */
+    public static dropUser() {
+        if(Connection.instance) {
+            Connection.instance.user = null;
+        }
+    }
+
+    /**
+     * Solicita al servidor un cambio de nombre. Es posible que el nombre no cambie al ejecutarse
+     * esta petición porque el nuevo nombre de usuario ya esté ocupado.
+     * @param newName nombre de usuario deseado
+     */
+    public static changeUsername(newName :string) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxPost("/users/" + Connection.instance.user.id, {username: newName})
+            .done(function(user) {
+                if(!user) {
+                    console.error("Ya hay otro usuario con el mismo nombre.");
+                } else {
+                    Connection.updateUser(user);
+                }
+            }).fail(function() {
+                console.error("No se ha podido solicitar al servidor un cambio de nombre.");
+            });
+        }
+    }
+
+    /**
+     * Cambia el estado de ready del usuario en el servidor
+     * @param ready Nuevo estado de ready
+     * @param listener Función a ejecutar cuando se confirme el cambio de estado
+     */
+    public static setReady(ready :boolean, listener? :() => void) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxPost("/users/" + Connection.instance.user.id + "/ready", {
+                username: Connection.instance.user.username,
+                ready: ready
+            }).done(function(user) {
+                Connection.updateUser(user);
+                if(listener)
+                    listener();
+            }).fail(function() {
+                console.error("No se ha podido cambiar el estado de ready en el servidor.");
+            });
+        }
+    }
+
+    /**
+     * Envía peticiones GET al servidor para asegurarle que seguimos conectados
+     */
+    private static update() {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.ajaxGet("/users/" + Connection.instance.user.id)
+            .fail(function() {
+                console.error("Se ha perdido la conexión con el servidor.");
+                Connection.dropUser();
+            });
+        }
+    }
+
+    /**
+     * Si hay un usuario en este cliente, actualiza sus datos con la nueva información. Esta
+     * función existe para evitar reinstanciar la clase User, porque puede ser problemático
+     * si otra parte del programa ha almacenado en una variable la instancia de usuario actual.
+     * @param newUser 
+     */
+    private static updateUser(newUser :User) {
+        if(Connection.instance && Connection.instance.user) {
+            Connection.instance.user.id = newUser.id;
+            Connection.instance.user.username = newUser.username;
+            Connection.instance.user.ready = newUser.ready;
+        } else {
+            console.error("Se ha intentado actualizar un usuario inexistente.");
+        }
+    }
+
+    /**
+     * Envía una petición GET a la url deseada del servidor
+     * @param url La dirección, basada en el servidor, a la que enviar la petición
+     */
+    private static ajaxGet(url :string) {
+        return $.ajax({
+            method: "GET",
+            url: "http://" + Connection.getHostAddress() + url
+        });
+    }
+
+    /**
+     * Envía una petición POST a la url del servidor con el cuerpo indicado
+     * @param url La dirección, basada en el servidor, a la que enviar la petición
+     * @param data El cuerpo de la petición
+     */
+    private static ajaxPost(url :string, data :object) {
+        return $.ajax({
+            method: "POST",
+            url: "http://" + Connection.getHostAddress() + url,
+            data: JSON.stringify(data),
+            processData: false,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
     }
 }

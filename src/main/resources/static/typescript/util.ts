@@ -23,6 +23,11 @@ var DEBUG = false;
 var multiplayer = false;
 
 /**
+ * Variable que contiene el chat
+ */
+
+
+/**
  * Registra una animación en el administrador de animaciones de Phaser
  * @param scene La escena a través de la cual se accederá al administrador de animaciones
  * @param thisName Nombre único e identificativo de la entidad que usará estas animaciones
@@ -173,7 +178,6 @@ function tileToPixelPosition(tile :Vector2) :Vector2 {
         y: (tile.y + 0.5) * TILE_SIZE
     }
 }
-
 // Inicializamos la conexión cuando cargue el documento
 $(document).ready(function() {
     Connection.initialize();

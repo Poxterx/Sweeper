@@ -18,6 +18,9 @@ var DEBUG = false;
  */
 var multiplayer = false;
 /**
+ * Variable que contiene el chat
+ */
+/**
  * Registra una animación en el administrador de animaciones de Phaser
  * @param scene La escena a través de la cual se accederá al administrador de animaciones
  * @param thisName Nombre único e identificativo de la entidad que usará estas animaciones
