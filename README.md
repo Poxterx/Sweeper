@@ -50,7 +50,10 @@ Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos de
 Si en el menú eliges Single Player, se inicia una partida con un solo jugador:
 ![singlep](https://user-images.githubusercontent.com/43203588/47756469-7923c480-dca2-11e8-8a9a-092261c7646d.jpg)
 
-Si en el menú eliges Multiplayer, se inicia una partida con un dos jugadores:
+Si en el menú eliges Multiplayer, te manda un menú en el que esperas hasta que los demás usuarios estén listos:
+![menumultijugador](https://user-images.githubusercontent.com/43203588/48808866-a3f1bd80-ed22-11e8-9f84-ec0b846714a5.jpg)
+
+Cuando todos los usuarios pulsen Ready (Estén listos), se inicia una partida con 2 jugadores:
 ![multip](https://user-images.githubusercontent.com/43203588/47756508-acfeea00-dca2-11e8-9ffa-871745f7bae0.jpg)
 
 Al morir el jugador 1 se acaba la partida y te lleva a la pantalla Game Over:
