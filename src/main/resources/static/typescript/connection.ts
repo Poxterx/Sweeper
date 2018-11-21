@@ -1,6 +1,3 @@
-// BORRAR EN EL MERGE
-type Message = any;
-
 /**
  * Tipo que representa a un usuario del juego
  */
@@ -18,6 +15,20 @@ type User = {
      */
     ready :boolean
 }
+/**
+ * Mensaje de chat
+ */
+type Message = {
+    /**
+     * Autor del mensaje
+     */
+    username :string,
+    /**
+     * Contenido del mensaje
+     */
+    content :string
+}
+
 
 /**
  * Clase estática que maneja la conexión con el servidor.
@@ -28,6 +39,7 @@ class Connection {
      * Instancia singleton de esta clase
      */
     private static instance :Connection;
+    
     /**
      * Funciones a ejecutar cuando la conexión se inicie
      */
@@ -167,7 +179,7 @@ class Connection {
      * @param listener Función a ejecutar si el mensaje se envía
      */
     public static sendChatMessage(message :Message, listener? :() => void) {
-        if(Connection.instance && Connection.instance.user) {
+        if(Connection.instance && Connection.instance.user || SERVER) {
             Connection.ajaxPost("/chat", message)
             .done(function() {
                 if(listener)
@@ -213,6 +225,7 @@ class Connection {
                     console.error("Ya hay otro usuario con el mismo nombre.");
                 } else {
                     Connection.instance.user = user;
+                    console.log("El usuario "+user.username+" se ha unido al servidor.");
                     if(listener)
                         listener(user);
                 }
@@ -228,6 +241,7 @@ class Connection {
     public static dropUser() {
         if(Connection.instance) {
             Connection.instance.user = null;
+            console.log("Este usuario ha abandonado el servidor.");
         }
     }
 
@@ -277,6 +291,14 @@ class Connection {
     private static update() {
         if(Connection.instance && Connection.instance.user) {
             Connection.ajaxGet("/users/" + Connection.instance.user.id)
+            .done(function(user) {
+                // Si el servidor devuelve un cuerpo vacío, es porque el método de Java
+                // correspondiente ha devuelto null
+                if(user == "") {
+                    console.error("Este usuario ya no es válido en el servidor.");
+                    Connection.dropUser();
+                }
+            })
             .fail(function() {
                 console.error("Se ha perdido la conexión con el servidor.");
                 Connection.dropUser();

@@ -23,7 +23,7 @@ public class ChatMessageController {
     /**
      * Cantidad máxima de mensajes que se almacenarán en el servidor
      */
-    private static final int maxMessages = 50;
+    private static final int maxMessages = 25;
 
     /**
      * Devuelve los mensajes almacenados en el servidor

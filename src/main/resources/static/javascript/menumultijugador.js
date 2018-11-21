@@ -150,7 +150,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 allReady = false;
             }
         }
-        if (allReady && users.length > 0) {
+        if (allReady && users.length >= 2) {
             this.userlist.stopUpdating();
             this.userlist = null;
             this.reset();

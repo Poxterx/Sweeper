@@ -77,6 +77,8 @@ public class UserController {
         User currentUser = users.get(id);
         if(currentUser != null) {
             currentUser.setReady(user.isReady());
+            String word = user.isReady()? " ya " : " no ";
+            ChatMessageController.postServerMessage(currentUser.getUsername() + word + "está listo.");
         }
         return currentUser;
     }

@@ -110,7 +110,7 @@ class Connection {
      * @param listener Función a ejecutar si el mensaje se envía
      */
     static sendChatMessage(message, listener) {
-        if (Connection.instance && Connection.instance.user) {
+        if (Connection.instance && Connection.instance.user || SERVER) {
             Connection.ajaxPost("/chat", message)
                 .done(function () {
                 if (listener)
@@ -156,6 +156,7 @@ class Connection {
                 }
                 else {
                     Connection.instance.user = user;
+                    console.log("El usuario " + user.username + " se ha unido al servidor.");
                     if (listener)
                         listener(user);
                 }
@@ -170,6 +171,7 @@ class Connection {
     static dropUser() {
         if (Connection.instance) {
             Connection.instance.user = null;
+            console.log("Este usuario ha abandonado el servidor.");
         }
     }
     /**
@@ -217,6 +219,14 @@ class Connection {
     static update() {
         if (Connection.instance && Connection.instance.user) {
             Connection.ajaxGet("/users/" + Connection.instance.user.id)
+                .done(function (user) {
+                // Si el servidor devuelve un cuerpo vacío, es porque el método de Java
+                // correspondiente ha devuelto null
+                if (user == "") {
+                    console.error("Este usuario ya no es válido en el servidor.");
+                    Connection.dropUser();
+                }
+            })
                 .fail(function () {
                 console.error("Se ha perdido la conexión con el servidor.");
                 Connection.dropUser();

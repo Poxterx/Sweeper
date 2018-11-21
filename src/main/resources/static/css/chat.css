@@ -1,0 +1,16 @@
+.chat {
+    position: absolute;
+    bottom: 2%;
+    right: 5px;
+    width: 15%;
+    text-align: left;
+    border: 2px solid #dedede;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px 0;
+}
+.canvasContainer{
+    position: relative;    
+    text-align: center;
+}

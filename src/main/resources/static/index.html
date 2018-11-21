@@ -4,9 +4,11 @@
     <!-- Phaser se importa y carga en este script -->
     <script src="//cdn.jsdelivr.net/npm/phaser@3.14.0/dist/phaser.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/chat.css", type="text/css"/>
 </head>
 
 <body style="background-color: black">
+
     <!-- Div centrado para situar el canvas -->
     <div style="text-align: center">
         <canvas id="gameCanvas"></canvas>
@@ -15,6 +17,17 @@
             top: 100px;
             width: 200px;
             text-align: center;">
+            
+    <div style="text-align: center" >
+        <canvas id="gameCanvas" class='canvasContainer'></canvas>
+    </div>
+
+    <!-- Div que contiene el chat -->
+    <div id='chat' class="chat" hidden>
+        <div id='ventana' class="ventana">
+        </div>
+        <input id='inputMensaje' type='text'>
+        <button id='enviar-boton' onclick="Chat.onclickEnviar()">Enviar</button>
     </div>
 
     <!-- Archivos ejecutables de los que se compone el juego.
@@ -36,6 +49,7 @@
     <script src="javascript/gameover.js"></script>
     <script src="javascript/title.js"></script>
     <script src="javascript/overworld.js"></script>
+    <script src="javascript/chat.js"></script>
     <script src="javascript/server.js"></script>
-    <script src="javascript/main.js"></script>
+    <script src="javascript/main.js"></script> 
 </body>

@@ -3,3 +3,4 @@
 **/*.js.map
 tiled
 host.txt
+target

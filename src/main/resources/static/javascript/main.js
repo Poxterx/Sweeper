@@ -1,4 +1,3 @@
-// CONFIGURACIÓN DEL JUEGO
 const game = new Phaser.Game({
     // Tamaño del lienzo
     width: 800,
@@ -38,4 +37,18 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if (SERVER) {
     document.title += " (SERVER)";
 }
+// Inicializamos la conexión cuando cargue el documento
+$(document).ready(function () {
+    Connection.initialize();
+}).on("keydown", function (event) {
+    if (event.key == "Enter") {
+        if (chat) {
+            Chat.onclickEnviar();
+        }
+    }
+});
+Connection.onInitialized(function () {
+    chat = new Chat();
+    chat.startUpdating();
+});
 //# sourceMappingURL=main.js.map
