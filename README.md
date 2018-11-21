@@ -40,6 +40,10 @@ Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida
 ## Diagrama de clases de la aplicación
 ![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
 
+## Instrucciones para ejecutar la aplicación
+Para compilar el proyecto, habría que instalar jdk y maven, configurar la herramienta spring-boot y ejecutar el comando mvn clean package en la carpeta del proyecto. 
+Para ejecutar el jar,  habría que entrar en la carpeta del proyecto y ejecutar el comando java -jar Sweeper-0.2.jar. Hace falta instalar en la máquina Java 8.
+Para el server, se debe cargar la url localhost:8080. Para el cliente, se usa la url que sale en el terminal y el server.
 ## Páginas principales
 Esto aparece en el localhost, al abrir el servidor en el navegador, y te da la ip (En la imagen se ha tachado la dirección) para entrar en el juego en modo cliente:
 ![gg](https://user-images.githubusercontent.com/43203588/48809187-e8ca2400-ed23-11e8-852f-8d32f1cf7ecb.png)
