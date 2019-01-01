@@ -20,6 +20,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Variables en las que se guardaran las imágenes de los botones.
      */
     private ready:Phaser.GameObjects.Image;
+    private notready:Phaser.GameObjects.Image;
     private changeName:Phaser.GameObjects.Image;
     private back:Phaser.GameObjects.Image;
     private acceptName:Phaser.GameObjects.Image;
@@ -57,11 +58,9 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Método que cambia de imagen el "toggle" button
      */
     buttonAnimation(status :boolean,widthPos :number,heightPos :number) {
-        if (status) {
-            this.ready = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5,this.sHeight * heightPos - this.menu.height * 0.5, "readyOff");
-        }else{
-            this.ready = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5,this.sHeight * heightPos - this.menu.height * 0.5, "readyOn");
-        }
+        this.ready.setVisible(!status);
+        this.notready.setVisible(status);
+
         this.statusReady = !this.statusReady;
     }
 
@@ -80,8 +79,13 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.centered = false;
         
         //Asignamos el método que llamará el botón Ready
-        this.ready = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "readyOff");
+        this.ready = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "readyOn");
+        this.ready.setVisible(this.statusReady);
+        this.notready = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "readyOff");
         this.ready.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.buttonAnimation(this.statusReady,0.85,0.85) )
+        ;
+        this.notready.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.buttonAnimation(this.statusReady,0.85,0.85) )
         ;
 
