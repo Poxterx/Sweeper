@@ -8,30 +8,29 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Texto título menu
      */
     private menu :Phaser.GameObjects.Text;
-    //Estado del botón
+    /** 
+     * Estado del botón
+     */
     private statusReady : boolean;
-    //Condición para la posición textbox según si se ha introducido o no el nombre de usuario, así como si se muestra la lista
+    /**
+     * Condición para la posición textbox según si se ha introducido o no el nombre de usuario, así como si se muestra la lista
+     */
     private centered : boolean;
     //Caja de texto
     private userName :HTMLTextAreaElement;
     //Canvas del juego, usado para obtener los datos de posición para la caja de texto
     private canvas :HTMLCanvasElement;
-    /**
-     * Variables en las que se guardaran las imágenes de los botones.
-     */
+    
+    // Variables en las que se guardaran las imágenes de los botones.
     private ready:Phaser.GameObjects.Image;
-    private notready:Phaser.GameObjects.Image;
+    private notReady:Phaser.GameObjects.Image;
     private changeName:Phaser.GameObjects.Image;
     private back:Phaser.GameObjects.Image;
     private acceptName:Phaser.GameObjects.Image;
     /**
-     * Objeto Text que se utilizara para pintar la lista de usuarios que se envia desde el backend
+     * Objeto que se utilizará para pintar la lista de usuarios que se envia desde el backend
      */
-    private user :Phaser.GameObjects.Text;
-    /**
-     * Array de strings con los nombres de cada usuario
-     */
-    private usersArray :string[];
+    private userlist :UsersList;
 
     /**
      * Variables en las que se guardaran el tamaño de la pantalla.
@@ -39,7 +38,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     private sWidth:number;
     private sHeight:number;
     /**
-     * Escena que representa el menú del juego
+     * Escena que representa el menú de la sala de espera para el modo multijugador
      */
     constructor() {
         super({key: "SceneMultiplayerMenu"});
@@ -59,8 +58,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      */
     buttonAnimation(status :boolean,widthPos :number,heightPos :number) {
         this.ready.setVisible(!status);
-        this.notready.setVisible(status);
-
+        this.notReady.setVisible(status);
         this.statusReady = !this.statusReady;
     }
 
@@ -69,31 +67,42 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      */
     playerReady(){
         //Destruimos el botón de introducir nombre
-        this.acceptName.destroy();
 
-        //Vaciamos la caja de texto
-        this.userName.value = "";
-        //Inicializamos el estado del toggle
-        this.statusReady = false;
-        //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
-        this.centered = false;
-        
-        //Asignamos el método que llamará el botón Ready
-        this.ready = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "readyOn");
-        this.ready.setVisible(this.statusReady);
-        this.notready = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "readyOff");
-        this.ready.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.buttonAnimation(this.statusReady,0.85,0.85) )
-        ;
-        this.notready.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.buttonAnimation(this.statusReady,0.85,0.85) )
-        ;
+        var that = this;
+        Connection.createUser(this.userName.value, function() {
 
-        //Asignamos el botón que llamará el botón Change Name
-        this.changeName = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.35 - this.menu.height * 0.5, "changeName"); 
-        this.changeName.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.changeUserName() )
-        ;
+            that.acceptName.destroy();
+            //Vaciamos la caja de texto
+            that.userName.value = "";
+            //Inicializamos el estado del toggle
+            that.statusReady = false;
+            //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
+            that.centered = false;
+            
+            //Asignamos el método que llamará el botón Ready
+            that.ready = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOn");
+            that.ready.setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => {
+                    Connection.setReady(!Connection.getUser().ready);
+                    that.buttonAnimation(that.statusReady,0.85,0.85)
+                });
+            that.ready.setVisible(that.statusReady);
+            //Asignamos el método que llamará el botón notReady
+            that.notReady = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOff");
+            that.notReady.setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => {
+                    Connection.setReady(!Connection.getUser().ready);
+                    that.buttonAnimation(that.statusReady,0.85,0.85)
+                });
+            //Asignamos el botón que llamará el botón Change Name
+            that.changeName = that.add.image(that.sWidth * 0.5, that.sHeight * 0.05, "changeName"); 
+            that.changeName.setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => that.changeUserName() );
+
+            that.userlist = new UsersList(that);
+            that.userlist.create();
+            that.userlist.startUpdating();
+        });
     }
 
     /**
@@ -101,7 +110,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      */
     changeUserName(){
 
-
+        Connection.changeUsername(this.userName.value);
         //Tras gestionar el cambio de nombre se borra el contenido de la caja de texto
         this.userName.value = "";
     }
@@ -112,13 +121,13 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     textBoxPosition(){
         //Cuando está en el centro de la pantalla
         if(this.centered){
-            var posX = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 - this.menu.width;
+            var posX = this.canvas.getBoundingClientRect().left + this.sWidth * 0.25 - this.menu.width;
             var posY = this.sHeight * 0.5 - this.menu.height * 0.5;
         }
         //Cuando está en la parte superior
         else{
-            var posX = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 - this.menu.width;
-            var posY = this.sHeight * 0.35 - this.menu.height * 0.5;
+            var posX = this.canvas.getBoundingClientRect().left + this.sWidth * 0.1;
+            var posY = this.sHeight * 0.05 ;
         }
         this.userName.style.left = posX + "px";
         this.userName.style.top = posY + "px";
@@ -129,13 +138,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      */
     create() {
         // Creamos el menú multijugador
-        this.menu = this.add.text(0, 0, "Menú Multijugador", {
+        this.menu = this.add.text(0, 0, "", {
             fontFamily: "Impact",
             fontSize: 36
         });
-        
-        //Inicialización del array de la lista de usuarios
-        this.usersArray = [];
 
         // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
         var screen = {
@@ -162,8 +168,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.centered = true;
 
         //Dibujamos los dos botones
-        this.acceptName = this.add.image(this.sWidth * 0.85 - this.menu.width * 0.5, this.sHeight * 0.5 - this.menu.height * 0.5, "acceptName");
-        this.back = this.add.image(this.sWidth * 0.5 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "back");
+        this.acceptName = this.add.image(this.sWidth * 0.65, this.sHeight * 0.5 - this.menu.height * 0.5, "acceptName");
+        this.back = this.add.image(this.sWidth * 0.5 - this.menu.width * 0.5, this.sHeight * 0.85, "back");
 
         /**
         * Ponemos los siguientes eventos asociados a las imágenes:
@@ -173,48 +179,52 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.acceptName.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.playerReady() )
         ;
+
         this.back.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 this.userName.hidden = true;
+                Connection.dropUser();
                 this.scene.start("SceneMenu");
-            })
-        ;
+            });
+    }
 
+    reset() {
+        this.changeName.destroy();
+        this.centered = true;
+        this.ready.destroy();
     }
 
     update(){
-        //Se gestiona la posición d ela caja de texto en caso de redimensionar la pantalla
+        //Se gestiona la posición de la caja de texto en caso de redimensionar la pantalla
         this.textBoxPosition();
 
-        //Lista
-        if(!this.centered){
-            // Se borran los nombres de los usuarios anteriores
-            this.usersArray.splice(0,this.usersArray.length);
-            // Aqui se rellenaria el array con lo que llega del backend
+        if(Connection.getUser() == null && !this.centered) {
+            this.userlist.stopUpdating();
+            this.userlist = null;
+            this.reset();
+            this.userName.hidden = true;
+            this.scene.start("SceneMenu");
+            return;
+        }
+
+        if(!this.userlist)
+            return;
             
-            // De momento le ponemos unos nombres para probar 
-            this.usersArray=["manuela420","jorgejavier69","feliciano666","memelord65","tumadreylamiasonamigasseconocen3"];
-            // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
-            var screen = {
-                width: game.config.width as number,
-                height: game.config.height as number
+        var users = this.userlist.getUsers();
+        var allReady = true;
+        for(let user of users) {
+            if(!user.ready) {
+                allReady = false;
             }
-            // Posicion vertical de la pantalla en la que ira cada nombre de usuario (inicialmente horizontalmente a un 25% desde arriba)
-            let vertPos = 0.4;
-            // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
-            for(let element of this.usersArray) {
-                this.user = this.add.text(0, 0, element, {
-                    fontFamily: "Arial",
-                    fontSize: 20
-                });
-                // Colocamos los nombres verticalmente en el centro, horizontalmente depende del elemento
-                this.user.setPosition(
-                    screen.width * 0.5 - this.user.width * 0.5,
-                    screen.height * vertPos - this.user.height * 0.5
-                );
-                // Cada elemento se posiciona un poco mas abajo
-                vertPos +=0.05;
-            }
+        }
+
+        if(allReady && users.length >= 2) {
+            this.userlist.stopUpdating();
+            this.userlist = null;
+            this.reset();
+            this.userName.hidden = true;
+            this.scene.start("SceneOverworld");
+            return;
         }
     }
     
