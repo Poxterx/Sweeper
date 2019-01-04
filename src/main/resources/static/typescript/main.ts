@@ -12,7 +12,7 @@ const game = new Phaser.Game({
 
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.2.0",
+    version: "0.2.1",
 
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
@@ -46,19 +46,3 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if(SERVER) {
     document.title += " (SERVER)";
 }
-
-// Inicializamos la conexión cuando cargue el documento
-$(document).ready(function() {
-    Connection.initialize();
-}).on("keydown", function(event) {
-    if(event.key == "Enter") {
-        if(chat) {
-            Chat.onclickEnviar();
-        }
-    }
-});
-
-Connection.onInitialized(function() {
-    chat = new Chat();
-    chat.startUpdating();
-});

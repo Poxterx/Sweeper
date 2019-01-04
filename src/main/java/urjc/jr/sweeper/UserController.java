@@ -1,10 +1,14 @@
 package urjc.jr.sweeper;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentSkipListSet;
+
+import javax.servlet.http.HttpServletRequest;
+
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -12,80 +16,117 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
 
-    private static Map<Integer, User> users = new ConcurrentHashMap<>();
-    private static List<String> takenUsernames = new ArrayList<>();
-    private static int currentId = 0;
+    public static class UserCreationReponse {
+        private UUID id;
+        private String nameStatus;
+
+        public UserCreationReponse(UUID uuid, String nameStatus) {
+            this.id = uuid;
+            this.nameStatus = nameStatus;
+        }
+
+        public UserCreationReponse() {}
+        public UUID getId() {return id;}
+        public String getNameStatus() {return nameStatus;}
+        public void setId(UUID id) {this.id = id;}
+        public void setNameStatus(String name) {this.nameStatus = name;}
+    }
+
+    private static Map<UUID, User> users = new ConcurrentHashMap<>();
+    private static Set<String> takenUsernames = new ConcurrentSkipListSet<>();
+
+    private static final int maxUsernameCharacters = 12;
 
     @GetMapping
     public static Collection<User> getUsers() {
         return users.values();
     }
     
-    @GetMapping("/{id}")
-    public static User getUser(@PathVariable int id) {
-        User ret = users.get(id);
-        if(ret != null) {
-            ret.resetIdle();
-        }
+    @GetMapping("/{uuid}")
+    public static User getUser(@PathVariable UUID uuid) {
+        User ret = users.get(uuid);
         return ret;
     }
 
     @PostMapping
-    public static User addUser(@RequestBody User user) {
-        if(takenUsernames.contains(user.getUsername())) {
-            ChatMessageController.postServerMessage("Otro usuario ha intentado usar el nombre "
-            + user.getUsername() + ", que ya estaba cogido. Se le ha rechazado el usuario.");
-            return null;
+    public static UserCreationReponse addUser(@RequestBody String name, HttpServletRequest request) {
+        User user = new User();
+        String usernameStatus = setUsername(user, name);
+        if(usernameStatus.equals("OK")) {
+            user.setId(UUID.randomUUID());
+            users.put(user.getId(), user);
+            takenUsernames.add(name);
+            ChatMessageController.postServerMessage(user.getName() + " se ha conectado.");
         }
-        if(user.getUsername() == null || user.getUsername().isEmpty()) {
-            return null;
-        }
-        user.setId(currentId);
-        users.put(currentId, user);
-        user.resetIdle();
-        takenUsernames.add(user.getUsername());
-        ChatMessageController.postServerMessage(user.getUsername() + " se ha conectado.");
-        currentId++;
-        return user;
+        
+        return new UserCreationReponse(user.getId(), usernameStatus);
     }
 
-    @PostMapping("/{id}")
-    public static User changeUsername(@PathVariable int id, @RequestBody User user) {
-        User currentUser = users.get(id);
-        if(currentUser == null) {
+    private static String setUsername(User user, String name) {
+        if(user == null) {
             return null;
         }
-        if(user.getUsername() == null || user.getUsername().isEmpty()) {
-            return currentUser;
+        
+        String ret;
+        
+        name = name.trim();
+        if(name == null || name.isEmpty()) {
+            ret = "EMPTY";
+        } else if(name.length() > maxUsernameCharacters) {
+            ret = "TOOLONG";
+        } else if(user.getName() != null && user.getName().equals(name)) {
+            ret = "SAME";
+        } else if(takenUsernames.contains(name)) {
+            ret = "TAKEN";
+        } else {
+            String oldName = user.getName();
+            user.setName(name);
+            takenUsernames.add(name);
+            if(oldName != null && takenUsernames.contains(oldName)) {
+                takenUsernames.remove(oldName);
+            }
+            ret = "OK";
         }
-        currentUser.resetIdle();
-        if(takenUsernames.contains(user.getUsername())) {
-            ChatMessageController.postServerMessage(currentUser.getUsername()
-            + " ha intentado cambiarse el nombre a " + user.getUsername()
-            + ", pero no ha podido porque ese nombre ya está cogido.");
-            return null;
-        }
-        takenUsernames.remove(currentUser.getUsername());
-        takenUsernames.add(user.getUsername());
-        ChatMessageController.postServerMessage(currentUser.getUsername() + " se ha cambiado el nombre a " + user.getUsername() + ".");
-        currentUser.setUsername(user.getUsername());
-        return currentUser;
+
+        return ret;
     }
 
-    @PostMapping("/{id}/ready")
-    public static User setReadyState(@PathVariable int id, @RequestBody User user) {
-        User currentUser = users.get(id);
+    @PostMapping("/{uuid}/username")
+    public static String changeUsername(@PathVariable UUID uuid, @RequestBody String name) {
+        User user = users.get(uuid);
+        if(user == null) {
+            return null;
+        }
+        String oldName = user.getName();
+        String ret = setUsername(user, name);
+        if(ret.equals("OK")) {
+            ChatMessageController.postServerMessage(oldName + " se ha cambiado el nombre a " + name);
+        } else {
+            ChatMessageController.postServerMessage(oldName + " ha intentado cambiarse el nombre a \"" + name
+            + "\", pero no ha podido. Error: " + ret);
+        }
+
+        return ret;
+    }
+
+    @PostMapping("/{uuid}/ready")
+    public static User setReadyState(@PathVariable UUID uuid, @RequestBody String ready) {
+        User currentUser = users.get(uuid);
         if(currentUser != null) {
-            currentUser.setReady(user.isReady());
-            String word = user.isReady()? " ya " : " no ";
-            ChatMessageController.postServerMessage(currentUser.getUsername() + word + "está listo.");
+            currentUser.setReady(Boolean.parseBoolean(ready));
+            String word = currentUser.isReady()? " ya " : " no ";
+            ChatMessageController.postServerMessage(currentUser.getName() + word + "está listo.");
         }
         return currentUser;
     }
 
     public static void removeUser(User user) {
         users.remove(user.getId());
-        takenUsernames.remove(user.getUsername());
-        ChatMessageController.postServerMessage(user.getUsername() +  " se ha desconectado.");
+        takenUsernames.remove(user.getName());
+        ChatMessageController.postServerMessage(user.getName() +  " se ha desconectado.");
+    }
+
+    public static void removeUser(UUID uuid) {
+        removeUser(users.get(uuid));
     }
 }

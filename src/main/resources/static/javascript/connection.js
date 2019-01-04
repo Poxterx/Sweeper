@@ -2,6 +2,10 @@
  * Clase estática que maneja la conexión con el servidor.
  */
 class Connection {
+    // /**
+    //  * Identificador del intervalo que actualiza la conexión cada poco tiempo
+    //  */
+    // private updateInterval :number;
     /**
      * Esta clase sigue el patrón singleton y no es instanciable.
      * @param host Dirección del host y su puerto, recibido desde el archivo host.txt
@@ -11,9 +15,7 @@ class Connection {
         this.host = host;
     }
     /**
-     * Inicializa la conexión. Realiza peticiones REST a través de la librería de jQuery,
-     * y por tanto esta función debe ser llamada dentro del callback de $(document).ready().
-     * La conexión sólo puede inicializarse una vez por ejecución del programa.
+     * Inicializa la conexión.
      */
     static initialize() {
         // Si ya estaba inicializada lanzamos un error
@@ -42,7 +44,8 @@ class Connection {
             // Vaciamos la cola de funciones que estaban esperando
             Connection.listeners = [];
             // Iniciamos las actualizaciones
-            Connection.instance.updateInterval = setInterval(Connection.update, 500);
+            // Connection.instance.updateInterval = setInterval(Connection.update, 500);
+            console.log("Conexión inicializada");
         }).fail(function (content) {
             // En este caso la petición GET no ha tenido éxito, lo cual puede ocurrir si
             // el programa del servidor ha fallado al crear el archivo host.txt.
@@ -50,10 +53,50 @@ class Connection {
         });
     }
     /**
+     * Inicializa el WebSocket y le indica al servidor a qué usuario pertenece el mismo
+     * @param user El usuario al que pertenece el WebSocket
+     */
+    static openSocket(user) {
+        Connection.instance.websocket = new WebSocket("ws://" + location.host + "/socket");
+        Connection.instance.websocket.addEventListener("open", () => {
+            Connection.instance.websocket.send(JSON.stringify({
+                operation: "LINK_USER",
+                value: user.id
+            }));
+            console.log("WebSocket abierto");
+        });
+    }
+    /**
+     * Finaliza la conexión con el servidor
+     */
+    static close() {
+        if (Connection.instance && Connection.instance.websocket) {
+            Connection.instance.websocket.close();
+            console.log("WebSocket cerrado");
+        }
+        Connection.dropUser();
+        Connection.instance = null;
+        console.log("Conexión terminada");
+    }
+    /**
+     * Indica si la conexión entre cliente y servidor está lista para usarse
+     */
+    static isReady() {
+        return Connection.instance && Connection.instance.user && Connection.instance.websocket
+            && Connection.instance.websocket.readyState == WebSocket.OPEN;
+    }
+    /**
      * Devuelve la dirección completa (dirección + puerto) del host.
      */
     static getHostAddress() {
         return Connection.instance.host;
+    }
+    /**
+     * Envía un mensaje al servidor través de WebSocket
+     * @param message El mensaje a enviar
+     */
+    static socketSend(message) {
+        Connection.instance.websocket.send(message);
     }
     /**
      * Devuelve el usuario asociado a este cliente
@@ -140,28 +183,34 @@ class Connection {
     }
     /**
      * Solicita un nuevo usuario que se asociará a este cliente, y ejecuta una función al
-     * recibir la confirmación de que se ha creado con éxito. Es posible que el usuario no
-     * se cree porque ya exista otro con el mismo nombre.
+     * recibir la confirmación de que se ha creado con éxito u otra si el usuario no se puede
+     * crear porque su nombre es inválido.
      * @param username El nombre de usuario deseado
-     * @param listener La función a ejecutar una vez el servidor confirme el usuario nuevo,
+     * @param onSuccess La función a ejecutar una vez el servidor confirme el usuario nuevo,
      * recibe por parámetro dicho usuario
+     * @param onFail La función a ejecutar si el servidor rechaza el nombre de usuario propuesto,
+     * recibe por parámetro el error indicado por el servidor
      */
-    static createUser(username, listener) {
+    static tryCreateUser(username, onSuccess, onFail) {
         Connection.onInitialized(function () {
-            Connection.ajaxPost("/users", {
-                username: username
-            }).done(function (user) {
-                if (!user) {
-                    console.error("Ya hay otro usuario con el mismo nombre.");
+            Connection.ajaxPost("/users", username)
+                .done(function (reponse) {
+                if (reponse.nameStatus == "OK") {
+                    Connection.ajaxGet("/users/" + reponse.id)
+                        .done(function (user) {
+                        Connection.instance.user = user;
+                        if (onSuccess)
+                            onSuccess(user);
+                    }).fail(function () {
+                        console.error("No se ha podido conectar con el servidor para iniciar sesión.");
+                    });
                 }
                 else {
-                    Connection.instance.user = user;
-                    console.log("El usuario " + user.username + " se ha unido al servidor.");
-                    if (listener)
-                        listener(user);
+                    if (onFail)
+                        onFail(reponse.nameStatus);
                 }
             }).fail(function () {
-                console.error("No se ha podido crear un usuario en el servidor.");
+                console.error("No se ha podido conectar con el servidor para iniciar sesión.");
             });
         });
     }
@@ -171,7 +220,6 @@ class Connection {
     static dropUser() {
         if (Connection.instance) {
             Connection.instance.user = null;
-            console.log("Este usuario ha abandonado el servidor.");
         }
     }
     /**
@@ -199,12 +247,9 @@ class Connection {
      * @param ready Nuevo estado de ready
      * @param listener Función a ejecutar cuando se confirme el cambio de estado
      */
-    static setReady(ready, listener) {
+    static setUserReady(ready, listener) {
         if (Connection.instance && Connection.instance.user) {
-            Connection.ajaxPost("/users/" + Connection.instance.user.id + "/ready", {
-                username: Connection.instance.user.username,
-                ready: ready
-            }).done(function (user) {
+            Connection.ajaxPost("/users/" + Connection.instance.user.id + "/ready", ready.toString()).done(function (user) {
                 Connection.updateUser(user);
                 if (listener)
                     listener();
@@ -213,26 +258,26 @@ class Connection {
             });
         }
     }
-    /**
-     * Envía peticiones GET al servidor para asegurarle que seguimos conectados
-     */
-    static update() {
-        if (Connection.instance && Connection.instance.user) {
-            Connection.ajaxGet("/users/" + Connection.instance.user.id)
-                .done(function (user) {
-                // Si el servidor devuelve un cuerpo vacío, es porque el método de Java
-                // correspondiente ha devuelto null
-                if (user == "") {
-                    console.error("Este usuario ya no es válido en el servidor.");
-                    Connection.dropUser();
-                }
-            })
-                .fail(function () {
-                console.error("Se ha perdido la conexión con el servidor.");
-                Connection.dropUser();
-            });
-        }
-    }
+    // /**
+    //  * Envía peticiones GET al servidor para asegurarle que seguimos conectados
+    //  */
+    // private static update() {
+    //     if(Connection.instance && Connection.instance.user) {
+    //         Connection.ajaxGet("/users/" + Connection.instance.user.id)
+    //         .done(function(user) {
+    //             // Si el servidor devuelve un cuerpo vacío, es porque el método de Java
+    //             // correspondiente ha devuelto null
+    //             if(user == "") {
+    //                 console.error("Este usuario ya no es válido en el servidor.");
+    //                 Connection.dropUser();
+    //             }
+    //         })
+    //         .fail(function() {
+    //             console.error("Se ha perdido la conexión con el servidor.");
+    //             Connection.dropUser();
+    //         });
+    //     }
+    // }
     /**
      * Si hay un usuario en este cliente, actualiza sus datos con la nueva información. Esta
      * función existe para evitar reinstanciar la clase User, porque puede ser problemático
@@ -265,13 +310,23 @@ class Connection {
      * @param data El cuerpo de la petición
      */
     static ajaxPost(url, data) {
+        var send;
+        var contentType;
+        if (typeof (data) !== "string") {
+            send = JSON.stringify(data);
+            contentType = "application/json";
+        }
+        else {
+            send = data;
+            contentType = "text/plain";
+        }
         return $.ajax({
             method: "POST",
             url: "http://" + Connection.getHostAddress() + url,
-            data: JSON.stringify(data),
+            data: send,
             processData: false,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": contentType
             }
         });
     }

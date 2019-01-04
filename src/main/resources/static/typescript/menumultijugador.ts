@@ -23,7 +23,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     
     // Variables en las que se guardaran las imágenes de los botones.
     private ready:Phaser.GameObjects.Image;
-    private changeName:Phaser.GameObjects.Image;
+    // private changeName:Phaser.GameObjects.Image;
     private back:Phaser.GameObjects.Image;
     private acceptName:Phaser.GameObjects.Image;
     /**
@@ -72,8 +72,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         //Destruimos el botón de introducir nombre
 
         var that = this;
-        Connection.createUser(this.userName.value, function() {
-
+        Connection.tryCreateUser(this.userName.value,
+        
+        // El usuario se ha creado correctamente porque el nombre es válido para el servidor
+        function(user :User) {
             that.acceptName.destroy();
             //Vaciamos la caja de texto
             that.userName.value = "";
@@ -86,29 +88,37 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             that.ready = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOff");
             that.ready.setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => {
-                    Connection.setReady(!Connection.getUser().ready);
+                    Connection.setUserReady(!Connection.getUser().ready);
                     that.buttonAnimation(that.statusReady,0.85,0.85)
                 });
             //Asignamos el botón que llamará el botón Change Name
-            that.changeName = that.add.image(that.sWidth * 0.5, that.sHeight * 0.05, "changeName"); 
+            /* that.changeName = that.add.image(that.sWidth * 0.5, that.sHeight * 0.05, "changeName"); 
             that.changeName.setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => that.changeUserName() );
+                .on('pointerdown', () => that.changeUserName() ); */
+
+            Connection.openSocket(user);
 
             that.userlist = new UsersList(that);
             that.userlist.create();
             that.userlist.startUpdating();
-        });
+        },
+        
+        // El usuario no se ha creado porque el nombre de usuario no es válido
+        function(error :UsernameStatus) {
+            console.log("El servidor no ha permitido usar este nombre. Error: " + error);
+        }
+        );
     }
 
-    /**
-     * Método para cambiar el nombre del jugador
-     */
-    changeUserName(){
+    // /**
+    //  * Método para cambiar el nombre del jugador
+    //  */
+    // changeUserName(){
 
-        Connection.changeUsername(this.userName.value);
-        //Tras gestionar el cambio de nombre se borra el contenido de la caja de texto
-        this.userName.value = "";
-    }
+    //     Connection.changeUsername(this.userName.value);
+    //     //Tras gestionar el cambio de nombre se borra el contenido de la caja de texto
+    //     this.userName.value = "";
+    // }
 
     /**
      * Método que posiciona la caja de texto
@@ -132,6 +142,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Inicializa la pantalla de menú
      */
     create() {
+        // Inicializamos la conexión
+        Connection.initialize();
         // Creamos el menú multijugador
         this.menu = this.add.text(0, 0, "", {
             fontFamily: "Impact",
@@ -178,13 +190,13 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.back.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 this.userName.hidden = true;
-                Connection.dropUser();
+                Connection.close();
                 this.scene.start("SceneMenu");
             });
     }
 
     reset() {
-        this.changeName.destroy();
+        // this.changeName.destroy();
         this.centered = true;
         this.ready.destroy();
     }

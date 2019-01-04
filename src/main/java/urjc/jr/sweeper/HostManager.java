@@ -4,6 +4,10 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +22,19 @@ public class HostManager {
      * Puerto en el que se aloja la aplicación.
      */
     private final static int port = 8080;
+    /**
+     * Mapa que relaciona las direcciones de los clientes con el UUID del usuario que están usando.
+     */
+    public static Map<String, UUID> clients = new ConcurrentHashMap<>();
     
     @GetMapping
     private String getHostAddress() {
         return getAddress();
+    }
+
+    @GetMapping("/clients")
+    private Set<String> getConnectedClients() {
+        return clients.keySet();
     }
 
     /**

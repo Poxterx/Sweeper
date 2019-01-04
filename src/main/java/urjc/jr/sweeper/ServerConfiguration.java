@@ -4,11 +4,17 @@ import org.springframework.context.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-// CLASE DE CONFIGURACIÓN para evitar el bloqueo de la CORS policy
+// CLASE DE CONFIGURACIÓN
 
 @Configuration
-public class ServerConfiguration {
+@EnableWebSocket
+public class ServerConfiguration implements WebSocketConfigurer {
+
+    // Para sortear la CORS policy, permitimos peticiones REST de tipo GET y POST desde cualquier sitio
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -20,4 +26,11 @@ public class ServerConfiguration {
             }
         };
     }
+
+    // Registramos el WebSocket para que los clientes puedan conectarse
+
+    @Override
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(new SocketManager(), "/socket").setAllowedOrigins("*");
+	}
 }

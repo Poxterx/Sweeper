@@ -66,6 +66,62 @@ declare namespace DirectionalAnimation {
     }
     
 }
+
+/**
+ * Tipo que representa a un usuario del juego
+ */
+type User = {
+    /**
+     * Id que identifica únicamente a cada usuario en el servidor
+     */
+    id :string,
+    /**
+     * Nombre del usuario
+     */
+    username :string,
+    /**
+     * Indica si el usuario considera que está listo para comenzar la partida
+     */
+    ready :boolean
+}
+/**
+ * Mensaje de chat
+ */
+type Message = {
+    /**
+     * Autor del mensaje
+     */
+    username :string,
+    /**
+     * Contenido del mensaje
+     */
+    content :string
+}
+
+/**
+ * Mensaje de respuesta que envía el servidor cuando se le propone un nuevo nombre de usuario:
+ * - OK: El nombre es válido y se puede usar
+ * - EMPTY: El nombre debe contener al menos un carácter, sin contar espacios vacíos
+ * - TOOLONG: El nombre tiene más caracteres de los permitidos por el servidor, sin contar espacios vacíos
+ * - SAME: El nombre es igual que el que tenía el usuario antes
+ * - TAKEN: Otro usuario ya existente tiene un nombre igual, sin contar espacios vacíos
+ */
+type UsernameStatus = "OK" | "EMPTY" | "TOOLONG" | "SAME" | "TAKEN"
+
+/**
+ * Respuesta que envía el servidor al agregar un usuario
+ */
+type UserCreationReponse = {
+    /**
+     * UUID que identifica al usuario en el servidor
+     */
+    id :string,
+    /**
+     * Posibilidad de usar el nombre propuesto para el nuevo usuario
+     */
+    nameStatus :UsernameStatus
+}
+
 // JQUERY
 // A falta de archivos de definición adecuados para la versión actual de jQuery, hemos añadido
 // algunas definiciones que permitan usarlo sin errores de compilación.
