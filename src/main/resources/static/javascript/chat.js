@@ -49,7 +49,7 @@ class Chat {
             username = "{{SERVER}}";
         }
         else if (Connection.getUser()) {
-            username = Connection.getUser().username;
+            username = Connection.getUser().name;
         }
         if (username && value != "") {
             var mes = { username: username, content: value };

@@ -10,23 +10,23 @@ type PlayerControl = {
     /**
      * String que almacena el nombre del evento cuando el jugador va hacia arriba
      */
-    up :string,
+    up? :string,
     /**
      * String que almacena el nombre del evento cuando el jugador va hacia abajo
      */
-    down :string,
+    down? :string,
     /**
      * String que almacena el nombre del evento cuando el jugador va hacia la izquierda
      */
-    left :string,
+    left? :string,
     /**
      * String que almacena el nombre del evento cuando el jugador va hacia derecha
      */
-    right :string,
+    right? :string,
     /**
      * String que almacena el nombre del evento cuando el jugador va a atacar
      */
-    attack :string,
+    attack? :string,
 }
 
 class Player extends Entity {
@@ -42,6 +42,10 @@ class Player extends Entity {
      * Array en el que se indica si la tecla asociada a un evento está pulsada
      */
     private arrayKeys: boolean[];
+    /**
+     * Intervalo que usa la entidad para enviar datos al servidor
+     */
+    private syncInterval :number;
     /**
      * Objeto de configuración con el que se inicializó esta entidad
      */
@@ -61,7 +65,7 @@ class Player extends Entity {
         // Si hay una configuración especificada se la pasamos, si no, le
         // pasamos la configuración por defecto de esta clase
         super(scene, config? config : {
-            name: "player",
+            name: control.name,
             path: "SweeperPlayer_Anim_Tile.png",
             frameWidth: 87,
             frameHeight: 128,
@@ -161,41 +165,54 @@ class Player extends Entity {
         super.create();
         //Se guarda al Player en that
         var that :Player = this;
-        /**
-        * Cuando se pulsa una tecla, se pone a true el elemento del array al que va asociado.
-        */
-        this.scene.input.keyboard.on("keydown_"+this.control.up, function (event) {
-            that.arrayKeys[0]=true;
-        });
-        this.scene.input.keyboard.on("keydown_"+this.control.right, function (event) {
-            that.arrayKeys[1]=true;
-        });
-        this.scene.input.keyboard.on("keydown_"+this.control.down, function (event) {
-            that.arrayKeys[2]=true;
-        });
-        this.scene.input.keyboard.on("keydown_"+this.control.left, function (event) {
-            that.arrayKeys[3]=true;
-        });
-        this.scene.input.keyboard.on("keydown_"+this.control.attack, function (event) {
-            //Comprobamos si el jugador no estaba en modo ataque 
-            if ((that.getMode()!="attack")){
-                that.setMode("attack");
-            }
-        });
-
+        
+        // Cuando se pulsa una tecla, se pone a true el elemento del array al que va asociado.
         // Cuando se deja de pulsar la tecla, se pone a false el elemento del array al que va asociado.
-        this.scene.input.keyboard.on("keyup_"+this.control.up, function (event) {
-            that.arrayKeys[0]=false;
-        });
-        this.scene.input.keyboard.on("keyup_"+this.control.right, function (event) {
-            that.arrayKeys[1]=false;
-        });
-        this.scene.input.keyboard.on("keyup_"+this.control.down, function (event) {
-            that.arrayKeys[2]=false;
-        });
-        this.scene.input.keyboard.on("keyup_"+this.control.left, function (event) {
-            that.arrayKeys[3]=false;
-        });
+        if(this.control.up) {
+            this.scene.input.keyboard.on("keydown_"+this.control.up, function (event) {
+                that.arrayKeys[0]=true;
+            });
+            this.scene.input.keyboard.on("keyup_"+this.control.up, function (event) {
+                that.arrayKeys[0]=false;
+            });
+        }
+        if(this.control.right) {
+            this.scene.input.keyboard.on("keydown_"+this.control.right, function (event) {
+                that.arrayKeys[1]=true;
+            });
+            this.scene.input.keyboard.on("keyup_"+this.control.right, function (event) {
+                that.arrayKeys[1]=false;
+            });
+        }
+        if(this.control.down) {
+            this.scene.input.keyboard.on("keydown_"+this.control.down, function (event) {
+                that.arrayKeys[2]=true;
+            });
+            this.scene.input.keyboard.on("keyup_"+this.control.down, function (event) {
+                that.arrayKeys[2]=false;
+            });
+        }
+        if(this.control.left) {
+            this.scene.input.keyboard.on("keydown_"+this.control.left, function (event) {
+                that.arrayKeys[3]=true;
+            });
+            this.scene.input.keyboard.on("keyup_"+this.control.left, function (event) {
+                that.arrayKeys[3]=false;
+            });
+        }
+        if(this.control.attack) {
+            this.scene.input.keyboard.on("keydown_"+this.control.attack, function (event) {
+                //Comprobamos si el jugador no estaba en modo ataque 
+                if ((that.getMode()!="attack")){
+                    that.setMode("attack");
+                }
+            });
+        }
+
+        if(multiplayer && !(this instanceof RemotePlayer)) {
+            var that :Player = this;
+            this.syncInterval = setInterval(() => this.sendData.call(this), 50);
+        }
     }
 
     /**
@@ -237,5 +254,29 @@ class Player extends Entity {
         this.target = this.sprite.body.center.clone();
         this.target.add(new Phaser.Math.Vector2(vector));
         
+    }
+
+    /**
+     * Envía datos propios al servidor para sincronizarlos con los demás clientes
+     */
+    private sendData() {
+        var animationinfo = this.currentAnimationInfo();
+        Connection.sendOperation("SYNC_DATA", {
+            uuid: Connection.getUser().id,
+            posX: this.sprite.x,
+            posY: this.sprite.y,
+            mode: this.getMode(),
+            anim: animationinfo.toString(),
+            frame: animationinfo.frame,
+            flip: this.sprite.flipX,
+            life: this.getLife()
+        });
+    }
+
+    /**
+     * Detiene la sincronización de datos con el servidor
+     */
+    public stopSync() {
+        clearInterval(this.syncInterval);
     }
 }

@@ -41,6 +41,11 @@ public class UserController {
     public static Collection<User> getUsers() {
         return users.values();
     }
+
+    @GetMapping("/uuid")
+    public static Collection<UUID> getUsersId() {
+        return users.keySet();
+    }
     
     @GetMapping("/{uuid}")
     public static User getUser(@PathVariable UUID uuid) {

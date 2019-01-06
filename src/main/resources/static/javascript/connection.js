@@ -36,13 +36,13 @@ class Connection {
             Connection.instance = new Connection(content);
             // Con la clase ya inicializada, ya podemos ejecutar las funciones que estaban
             // esperando a que cargara
-            if (Connection.listeners) {
-                for (let listener of Connection.listeners) {
+            if (Connection.listenersInit) {
+                for (let listener of Connection.listenersInit) {
                     listener();
                 }
             }
             // Vaciamos la cola de funciones que estaban esperando
-            Connection.listeners = [];
+            Connection.listenersInit = [];
             // Iniciamos las actualizaciones
             // Connection.instance.updateInterval = setInterval(Connection.update, 500);
             console.log("Conexión inicializada");
@@ -57,14 +57,26 @@ class Connection {
      * @param user El usuario al que pertenece el WebSocket
      */
     static openSocket(user) {
-        Connection.instance.websocket = new WebSocket("ws://" + location.host + "/socket");
-        Connection.instance.websocket.addEventListener("open", () => {
-            Connection.instance.websocket.send(JSON.stringify({
-                operation: "LINK_USER",
-                value: user.id
-            }));
+        var websocket = new WebSocket("ws://" + location.host + "/socket");
+        Connection.instance.websocket = websocket;
+        websocket.onopen = () => {
+            Connection.sendOperation("LINK_USER", user.id);
             console.log("WebSocket abierto");
-        });
+        };
+        websocket.onmessage = Connection.onWebSocketMessage;
+        websocket.onclose = Connection.onWebSocketClose;
+        Connection.onClosed(() => console.log("WebSocket cerrado"));
+        Connection.onLost(() => console.error("Se ha perdido la conexión con el servidor"));
+    }
+    static sendOperation(operation, value) {
+        var data = value;
+        if (typeof (data) !== "string") {
+            data = JSON.stringify(data);
+        }
+        Connection.instance.websocket.send(JSON.stringify({
+            operation: operation,
+            value: data
+        }));
     }
     /**
      * Finaliza la conexión con el servidor
@@ -72,11 +84,10 @@ class Connection {
     static close() {
         if (Connection.instance && Connection.instance.websocket) {
             Connection.instance.websocket.close();
-            console.log("WebSocket cerrado");
         }
         Connection.dropUser();
         Connection.instance = null;
-        console.log("Conexión terminada");
+        console.log("Conexión finalizada");
     }
     /**
      * Indica si la conexión entre cliente y servidor está lista para usarse
@@ -119,19 +130,41 @@ class Connection {
      */
     static onInitialized(listener) {
         // Si la cola de listeners aún no está creada, hay que crearla
-        if (!Connection.listeners) {
-            Connection.listeners = [];
+        if (!Connection.listenersInit) {
+            Connection.listenersInit = [];
         }
         // Si aún no tenemos instancia singleton es porque la conexión no está inicializada,
         // así que ponemos la función a la espera
         if (!Connection.instance) {
-            Connection.listeners.push(listener);
+            Connection.listenersInit.push(listener);
             // Pero si la hay, entonces la conexión ya estaba inicializada y podemos ejecutar
             // la función directamente
         }
         else {
             listener();
         }
+    }
+    /**
+     * Añade una función a la espera de ejecutarse cuando la conexión se cierre con éxito
+     * @param listener La función en cuestión
+     */
+    static onClosed(listener) {
+        // Si la cola de listeners aún no está creada, hay que crearla
+        if (!Connection.listenersClose) {
+            Connection.listenersClose = [];
+        }
+        Connection.listenersClose.push(listener);
+    }
+    /**
+     * Añade una función a la espera de ejecutarse cuando la conexión se cierra debido a algú problema
+     * @param listener La función en cuestión
+     */
+    static onLost(listener) {
+        // Si la cola de listeners aún no está creada, hay que crearla
+        if (!Connection.listenersLost) {
+            Connection.listenersLost = [];
+        }
+        Connection.listenersLost.push(listener);
     }
     /**
      * Pide al servidor los mensajes del chat y ejecuta una función cuando los recibe
@@ -143,7 +176,7 @@ class Connection {
                 .done(function (messages) {
                 listener(messages);
             }).fail(function () {
-                console.error("No se ha podido conectar al chat.");
+                console.error("No se ha podido conectar al chat");
             });
         });
     }
@@ -171,13 +204,43 @@ class Connection {
      * Solicita al servidor una lista con los usuarios conectados y ejecuta una función al recibirla
      * @param listener La función en cuestión. Recibe un array de usuarios como parámetro
      */
-    static readConnectedUsers(listener) {
+    static getAllUsers(listener) {
         Connection.onInitialized(function () {
             Connection.ajaxGet("/users")
                 .done(function (users) {
                 listener(users);
             }).fail(function () {
-                console.error("No se ha podido obtener los usuarios conectados.");
+                console.error("No se ha podido obtener los usuarios conectados");
+            });
+        });
+    }
+    /**
+     * Solicita al servidor un array con los UUIDs de todos los usuarios, y ejecuta
+     * una función cuando se reciben
+     * @param listener La función en cuestión
+     */
+    static getAllUsersId(listener) {
+        Connection.onInitialized(function () {
+            Connection.ajaxGet("/users/uuid")
+                .done(function (uuids) {
+                listener(uuids);
+            }).fail(function () {
+                console.error("No se ha podido obtener los usuarios conectados");
+            });
+        });
+    }
+    /**
+     * Pregunta al servidor si existe un usuario con la UUID dada, y ejecuta una función cuando responda
+     * @param uuid
+     * @param listener
+     */
+    static checkIfUserExists(uuid, listener) {
+        Connection.onInitialized(function () {
+            Connection.ajaxGet("/users/" + uuid)
+                .done(function (user) {
+                listener(user !== "");
+            }).fail(function () {
+                console.error("No se ha podido comprobar la conexión de un usuario");
             });
         });
     }
@@ -223,26 +286,6 @@ class Connection {
         }
     }
     /**
-     * Solicita al servidor un cambio de nombre. Es posible que el nombre no cambie al ejecutarse
-     * esta petición porque el nuevo nombre de usuario ya esté ocupado.
-     * @param newName nombre de usuario deseado
-     */
-    static changeUsername(newName) {
-        if (Connection.instance && Connection.instance.user) {
-            Connection.ajaxPost("/users/" + Connection.instance.user.id, { username: newName })
-                .done(function (user) {
-                if (!user) {
-                    console.error("Ya hay otro usuario con el mismo nombre.");
-                }
-                else {
-                    Connection.updateUser(user);
-                }
-            }).fail(function () {
-                console.error("No se ha podido solicitar al servidor un cambio de nombre.");
-            });
-        }
-    }
-    /**
      * Cambia el estado de ready del usuario en el servidor
      * @param ready Nuevo estado de ready
      * @param listener Función a ejecutar cuando se confirme el cambio de estado
@@ -258,26 +301,6 @@ class Connection {
             });
         }
     }
-    // /**
-    //  * Envía peticiones GET al servidor para asegurarle que seguimos conectados
-    //  */
-    // private static update() {
-    //     if(Connection.instance && Connection.instance.user) {
-    //         Connection.ajaxGet("/users/" + Connection.instance.user.id)
-    //         .done(function(user) {
-    //             // Si el servidor devuelve un cuerpo vacío, es porque el método de Java
-    //             // correspondiente ha devuelto null
-    //             if(user == "") {
-    //                 console.error("Este usuario ya no es válido en el servidor.");
-    //                 Connection.dropUser();
-    //             }
-    //         })
-    //         .fail(function() {
-    //             console.error("Se ha perdido la conexión con el servidor.");
-    //             Connection.dropUser();
-    //         });
-    //     }
-    // }
     /**
      * Si hay un usuario en este cliente, actualiza sus datos con la nueva información. Esta
      * función existe para evitar reinstanciar la clase User, porque puede ser problemático
@@ -287,11 +310,11 @@ class Connection {
     static updateUser(newUser) {
         if (Connection.instance && Connection.instance.user) {
             Connection.instance.user.id = newUser.id;
-            Connection.instance.user.username = newUser.username;
+            Connection.instance.user.name = newUser.name;
             Connection.instance.user.ready = newUser.ready;
         }
         else {
-            console.error("Se ha intentado actualizar un usuario inexistente.");
+            console.error("Se ha intentado actualizar un usuario inexistente");
         }
     }
     /**
@@ -329,6 +352,44 @@ class Connection {
                 "Content-Type": contentType
             }
         });
+    }
+    /**
+     * Evento que se ejecuta cuando se recibe un mensaje por WebSocket
+     * @param message Mensaje recibido, usar message.data para obtener el string que envió el servidor
+     */
+    static onWebSocketMessage(message) {
+        var msgdata = JSON.parse(message.data);
+        switch (msgdata.operation) {
+            case "SYNC_DATA":
+                var value = JSON.parse(msgdata.value);
+                var player = RemotePlayer.get(value.uuid);
+                if (player && Connection.getUser().id != value.uuid) {
+                    player.receiveData(value);
+                }
+                break;
+            default:
+                console.error("La operación " + msgdata.operation + " recibida del servidor"
+                    + " no está soportada");
+        }
+    }
+    /**
+     * Evento que se ejecuta cuando se cierra la conexión por WebSocket, independientemente del motivo
+     * @param event
+     */
+    static onWebSocketClose(event) {
+        if (event.code == 1000) {
+            for (let listener of Connection.listenersClose) {
+                listener();
+            }
+        }
+        else {
+            for (let listener of Connection.listenersLost) {
+                listener();
+            }
+            Connection.dropUser();
+            Connection.instance = null;
+            console.log("Conexión finalizada forzadamente");
+        }
     }
 }
 //# sourceMappingURL=connection.js.map

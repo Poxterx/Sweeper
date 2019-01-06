@@ -34,17 +34,9 @@ class SceneOverworld extends Phaser.Scene {
                 left:"A",
                 right:"D",
                 attack:"R"
-            }, 384, 1576)];
+            }, 384 + Math.random() * TILE_SIZE * 5, 1576 + Math.random() * TILE_SIZE)];
         if(multiplayer)
-            this.entities.push(new Player(this,{
-                name:"player2",
-                weaponName:"weapon2",
-                up:"I",
-                down:"K",
-                left:"J",
-                right:"L",
-                attack:"P"
-            }, 384, 1704));
+            this.addRemotePlayers();
         this.entities.push(new Dummy(this));
         // this.entities.push(new DummyAI(this));
         this.entities.push(new Enemy(this));
@@ -104,9 +96,39 @@ class SceneOverworld extends Phaser.Scene {
             this.entities.splice(this.entities.indexOf(e),1);
         }
         if(this.entities.indexOf(mainPlayer) == -1) {
+            this.stopSync();
             this.scene.stop("SceneOverworld");
             this.scene.stop("SceneGUI");
             this.scene.start("SceneGameOver");
+        }
+    }
+
+    /**
+     * Detiene la sincronización de datos de la escena con el servidor
+     */
+    public stopSync() {
+        // Si estamos en single player, no hay sincronización en primer lugar
+        if(!multiplayer) {
+            return;
+        }
+        for(let e of this.entities) {
+            if(e instanceof Player) {
+                e.stopSync();
+            }
+        }
+    }
+
+    /**
+     * Añade a la escena los jugadores remotos que hay en el servidor
+     */
+    private addRemotePlayers() {
+        var uuids = RemotePlayer.pendingUuids;
+        for(let i = 0; i < uuids.length; i++) {
+            var rp = new RemotePlayer(uuids[i], this, {
+                name:"player"+(i+2),
+                weaponName:"weapon"+(i+2)
+            }, -250, -250);
+            this.entities.push(rp);
         }
     }
 }

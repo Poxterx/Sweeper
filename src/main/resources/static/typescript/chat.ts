@@ -62,7 +62,7 @@ class Chat{
         if(SERVER) {
             username = "{{SERVER}}";
         } else if(Connection.getUser()) {
-            username = Connection.getUser().username;
+            username = Connection.getUser().name;
         }
 
         if(username && value != "") {

@@ -85,6 +85,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         else {
             var posX = this.canvas.getBoundingClientRect().left + this.sWidth * 0.1;
             var posY = this.sHeight * 0.05;
+            this.userName.hidden = true;
         }
         this.userName.style.left = posX + "px";
         this.userName.style.top = posY + "px";
@@ -164,9 +165,20 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.userlist = null;
             this.reset();
             this.userName.hidden = true;
-            this.scene.start("SceneOverworld");
+            this.getUuids(() => this.scene.start("SceneOverworld"));
             return;
         }
+    }
+    getUuids(listener) {
+        RemotePlayer.pendingUuids = [];
+        Connection.getAllUsersId(function (uuids) {
+            for (let uuid of uuids) {
+                if (uuid != Connection.getUser().id) {
+                    RemotePlayer.pendingUuids.push(uuid);
+                }
+            }
+            listener();
+        });
     }
 }
 //# sourceMappingURL=menumultijugador.js.map

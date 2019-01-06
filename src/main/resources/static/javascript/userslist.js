@@ -39,7 +39,7 @@ class UsersList {
      */
     update() {
         var that = this;
-        Connection.readConnectedUsers(function (users) {
+        Connection.getAllUsers(function (users) {
             // Aqui se rellenaria el array con lo que llega del backend
             that.usersArray.splice(0, that.usersArray.length);
             for (let user of users) {
@@ -48,7 +48,7 @@ class UsersList {
             that.text.text = "";
             // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
             for (let user of that.usersArray) {
-                that.text.text += user.username;
+                that.text.text += user.name;
                 if (user.ready) {
                     that.text.text += " ✔️";
                 }

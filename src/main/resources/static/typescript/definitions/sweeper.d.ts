@@ -78,7 +78,7 @@ type User = {
     /**
      * Nombre del usuario
      */
-    username :string,
+    name :string,
     /**
      * Indica si el usuario considera que está listo para comenzar la partida
      */
@@ -122,6 +122,20 @@ type UserCreationReponse = {
     nameStatus :UsernameStatus
 }
 
+/**
+ * Operación de WebSocket recibida desde el servidor para ejecutar en Connection
+ */
+type WebSocketOperation = {
+    /**
+     * String que identifica la operación a realizar
+     */
+    operation :string,
+    /**
+     * String que contiene el valor con el que operar. A menudo está codificado en formato JSON
+     */
+    value :string
+}
+
 // JQUERY
 // A falta de archivos de definición adecuados para la versión actual de jQuery, hemos añadido
 // algunas definiciones que permitan usarlo sin errores de compilación.
@@ -130,7 +144,7 @@ type UserCreationReponse = {
  * Función de búsqueda de jQuery.
  * @param any
  */
-declare function $(element :any);
+declare function $(element :any): any;
 
 declare namespace $ {
 

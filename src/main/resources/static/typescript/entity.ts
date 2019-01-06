@@ -452,6 +452,11 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Selecciona la animación adecuada para que la entidad mire hacia su target
      */
     private turnToTarget() {
+        // Si es un jugador controlado remotamente por el servidor, esta función no debe hacer nada
+        if(this instanceof RemotePlayer) {
+            return;
+        }
+
         // Calculamos el target respecto a la posición de la entidad. La llamada a 'clone()' se hace
         // porque en Phaser, las operaciones de vectores como 'add' o 'subtract' modifican el vector
         // base en lugar de devolver el resultado sin modificar los operandos, que es lo que uno esperaría
