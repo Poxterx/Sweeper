@@ -349,4 +349,8 @@ class Connection {
             }
         });
     }
+
+    public static onLost(listener :() => void){
+        
+    }
 }
