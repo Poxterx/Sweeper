@@ -1,6 +1,11 @@
 class SceneGameOver extends Phaser.Scene {
+
     constructor() {
         super({key:"SceneGameOver"});
+    }
+
+    preload(){
+        this.load.image("backToMenu", "assets/images/SinglePlayer.png");
     }
 
     create() {
@@ -13,8 +18,14 @@ class SceneGameOver extends Phaser.Scene {
             fontFamily: "Impact",
             fontSize: 46
         });
-
+        
         text.setPosition(screen.width * 0.5 - text.width * 0.5,
                         screen.height * 0.5 - text.height * 0.5);
+
+        //Vuelta al menú principal pulsando en el texto
+        text.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start("SceneMenu");
+            });
     }
 }
