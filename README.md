@@ -38,7 +38,7 @@ Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compe
 Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos estén listos se empieza la partida.
 
 ## Diagrama de clases de la aplicación
-![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
+![diagf4](https://user-images.githubusercontent.com/43203588/50811643-aa0e1e80-130f-11e9-91f9-e02e4c798364.PNG)
 
 ## Instrucciones para ejecutar la aplicación
 Para compilar el proyecto, habría que instalar jdk y maven, configurar la herramienta spring-boot y ejecutar el comando mvn clean package en la carpeta del proyecto. 
