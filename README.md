@@ -34,12 +34,12 @@ El planteamiento del diseño de nivel para las distintas zonas del juego estarí
 Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compenetración por parte de los jugadores. Estarían planteados de forma similar a la saga Mario & Luigi, pero en multijugador y a tiempo real.  
 
 ## Diagrama de navegación de la página
-![diagramaestados](https://user-images.githubusercontent.com/43203588/48800662-b829c080-ed0a-11e8-995f-5384f5624463.PNG)
+![states](https://user-images.githubusercontent.com/43203588/50811697-d9249000-130f-11e9-808d-2d48f3143716.JPG)
 Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos estén listos se empieza la partida.
 
 ## Diagrama de clases de la aplicación
 ![diagf4](https://user-images.githubusercontent.com/43203588/50811643-aa0e1e80-130f-11e9-91f9-e02e4c798364.PNG)
-
+Se ha añadido la pantalla de victoria entre otras cosas.
 ## Instrucciones para ejecutar la aplicación
 Para compilar el proyecto, habría que instalar jdk y maven, configurar la herramienta spring-boot y ejecutar el comando mvn clean package en la carpeta del proyecto. 
 Para ejecutar el jar,  habría que entrar en la carpeta del proyecto y ejecutar el comando java -jar Sweeper-0.2.jar. Hace falta instalar en la máquina Java 8.
