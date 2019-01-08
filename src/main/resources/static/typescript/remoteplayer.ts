@@ -25,6 +25,8 @@ class RemotePlayer extends Player {
             this.uuid,
             exists => {if(!exists) that.delete()}
         ), 250);
+
+        this.skipTarget = true;
     }
 
     /**
@@ -59,17 +61,18 @@ class RemotePlayer extends Player {
      * @param data 
      */
     public receiveData(data :any) {
+        this.setLife(data.life);
+        
+        if(!this.sprite) {
+            return;
+        }
+
         this.sprite.setPosition(data.posX, data.posY);
+        this.sprite.setVelocity(data.velX, data.velY);
         this.setMode(data.mode);
         var animKeys = data.anim.split("@");
         this.sprite.anims.play(this.name + "@" + animKeys[1] + "@" + animKeys[2], false);
         this.sprite.anims.setCurrentFrame(this.sprite.anims.currentAnim.frames[data.frame]);
-        this.sprite.flipX = data.flip;
-        this.setLife(data.life);
+        this.sprite.flipX = data.flip;   
     }
-
-    protected controlTarget() {
-       // Nada
-    }
-
 }

@@ -43,8 +43,7 @@ class Connection {
             }
             // Vaciamos la cola de funciones que estaban esperando
             Connection.listenersInit = [];
-            // Iniciamos las actualizaciones
-            // Connection.instance.updateInterval = setInterval(Connection.update, 500);
+            Connection.instance.mod = false;
             console.log("Conexión inicializada");
         }).fail(function (content) {
             // En este caso la petición GET no ha tenido éxito, lo cual puede ocurrir si
@@ -73,10 +72,12 @@ class Connection {
         if (typeof (data) !== "string") {
             data = JSON.stringify(data);
         }
-        Connection.instance.websocket.send(JSON.stringify({
-            operation: operation,
-            value: data
-        }));
+        Connection.onInitialized(function () {
+            Connection.instance.websocket.send(JSON.stringify({
+                operation: operation,
+                value: data
+            }));
+        });
     }
     /**
      * Finaliza la conexión con el servidor
@@ -165,6 +166,18 @@ class Connection {
             Connection.listenersLost = [];
         }
         Connection.listenersLost.push(listener);
+    }
+    static setMod(mod = true) {
+        Connection.instance.mod = mod;
+        if (mod && !NpcSync.isActive()) {
+            NpcSync.activate();
+        }
+        else if (!mod && NpcSync.isActive()) {
+            NpcSync.deactivate();
+        }
+    }
+    static isMod() {
+        return Connection.instance.mod;
     }
     /**
      * Pide al servidor los mensajes del chat y ejecuta una función cuando los recibe
@@ -360,12 +373,19 @@ class Connection {
     static onWebSocketMessage(message) {
         var msgdata = JSON.parse(message.data);
         switch (msgdata.operation) {
-            case "SYNC_DATA":
+            case "SYNC_PLAYER":
                 var value = JSON.parse(msgdata.value);
                 var player = RemotePlayer.get(value.uuid);
                 if (player && Connection.getUser().id != value.uuid) {
                     player.receiveData(value);
                 }
+                break;
+            case "SYNC_NPC":
+                var value = JSON.parse(msgdata.value);
+                NpcSync.receiveData(value);
+                break;
+            case "SET_MOD":
+                Connection.setMod();
                 break;
             default:
                 console.error("La operación " + msgdata.operation + " recibida del servidor"

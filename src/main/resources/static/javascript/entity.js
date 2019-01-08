@@ -13,6 +13,7 @@ class Entity extends Phaser.GameObjects.GameObject {
         this.maxLife = 100;
         this.dead = false;
         this.weapon = null;
+        this.skipTarget = false;
     }
     /**
      * Prepara los recursos que necesite esta entidad
@@ -72,6 +73,10 @@ class Entity extends Phaser.GameObjects.GameObject {
         // Elegimos lo que hacer a continuación en base al modo de la entidad
         switch (this.mode) {
             case "walk":
+                if (this.skipTarget) {
+                    this.sprite.setVelocity(0, 0);
+                    break;
+                }
                 // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
                 this.controlTarget();
                 // Elegimos la animación correspondiente para que la entidad mire hacia el target
@@ -203,7 +208,12 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Devuelve la información de la animación que la entidad está usando en este momento
      */
     currentAnimationInfo() {
-        return AnimationInfo.current(this.sprite.anims);
+        if (!this.sprite) {
+            return AnimationInfo.default();
+        }
+        else {
+            return AnimationInfo.current(this.sprite.anims);
+        }
     }
     /**
      * Asigna valores por defecto a las propiedades opcionales no especificadas en la configuración
@@ -284,10 +294,6 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Selecciona la animación adecuada para que la entidad mire hacia su target
      */
     turnToTarget() {
-        // Si es un jugador controlado remotamente por el servidor, esta función no debe hacer nada
-        if (this instanceof RemotePlayer) {
-            return;
-        }
         // Calculamos el target respecto a la posición de la entidad. La llamada a 'clone()' se hace
         // porque en Phaser, las operaciones de vectores como 'add' o 'subtract' modifican el vector
         // base en lugar de devolver el resultado sin modificar los operandos, que es lo que uno esperaría
@@ -378,6 +384,9 @@ class Entity extends Phaser.GameObjects.GameObject {
      * Prepara el objeto gráficos para dibujar lo que corresponda a este fotograma
      */
     prepareGraphics() {
+        if (!this.graphics) {
+            return;
+        }
         // Borramos todo lo dibujado en el frame anterior
         this.graphics.clear();
         // Nos colocamos justo en el target

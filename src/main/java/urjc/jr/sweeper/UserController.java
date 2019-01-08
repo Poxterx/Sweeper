@@ -5,8 +5,11 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,6 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    private static UUID mod;
+
+    private static Random random = new Random();
 
     public static class UserCreationReponse {
         private UUID id;
@@ -63,7 +70,7 @@ public class UserController {
             takenUsernames.add(name);
             ChatMessageController.postServerMessage(user.getName() + " se ha conectado.");
         }
-        
+
         return new UserCreationReponse(user.getId(), usernameStatus);
     }
 
@@ -126,6 +133,10 @@ public class UserController {
     }
 
     public static void removeUser(User user) {
+        if(user == null) {
+            return;
+        }
+
         users.remove(user.getId());
         takenUsernames.remove(user.getName());
         ChatMessageController.postServerMessage(user.getName() +  " se ha desconectado.");
@@ -133,5 +144,38 @@ public class UserController {
 
     public static void removeUser(UUID uuid) {
         removeUser(users.get(uuid));
+    }
+
+    public static UUID getModId() {
+        return mod;
+    }
+
+    public static void setModId(UUID id) {
+        mod = id;
+        try {
+            SocketManager.notifyMod(id);
+        } catch(Exception e) {
+            System.out.println("El servidor ha elegido a un moderador pero no se lo ha podido notificar");
+        }
+    }
+
+    public static boolean isModId(UUID id) {
+        return mod.toString().equals(id.toString());
+    }
+
+    public static void pickRandomMod() {
+        List<UUID> keys = new ArrayList<>(users.keySet());
+        int chosen = random.nextInt(keys.size());
+        for(int i = 0; i < keys.size(); i++) {
+            if(chosen == i) {
+                mod = keys.get(i);
+            }
+        }
+        try {
+            SocketManager.notifyMod(mod);
+        } catch(Exception e) {
+            System.out.println("El servidor ha elegido a un moderador pero no se lo ha podido notificar: "
+            + e.getClass().getName() + ", " + e.getMessage());
+        }
     }
 }

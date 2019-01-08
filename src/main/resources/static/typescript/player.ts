@@ -261,10 +261,12 @@ class Player extends Entity {
      */
     private sendData() {
         var animationinfo = this.currentAnimationInfo();
-        Connection.sendOperation("SYNC_DATA", {
+        Connection.sendOperation("SYNC_PLAYER", {
             uuid: Connection.getUser().id,
             posX: this.sprite.x,
             posY: this.sprite.y,
+            velX: this.sprite.body.velocity.x,
+            velY: this.sprite.body.velocity.y,
             mode: this.getMode(),
             anim: animationinfo.toString(),
             frame: animationinfo.frame,

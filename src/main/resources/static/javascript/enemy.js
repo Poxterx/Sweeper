@@ -37,6 +37,10 @@ class Enemy extends Entity {
             }
         });
     }
+    create() {
+        super.create();
+        NpcSync.register(this);
+    }
     update() {
         if (this.dead) {
             this.dead = false;
@@ -70,6 +74,38 @@ class Enemy extends Entity {
         if (this.path && !this.path.isImpossible()) {
             this.target = new Phaser.Math.Vector2(this.path.next());
         }
+    }
+    sendData() {
+        if (!this.sprite) {
+            return {
+                life: this.getLife()
+            };
+        }
+        var animationinfo = this.currentAnimationInfo();
+        return {
+            posX: this.sprite.x,
+            posY: this.sprite.y,
+            velX: this.sprite.body.velocity.x,
+            velY: this.sprite.body.velocity.y,
+            mode: this.getMode(),
+            anim: animationinfo.toString(),
+            frame: animationinfo.frame,
+            flip: this.sprite.flipX,
+            life: this.getLife()
+        };
+    }
+    receiveData(data) {
+        this.setLife(data.life);
+        if (!this.sprite) {
+            return;
+        }
+        this.sprite.setPosition(data.posX, data.posY);
+        this.sprite.setVelocity(data.velX, data.velY);
+        this.setMode(data.mode);
+        var animKeys = data.anim.split("@");
+        this.sprite.anims.play(this.name + "@" + animKeys[1] + "@" + animKeys[2], false);
+        this.sprite.anims.setCurrentFrame(this.sprite.anims.currentAnim.frames[data.frame]);
+        this.sprite.flipX = data.flip;
     }
 }
 //# sourceMappingURL=enemy.js.map

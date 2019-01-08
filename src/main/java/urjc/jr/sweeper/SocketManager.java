@@ -57,12 +57,16 @@ class SocketManager extends TextWebSocketHandler {
             case "LINK_USER":
                 try {
                     sessions.get(session.getId()).setUserId(UUID.fromString(value.asText()));
+                    if(UserController.getModId() == null) {
+                        UserController.setModId(UUID.fromString(value.asText()));
+                    }
                 } catch(IllegalArgumentException e) {
                     System.out.println("El UUID recibido de " + hostname + " no es válido.");
                 }
                 break;
-            case "SYNC_DATA":
-                broadcastTextMessage(syncData(session, mapper.readTree(value.asText())));
+            case "SYNC_PLAYER":
+            case "SYNC_NPC":
+                broadcastTextMessage(syncData(session, operation, mapper.readTree(value.asText())));
                 break;
             // En caso de que se reciba una operación que no está descrita aquí:
             default:
@@ -80,24 +84,32 @@ class SocketManager extends TextWebSocketHandler {
         }
     }
 
-    private String syncData(WebSocketSession session, JsonNode data) throws Exception {
+    private String syncData(WebSocketSession session, String operation, JsonNode data) throws Exception {
         ObjectNode reponse = mapper.createObjectNode();
-        ObjectNode value = mapper.createObjectNode();
-        reponse.put("operation", "SYNC_DATA");
-        String[] textKeys = new String[]{"uuid", "mode", "anim"};
-        String[] intKeys = new String[]{"posX", "posY", "frame", "life"};
-        String[] boolKeys = new String[]{"flip"};
-        for(String k : textKeys) {
-            value.put(k, data.get(k).asText());    
-        }
-        for(String k : intKeys) {
-            value.put(k, data.get(k).asInt());
-        }
-        for(String k : boolKeys) {
-            value.put(k, data.get(k).asBoolean());
-        }
-        reponse.put("value", value.toString());
+        reponse.put("operation", operation);
+        reponse.put("value", data.toString());
         return reponse.toString();
+    }
+
+    public static void notifyMod(UUID id) throws Exception {
+        ObjectNode notification = mapper.createObjectNode();
+        notification.put("operation", "SET_MOD");
+        notification.put("value", "");
+
+        WebSocketSession session = null;
+        for(String key : sessions.keySet()) {
+            if(sessions.get(key).getUserId().equals(id)) {
+                session = sessions.get(key).getSession();
+            }
+        }
+
+        if(session != null) {
+            synchronized(session) {
+                session.sendMessage(new TextMessage(notification.toString()));
+            }
+            System.out.println("El moderador es " + 
+            UserController.getUser(sessions.get(session.getId()).getUserId()).getName());
+        }   
     }
 
     @Override
@@ -110,8 +122,17 @@ class SocketManager extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus code) throws Exception {
         String hostname = session.getRemoteAddress().getHostName();
+        boolean needNewMod = false;
+        if(sessions.size() <= 1) {
+            UserController.setModId(null);
+        } else if(UserController.isModId(sessions.get(session.getId()).getUserId())) {
+           needNewMod = true;
+        }
         UserController.removeUser(sessions.get(session.getId()).getUserId());
         sessions.remove(session.getId());
+        if(needNewMod) {
+            UserController.pickRandomMod();
+        }
         System.out.println("Se ha cerrado la conexión con " + hostname
         + " -- Código de cierre " + code.getCode());
         // El código de cierre indica el motivo por el que se ha cerrado el WebSocket.

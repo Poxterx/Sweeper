@@ -80,6 +80,9 @@ class SceneOverworld extends Phaser.Scene {
             this.scene.stop("SceneOverworld");
             this.scene.stop("SceneGUI");
             this.scene.start("SceneGameOver");
+            if (multiplayer) {
+                Connection.close();
+            }
         }
     }
     /**

@@ -16,6 +16,7 @@ class RemotePlayer extends Player {
         var that = this;
         this.checkExistenceInterval = setInterval(() => Connection.checkIfUserExists(this.uuid, exists => { if (!exists)
             that.delete(); }), 250);
+        this.skipTarget = true;
     }
     /**
      * Obtiene la instancia de RemotePlayer asociada al usuario al que corresponda la UUID dada
@@ -46,16 +47,17 @@ class RemotePlayer extends Player {
      * @param data
      */
     receiveData(data) {
+        this.setLife(data.life);
+        if (!this.sprite) {
+            return;
+        }
         this.sprite.setPosition(data.posX, data.posY);
+        this.sprite.setVelocity(data.velX, data.velY);
         this.setMode(data.mode);
         var animKeys = data.anim.split("@");
         this.sprite.anims.play(this.name + "@" + animKeys[1] + "@" + animKeys[2], false);
         this.sprite.anims.setCurrentFrame(this.sprite.anims.currentAnim.frames[data.frame]);
         this.sprite.flipX = data.flip;
-        this.setLife(data.life);
-    }
-    controlTarget() {
-        // Nada
     }
 }
 RemotePlayer.map = new Map();
