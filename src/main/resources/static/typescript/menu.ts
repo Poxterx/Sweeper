@@ -1,19 +1,27 @@
 /**
  * Nombres de los botones
  */
-type MenuButton = "singlePlayer"|"singlePlayerOn"|"multiPlayer"|"multiPlayerOn";
+type MenuButton = "singlePlayer"|"singlePlayerOn"|"multiPlayer"|"multiPlayerOn"|"options"|"optionsOn"|"exit"|"exitOn";
 
 class SceneMenu extends Phaser.Scene {
-    /**
-     * Texto menu
-     */
-    private menu :Phaser.GameObjects.Text;
     /**
      * Variables en las que se guardaran las imágenes de los botones.
      */
     private singlePlayer:Phaser.GameObjects.Image;
+    private singlePlayerOn:Phaser.GameObjects.Image;
     private multiPlayer:Phaser.GameObjects.Image;
+    private multiPlayerOn:Phaser.GameObjects.Image;
     private options:Phaser.GameObjects.Image;
+    private optionsOn:Phaser.GameObjects.Image;
+    private exit:Phaser.GameObjects.Image;
+    private exitOn:Phaser.GameObjects.Image;
+
+    /**
+     * Boolean para saber si se ha caido la conexion
+     */
+    public lostConex:boolean = false;
+    private updateInterval :number;
+    private lostConexImg:Phaser.GameObjects.Image;
 
     /**
      * Variables en las que se guardaran el tamaño de la pantalla.
@@ -30,11 +38,27 @@ class SceneMenu extends Phaser.Scene {
      * Cargamos las imágenes de los botones
      */
     preload(){
-        this.load.image("singlePlayer", "assets/images/SinglePlayer.png");
-        this.load.image("singlePlayerOn", "assets/images/SinglePlayerOn.png");
-        this.load.image("multiPlayer", "assets/images/Multiplayer.png");
-        this.load.image("multiPlayerOn", "assets/images/MultiplayerOn.png");
-        this.load.image("options", "assets/images/Options.png");
+        //Fondo
+        this.load.image("background", "assets/images/Menu_Principal/Background.png");
+        //Carteles
+        //Solo
+        this.load.image("singlePlayer", "assets/images/Menu_Principal/Solo_Button.png");
+        this.load.image("singlePlayerOn", "assets/images/Menu_Principal/Solo_ButtonOn.png");
+        //Coop
+        this.load.image("multiPlayer", "assets/images/Menu_Principal/Coop_Button.png");
+        this.load.image("multiPlayerOn", "assets/images/Menu_Principal/Coop_ButtonOn.png");
+        //Opciones
+        this.load.image("options", "assets/images/Menu_Principal/Options_Button.png");
+        this.load.image("optionsOn", "assets/images/Menu_Principal/Options_ButtonOn.png");
+        //Exit
+        this.load.image("exit", "assets/images/Menu_Principal/Exit_Button.png");
+        this.load.image("exitOn", "assets/images/Menu_Principal/LuzExit.png");
+        //Sombras
+        this.load.image("shadowBackground", "assets/images/Menu_Principal/SombrasFinal.png");
+
+        //Error
+        this.load.image("lostConex", "assets/images/Menu_Principal/ConexionPerdida.png");
+        
     }
     /**
      * Método que cambia de imagen a la que se le pasa si entramos o salimos de ella
@@ -42,13 +66,29 @@ class SceneMenu extends Phaser.Scene {
     buttonAnimation(button :MenuButton,widthPos :number,heightPos :number) {
         switch (button) {
             case "singlePlayer":
+                this.singlePlayerOn.setVisible(false);
+                break;
             case "singlePlayerOn":
-                this.singlePlayer = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5,this.sHeight * heightPos - this.menu.height * 0.5, button);
+                this.singlePlayerOn.setVisible(true);
                 break;
             
             case "multiPlayer":
+                this.multiPlayerOn.setVisible(false);
+                break;
             case "multiPlayerOn":
-                this.multiPlayer = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5,this.sHeight * heightPos - this.menu.height * 0.5, button);
+                this.multiPlayerOn.setVisible(true);
+                break;
+            case "options":
+                this.optionsOn.setVisible(false);
+                break;
+            case "optionsOn":
+                this.optionsOn.setVisible(true);
+                break;
+            case "exit":
+                this.exitOn.setVisible(false);
+                break;
+            case "exitOn":
+                this.exitOn.setVisible(true);
                 break;
             default:
                 break;
@@ -59,39 +99,69 @@ class SceneMenu extends Phaser.Scene {
      * Inicializa la pantalla de menú
      */
     create() {
-        // Creamos el menú
-        this.menu = this.add.text(0, 0, "Menu", {
-            fontFamily: "Impact",
-            fontSize: 36
-        });
-        
         // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
         var screen = {
             width: this.game.config.width as number,
             height: this.game.config.height as number
         }
 
-        // Colocamos el menu verticalmente en el centro y horizontalmente a un 20% desde arriba
-        this.menu.setPosition(
-            screen.width * 0.45 - this.menu.width * 0.5,
-            screen.height * 0.20 - this.menu.height * 0.5
-        );
+        // Creamos el menú
+        this.add.image(screen.width*0.5,screen.height*0.5, "background");
 
         //Se guardan las dimensiones de la pantalla
         this.sWidth=screen.width;
         this.sHeight=screen.height;
 
         //Colocamos los botones
-        //Un 25% a la izquierda y centrado en altura
-        this.singlePlayer = this.add.image(this.sWidth * 0.25 - this.menu.width * 0.5,this.sHeight * 0.5 - this.menu.height * 0.5, "singlePlayer");
-        //Un 25% a la derecha y centrado en altura
-        this.multiPlayer = this.add.image(this.sWidth * 0.75 - this.menu.width * 0.5, this.sHeight * 0.5 - this.menu.height * 0.5, "multiPlayer");
-        //Centrado a lo ancho y un 35% abajo
-        this.options = this.add.image(this.sWidth * 0.5 - this.menu.width * 0.5, this.sHeight * 0.85 - this.menu.height * 0.5, "options");
+        //Situamos Singleplayer
+        this.singlePlayer = this.add.image(this.sWidth * 0.25 ,this.sHeight * 0.5, "singlePlayer");
+        this.singlePlayer.setScale(0.75);
+        this.singlePlayer.setRotation(0.2617993878); //15º
+        this.singlePlayer.setPosition(this.sWidth * 0.30 ,this.sHeight * 0.37);
+            //Añadimos tambien su hover
+            this.singlePlayerOn = this.add.image(this.sWidth * 0.25 ,this.sHeight * 0.5, "singlePlayerOn");
+            this.singlePlayerOn.setScale(0.75);
+            this.singlePlayerOn.setRotation(0.2617993878); //15º
+            this.singlePlayerOn.setPosition(this.sWidth * 0.30 ,this.sHeight * 0.37);
+            this.singlePlayerOn.setVisible(false);
 
-        
+        //Situamos Multiplayer
+        this.multiPlayer = this.add.image(this.sWidth * 0.75 , this.sHeight * 0.5 , "multiPlayer");
+        this.multiPlayer.setScale(0.75);
+        this.multiPlayer.setRotation(-0.2617993878); //-15º
+            //Añadimos tambien su hover
+            this.multiPlayerOn = this.add.image(this.sWidth * 0.75 , this.sHeight * 0.5 , "multiPlayerOn");
+            this.multiPlayerOn.setScale(0.75);
+            this.multiPlayerOn.setRotation(-0.2617993878); //-15º
+            this.multiPlayerOn.setVisible(false);
+
+        //Situamos Options
+        this.options = this.add.image(this.sWidth * 0.5 , this.sHeight * 0.85 , "options");
+        this.options.setScale(0.75);
+        this.options.setRotation(-0.7853981634); //-45º
+        this.options.setPosition(this.sWidth * 0.35 ,this.sHeight * 1.01);
+            //Añadimos su hover
+            this.optionsOn = this.add.image(this.sWidth * 0.5 , this.sHeight * 0.85 , "optionsOn");
+            this.optionsOn.setScale(0.75);
+            this.optionsOn.setRotation(-0.7853981634); //-45º
+            this.optionsOn.setPosition(this.sWidth * 0.35 ,this.sHeight * 1.01);
+            this.optionsOn.setVisible(false);
+
+        //Añadimos el exit arriba a la derecha
+        this.exit = this.add.image(this.sWidth * 0.80 ,this.sHeight * 0.10, "exit");
+        this.exit.setScale(0.75);
+        //Añadimos tambien su hover
+        this.exitOn = this.add.image(this.sWidth * 0.50 ,this.sHeight * 0.50, "exitOn");
+        this.exitOn.setVisible(false);
+        //Añadimos los detalles
+        this.add.image(screen.width*0.5,screen.height*0.5,"shadowBackground");
+
+        //Añadimos el error
+        this.lostConexImg = this.add.image(screen.width*0.75,screen.height*0.8,"lostConex");
+        this.lostConexImg.setVisible(false);
+
         /**
-        * Ponemos los siguientes eventos asociados a la imagene singlePlayer :
+        * Ponemos los siguientes eventos asociados a la imagen singlePlayer :
         * En caso de que se pulse se empieza a jugar
         * Si entramos o salimos de la imagen, esta se cambia
         */
@@ -104,19 +174,49 @@ class SceneMenu extends Phaser.Scene {
             .on('pointerout', () => this.buttonAnimation("singlePlayer",0.25,0.5) )
         ;
         /**
-        * Ponemos los siguientes eventos asociados a la imagene multiPlayer:
+        * Ponemos los siguientes eventos asociados a la imagen multiPlayer:
         * En caso de que se pulse se empieza a jugar
         * Si entramos o salimos de la imagen, esta se cambia
         */
         this.multiPlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 multiplayer = true;
-                this.scene.start("SceneOverworld");
+                this.scene.start("SceneMultiplayerMenu");
             })
             .on('pointerover', () => this.buttonAnimation("multiPlayerOn",0.75,0.5) )
             .on('pointerout', () => this.buttonAnimation("multiPlayer",0.75,0.5) )
         ;
-        //El boton opciones aun no tiene funcionalidad
+        /**
+        * Ponemos los siguientes eventos asociados a la imagen Options:
+        */
+       this.options.setInteractive({ useHandCursor: true })
+            //Sin Funcionalidad
+            .on('pointerover', () => this.buttonAnimation("optionsOn",0.75,0.5) )
+            .on('pointerout', () => this.buttonAnimation("options",0.75,0.5) )
+        ;
+        /**
+        * Ponemos los siguientes eventos asociados a la imagen exit:
+        * En caso de que se sale
+        * Si entramos o salimos de la imagen, esta se cambia
+        */
+        this.exit.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+                this.scene.start("SceneTitle");
+                console.log("Boom");
+            })
+            .on('pointerover', () => this.buttonAnimation("exitOn",0.75,0.5) )
+            .on('pointerout', () => this.buttonAnimation("exit",0.75,0.5) )
+        ;
     }
     
+    update(){
+
+        if(this.lostConex){
+            this.lostConex = false;
+            this.lostConexImg.setVisible(true);
+            this.updateInterval = setInterval(() => this.update.call(this), 500);
+        }else{
+            this.lostConexImg.setVisible(false);
+        }
+    }
 }

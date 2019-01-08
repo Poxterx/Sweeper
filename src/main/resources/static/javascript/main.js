@@ -1,8 +1,3 @@
-// CONFIGURACIÓN DEL JUEGO
-var registro;
-registro = [];
-var chat = new Chat(registro, 5);
-chat.addMessage("Juanca", "Shumin");
 const game = new Phaser.Game({
     // Tamaño del lienzo
     width: 800,
@@ -13,7 +8,7 @@ const game = new Phaser.Game({
     type: Phaser.CANVAS,
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.1.2",
+    version: "0.2.0",
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
     physics: {
@@ -28,6 +23,7 @@ const game = new Phaser.Game({
     scene: [new SceneServer(),
         new SceneTitle(),
         new SceneMenu(),
+        new SceneMultiplayerMenu(),
         new SceneOverworld(new Room("mainroom", {
             tilemap: "Mapa.json",
             tileset: "tileset.png"
@@ -41,4 +37,18 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if (SERVER) {
     document.title += " (SERVER)";
 }
+// Inicializamos la conexión cuando cargue el documento
+$(document).ready(function () {
+    Connection.initialize();
+}).on("keydown", function (event) {
+    if (event.key == "Enter") {
+        if (chat) {
+            Chat.onclickEnviar();
+        }
+    }
+});
+Connection.onInitialized(function () {
+    chat = new Chat();
+    chat.startUpdating();
+});
 //# sourceMappingURL=main.js.map

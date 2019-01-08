@@ -6,7 +6,7 @@ class UsersList {
     /**
      * Array de strings con los nombres de cada usuario
      */
-    private usersArray :string[];
+    private usersArray :User[];
     /**
      * Identificador del intervalo que carga periódicamente los nombres de usuario
      */
@@ -14,13 +14,13 @@ class UsersList {
     /**
      * Escena en la que se pondran los usuaios conectados
      */
-    public scene :SceneServer;
+    public scene :Phaser.Scene;
 
     /**
      * Crea una lista de usuarios con las opciones pasadas como parámetro
      * @param scene Escena del servidor
      */
-    constructor(scene :SceneServer){
+    constructor(scene :Phaser.Scene){
         this.scene = scene;
         this.usersArray = [];
     }
@@ -51,29 +51,38 @@ class UsersList {
             fontSize: 20
         });
 
+
         this.text.setPosition(
-            screen.width * 0.5 - this.text.width * 0.5,
-            screen.height * 0.25
+            screen.width * 0.65,
+            SERVER ? screen.height * 0.2 : screen.height * 0.45
         )
+    }
+
+    public getUsers() {
+        return clone(this.usersArray) as User[];
     }
 
     /**
      * Actualiza la escena del servidor poniendo los usuarios conectados en el momento
      */
-    update(){
+    private update(){
         var that = this;
         Connection.readConnectedUsers(function(users) {
             // Aqui se rellenaria el array con lo que llega del backend
             that.usersArray.splice(0, that.usersArray.length);
             for(let user of users) {
-                that.usersArray.push(user.username);
+                that.usersArray.push(user);
             }
 
             that.text.text = "";
 
             // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
-            for(let element of that.usersArray) {
-                that.text.text += element + "\n";
+            for(let user of that.usersArray) {
+                that.text.text += user.username;
+                if(user.ready) {
+                    that.text.text += " ✔️";
+                }
+                that.text.text += "\n";
             }
         });
     }

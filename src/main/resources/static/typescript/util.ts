@@ -25,7 +25,7 @@ var multiplayer = false;
 /**
  * Variable que contiene el chat
  */
-
+var chat :Chat = null;
 
 /**
  * Registra una animación en el administrador de animaciones de Phaser
@@ -178,7 +178,3 @@ function tileToPixelPosition(tile :Vector2) :Vector2 {
         y: (tile.y + 0.5) * TILE_SIZE
     }
 }
-// Inicializamos la conexión cuando cargue el documento
-$(document).ready(function() {
-    Connection.initialize();
-});
