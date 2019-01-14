@@ -6,7 +6,7 @@
 [Integrantes](#integrantes)  
 
 ## Gameplay
-La partida consta de un mínimo de dos jugadores que explorarán el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar, recoger objetos, y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
+La partida consta de un mínimo de dos jugadores que explorarán el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
 
 El área jugable es un conjunto de salas interconectadas y agrupadas en múltiples zonas. Para avanzar por la zona, los jugadores deben desbloquear u obtener herramientas o poderes que permitan sortear ciertos obstáculos. Estos obstáculos bloquean el paso a varias secciones del juego que son inaccesibles hasta obtener dichas herramientas, efectivamente ofreciendo una experiencia más o menos lineal en un entorno que hay que explorar. Existe una zona central que, además de suponer un desafío similar al de las otras zonas, permite navegar entre las demás zonas del juego.
 
@@ -29,9 +29,6 @@ La estética estaría inspirada en Punch Club
 
 ![Metroid Samus Returns](https://vignette.wikia.nocookie.net/metroid/images/1/15/Metroid_Samus_Returns_area_2_map.png "Metroid Samus Returns")  
 El planteamiento del diseño de nivel para las distintas zonas del juego estarían basadas en juegos como Metroid o Hollow Knight  
-
-![Mario & Luigi: Superstar Saga](https://i.ytimg.com/vi/FyB2U2lIaLI/hqdefault.jpg "Mario & Luigi: Superstar Saga")  
-Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compenetración por parte de los jugadores. Estarían planteados de forma similar a la saga Mario & Luigi, pero en multijugador y a tiempo real.  
 
 ## Diagrama de navegación de la página
 ![states](https://user-images.githubusercontent.com/43203588/50811697-d9249000-130f-11e9-808d-2d48f3143716.JPG)
