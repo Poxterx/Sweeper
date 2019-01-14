@@ -4,10 +4,6 @@ class SceneMenu extends Phaser.Scene {
      */
     constructor() {
         super({ key: "SceneMenu" });
-        /**
-         * Boolean para saber si se ha caido la conexion
-         */
-        this.lostConex = false;
     }
     /**
     * Cargamos las imágenes de los botones
@@ -30,8 +26,6 @@ class SceneMenu extends Phaser.Scene {
         this.load.image("exitOn", "assets/images/Menu_Principal/LuzExit.png");
         //Sombras
         this.load.image("shadowBackground", "assets/images/Menu_Principal/SombrasFinal.png");
-        //Error
-        this.load.image("lostConex", "assets/images/Menu_Principal/ConexionPerdida.png");
     }
     /**
      * Método que cambia de imagen a la que se le pasa si entramos o salimos de ella
@@ -120,9 +114,6 @@ class SceneMenu extends Phaser.Scene {
         this.exitOn.setVisible(false);
         //Añadimos los detalles
         this.add.image(screen.width * 0.5, screen.height * 0.5, "shadowBackground");
-        //Añadimos el error
-        this.lostConexImg = this.add.image(screen.width * 0.75, screen.height * 0.8, "lostConex");
-        this.lostConexImg.setVisible(false);
         /**
         * Ponemos los siguientes eventos asociados a la imagen singlePlayer :
         * En caso de que se pulse se empieza a jugar
@@ -166,18 +157,6 @@ class SceneMenu extends Phaser.Scene {
         })
             .on('pointerover', () => this.buttonAnimation("exitOn", 0.75, 0.5))
             .on('pointerout', () => this.buttonAnimation("exit", 0.75, 0.5));
-    }
-    update() {
-        var aux;
-        this.lostConexImg.setVisible(true);
-        if (this.lostConex) {
-            this.lostConex = false;
-            this.lostConexImg.setVisible(true);
-            this.updateInterval = setInterval(() => this.update.call(this), 500);
-        }
-        else {
-            //this.lostConexImg.setVisible(false);
-        }
     }
 }
 //# sourceMappingURL=menu.js.map

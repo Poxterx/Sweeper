@@ -1,9 +1,9 @@
-class SceneGameOver extends Phaser.Scene {
+class SceneGameDisconect extends Phaser.Scene {
     constructor() {
-        super({ key: "SceneGameOver" });
+        super({ key: "SceneGameDisconect" });
     }
     preload() {
-        this.load.image("backToMenu", "assets/images/GameOver.png");
+        this.load.image("backToMenu", "assets/images/Disconect.png");
     }
     create() {
         var screen = {
@@ -15,4 +15,4 @@ class SceneGameOver extends Phaser.Scene {
         this.input.addDownCallback(() => this.scene.start("SceneMenu"));
     }
 }
-//# sourceMappingURL=gameover.js.map
+//# sourceMappingURL=disconnect.js.map

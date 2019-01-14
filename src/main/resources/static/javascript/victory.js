@@ -1,9 +1,9 @@
-class SceneGameOver extends Phaser.Scene {
+class SceneGameVictory extends Phaser.Scene {
     constructor() {
-        super({ key: "SceneGameOver" });
+        super({ key: "SceneGameVictory" });
     }
     preload() {
-        this.load.image("backToMenu", "assets/images/GameOver.png");
+        this.load.image("backToMenu", "assets/images/Victory.png");
     }
     create() {
         var screen = {
@@ -15,4 +15,4 @@ class SceneGameOver extends Phaser.Scene {
         this.input.addDownCallback(() => this.scene.start("SceneMenu"));
     }
 }
-//# sourceMappingURL=gameover.js.map
+//# sourceMappingURL=victory.js.map

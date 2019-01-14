@@ -275,5 +275,7 @@ class Connection {
             }
         });
     }
+    static onLost(listener) {
+    }
 }
 //# sourceMappingURL=connection.js.map

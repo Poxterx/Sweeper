@@ -16,12 +16,6 @@ class SceneMenu extends Phaser.Scene {
     private exit:Phaser.GameObjects.Image;
     private exitOn:Phaser.GameObjects.Image;
 
-    /**
-     * Boolean para saber si se ha caido la conexion
-     */
-    public lostConex:boolean = false;
-    private updateInterval :number;
-    private lostConexImg:Phaser.GameObjects.Image;
 
     /**
      * Variables en las que se guardaran el tamaño de la pantalla.
@@ -55,9 +49,6 @@ class SceneMenu extends Phaser.Scene {
         this.load.image("exitOn", "assets/images/Menu_Principal/LuzExit.png");
         //Sombras
         this.load.image("shadowBackground", "assets/images/Menu_Principal/SombrasFinal.png");
-
-        //Error
-        this.load.image("lostConex", "assets/images/Menu_Principal/ConexionPerdida.png");
         
     }
     /**
@@ -156,10 +147,6 @@ class SceneMenu extends Phaser.Scene {
         //Añadimos los detalles
         this.add.image(screen.width*0.5,screen.height*0.5,"shadowBackground");
 
-        //Añadimos el error
-        this.lostConexImg = this.add.image(screen.width*0.75,screen.height*0.8,"lostConex");
-        this.lostConexImg.setVisible(false);
-
         /**
         * Ponemos los siguientes eventos asociados a la imagen singlePlayer :
         * En caso de que se pulse se empieza a jugar
@@ -209,14 +196,4 @@ class SceneMenu extends Phaser.Scene {
         ;
     }
     
-    update(){
-
-        if(this.lostConex){
-            this.lostConex = false;
-            this.lostConexImg.setVisible(true);
-            this.updateInterval = setInterval(() => this.update.call(this), 500);
-        }else{
-            this.lostConexImg.setVisible(false);
-        }
-    }
 }

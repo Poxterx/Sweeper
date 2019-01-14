@@ -1,10 +1,11 @@
-class SceneGameOver extends Phaser.Scene {
+class SceneGameDisconect extends Phaser.Scene {
+
     constructor() {
-        super({key:"SceneGameOver"});
+        super({key:"SceneGameDisconect"});
     }
 
     preload(){
-        this.load.image("backToMenu", "assets/images/GameOver.png");
+        this.load.image("backToMenu", "assets/images/Disconect.png");
     }
 
     create() {

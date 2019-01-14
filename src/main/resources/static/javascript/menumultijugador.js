@@ -11,7 +11,6 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     preload() {
         this.load.image("readyOn", "assets/images/ReadyOn.png");
         this.load.image("readyOff", "assets/images/ReadyOff.png");
-        this.load.image("back", "assets/images/Back.png");
         //Nuevo
         this.load.image("backgroundMulti", "assets/images/Menu_Multi/Multi_Base.png");
         this.load.image("backgroundMultiShadow", "assets/images/Menu_Multi/Multi_sombras.png");
@@ -30,6 +29,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.load.image("sign_logInOn", "assets/images/Menu_Multi/LogInOn.png");
         this.load.image("sign_signUp", "assets/images/Menu_Multi/SignUp.png");
         this.load.image("sign_signUpOn", "assets/images/Menu_Multi/SignUpOn.png");
+        this.load.image("backToMenu", "assets/images/Disconect.png");
     }
     /**
      * Método que cambia de imagen el "toggle" button
@@ -83,29 +83,50 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Método que carga la lista de jugadores y los controles pertinentes
      */
     playerReady() {
-        var that = this;
-        Connection.createUser(this.userName.value, function () {
-            //that.acceptName.destroy();
-            //Vaciamos la caja de texto
-            that.userName.value = "";
-            //Inicializamos el estado del toggle
-            that.statusReady = false;
-            //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
-            that.logActive = false;
-            //Indicamos la transicion
-            that.transition = false;
-            //Asignamos el método que llamará el botón Ready
-            that.readyOff.setVisible(true);
-            that.readyOff.setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => {
-                Connection.setReady(!Connection.getUser().ready);
-                that.buttonAnimation("playerReady", 0.85, 0.85);
+        //Añadir funcion que devuelve que los credenciales son correctos
+        var credenciales = true;
+        ////////////////////////////
+        if (credenciales) {
+            var that = this;
+            Connection.createUser(this.userName.value, function () {
+                //that.acceptName.destroy();
+                //Vaciamos la caja de texto
+                that.userName.value = "";
+                //Vaciamos la caja de texto
+                that.userPassword.value = "";
+                //Inicializamos el estado del toggle
+                that.statusReady = false;
+                //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
+                that.logActive = false;
+                //Indicamos la transicion
+                that.transition = false;
+                //Indicamos lobby
+                that.inLobby = true;
+                //Asignamos el método que llamará el botón Ready
+                that.readyOff.setVisible(true);
+                that.readyOff.setInteractive({ useHandCursor: true })
+                    .on('pointerdown', () => {
+                    Connection.setReady(!Connection.getUser().ready);
+                    that.buttonAnimation("playerReady", 0.85, 0.85);
+                });
+                that.exitMulti.setVisible(true);
+                that.userlist = new UsersList(that);
+                that.userlist.create();
+                that.userlist.startUpdating();
+                that.generateLobbies();
             });
-            that.exitMulti.setVisible(true);
-            that.userlist = new UsersList(that);
-            that.userlist.create();
-            that.userlist.startUpdating();
-        });
+        }
+        else {
+            //Añadir el mensaje de error correspondiente
+        }
+    }
+    /**
+     * Método que pasa los valores para el registro
+     */
+    playerSignUp() {
+        //this.userName.value;
+        //this.userPassword.value;
+        console.log("holi");
     }
     /**
      * Método que posiciona la caja de texto
@@ -117,8 +138,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             var posY_name = this.canvas.getBoundingClientRect().top + this.sHeight * 0.5 - 90;
             var posX_pass = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 - 60;
             var posY_pass = this.canvas.getBoundingClientRect().top + this.sHeight * 0.5 + 20;
-            var posX_error = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 + 60;
-            var posY_error = this.canvas.getBoundingClientRect().top + this.sHeight * 0.8 - 10;
+            var posX_error = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 + 45;
+            var posY_error = this.canvas.getBoundingClientRect().top + this.sHeight * 0.8 - 20;
         }
         else {
             var posX_chat = this.canvas.getBoundingClientRect().left + this.sWidth * 0.25 - 150;
@@ -134,6 +155,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.chat.style.top = posY_chat + "px";
         this.chat.style.width = this.sWidth * 0.46 + "px";
         this.chat.style.height = this.sHeight * 0.55 + "px";
+        this.lista.style.left = posX_chat + "px";
+        this.lista.style.top = posY_chat + "px";
+        this.lista.style.width = this.sWidth * 0.46 + "px";
+        this.lista.style.height = this.sHeight * 0.55 + "px";
         this.currentLobby.style.left = posX_lobby + "px";
         this.currentLobby.style.top = posY_lobby + "px";
         this.errorLog.style.left = posX_error + "px";
@@ -163,8 +188,9 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 this.angle = this.angle - 0.06;
                 this.signX = this.signX - 15;
             }
-            //Activamos los botones en casoi de que la transicion ya haya terminado.
+            //Activamos los botones en caso de que la transicion ya haya terminado.
             if (this.angle <= -0.7853981634 && this.signX <= this.sWidth * 0.8) {
+                this.sign.setPosition(this.sWidth * 0.796, this.sHeight * 0.85);
                 this.userName.hidden = false;
                 this.userPassword.hidden = false;
                 this.errorLog.hidden = false;
@@ -200,6 +226,34 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 this.angle = this.angle + 0.06;
                 this.signX = this.signX + 15;
             }
+        }
+    }
+    /**
+     * Crea la lista de lobbies
+     */
+    generateLobbies() {
+        //Limpiamos
+        $(".Row").remove();
+        //Cargamos los lobbys
+        for (var i = 0; i < this.lobbys.length; i++) {
+            var aux = this.lobbys[i];
+            //Construir el Wrap del lobby
+            var NombreLobby = document.createElement("div");
+            NombreLobby.innerHTML = aux.Nombre;
+            NombreLobby.setAttribute("style", "width:30%;align-self: left; font-size: 25px");
+            //var BotonConnect = document.createElement("image");
+            //BotonConnect.src = "assets/images/Menu_Multi/Connect.png";
+            var numeroIntegrantes = document.createElement("div");
+            numeroIntegrantes.innerHTML = aux.integrantes.length.toString() + "/4";
+            numeroIntegrantes.setAttribute("style", "float:right;top:50%");
+            var wrapLobby = document.createElement("div");
+            wrapLobby.setAttribute("class", "Row");
+            wrapLobby.setAttribute("style", "background-color:lightgrey;margin-bottom:5px;font-family: Impact; font-size: 15px");
+            //wrapLobby.setAttribute("style","position:absolute");
+            wrapLobby.insertAdjacentElement('beforeend', NombreLobby);
+            //wrapLobby.insertAdjacentElement('beforeend', BotonConnect);
+            wrapLobby.insertAdjacentElement('beforeend', numeroIntegrantes);
+            this.lista.insertAdjacentElement('beforeend', wrapLobby);
         }
     }
     /**
@@ -250,17 +304,16 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.chat = document.getElementById("chat");
         this.currentLobby = document.getElementById("Lobby_name");
         this.errorLog = document.getElementById("ErrorLog");
+        this.lista = document.getElementById("lobbyList");
         //Hacemos invisible la caja de texto y el chat
         this.userName.hidden = true;
         this.userPassword.hidden = true;
         this.chat.hidden = true;
         this.currentLobby.hidden = true;
         this.errorLog.hidden = true;
+        this.lista.hidden = true;
         //Al iniciar la escena, hacemos aparecer la caja y el botón en el centro
         this.logActive = true;
-        //Dibujamos los dos botones
-        this.back = this.add.image(this.sWidth * 0.5, this.sHeight * 0.85, "back");
-        this.back.setVisible(false);
         //Creamos la imagen del ready
         this.readyOff = this.add.image(this.sWidth * 0.8, this.sHeight * 0.75, "readyOff");
         this.readyOff.setScale(0.7);
@@ -286,21 +339,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         /**
         * Ponemos los siguientes eventos asociados a las imágenes:
         * acceptName: llamamos a playerReady()
-        * back: volvemos a la escena de Menú
         * sign_exit: cerramos la señal, ocultamos las cajas de texto y volvemos al menu
         * sign_logIn: accedemos con nuestro usuario al menu multijugador
         * sign_sign_up: creamos un nuevo usuario y accedemos al menu multijugador
         */
-        this.back.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => {
-            Connection.dropUser();
-            this.userName.hidden = true;
-            this.userPassword.hidden = true;
-            this.currentLobby.hidden = true;
-            this.errorLog.hidden = true;
-            this.transition = false;
-            this.scene.start("SceneMenu");
-        });
         this.sign_exit.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             Connection.dropUser();
@@ -309,6 +351,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
             this.transition = false;
+            this.lista.hidden = true;
             this.scene.start("SceneMenu");
         })
             .on('pointerover', () => this.buttonAnimation("sign_exitOn", 0.25, 0.5))
@@ -319,6 +362,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             .on('pointerover', () => this.buttonAnimation("logInOn", 0.25, 0.5))
             .on('pointerout', () => this.buttonAnimation("logIn", 0.25, 0.5));
         this.sign_signUp.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.playerSignUp())
             .on('pointerover', () => this.buttonAnimation("signUpOn", 0.25, 0.5))
             .on('pointerout', () => this.buttonAnimation("signUp", 0.25, 0.5));
         this.connect.setInteractive({ useHandCursor: true })
@@ -332,35 +376,56 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
             this.transition = false;
+            this.lista.hidden = true;
             this.scene.start("SceneMenu");
         })
             .on('pointerover', () => this.buttonAnimation("exitMultiOn", 0.25, 0.5))
             .on('pointerout', () => this.buttonAnimation("exitMulti", 0.25, 0.5));
         this.backLobby.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+            this.inLobby = false;
+            this.chat.hidden = true;
+            this.generateLobbies();
+        })
             .on('pointerover', () => this.buttonAnimation("backLobbyOn", 0.25, 0.5))
             .on('pointerout', () => this.buttonAnimation("backLobby", 0.25, 0.5));
         //////////////////////////
         //Activamos la transicion de entrada
         this.transition = true;
+        var hey = new Lobby("PEPE", 1);
+        this.lobbys = [];
+        this.lobbys.push(hey);
+        this.lobbys.push(hey);
     }
     reset() {
         this.logActive = true;
         this.readyOff.destroy();
+        this.userName.innerHTML = "";
+        this.userPassword.innerHTML = "";
     }
+    /**
+     * Gestiona la visibilidad entre lobby y chat
+     */
     gestionLobby() {
         //Actualizamos la pantalla de lobbys
         if (!this.logActive) {
             this.currentLobby.hidden = false;
-            //Recibe el lobby actual, si no hay dice no lobby
-            document.getElementById("NameText").innerText = "Lobby_1";
             //Si nos encontramos en seleccion de lobby o no.
-            this.inLobby = true;
             if (this.inLobby) {
+                this.lista.hidden = true;
                 this.backLobby.setVisible(true);
-                //El chat??
+                //Recibe el lobby actual, si no hay dice no lobby
+                document.getElementById("NameText").innerText = this.lobbyActual;
+                //El chat??//////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////
             }
             else {
                 this.backLobby.setVisible(false);
+                this.lista.hidden = false;
+                //Deshabilitar el chat//////////////
+                ////////////////////////////////////
+                //Ponemos que no hay lobby seleccionado
+                document.getElementById("NameText").innerText = "No lobby";
             }
         }
         else {
@@ -370,7 +435,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     /**
      * Metodo para poner un error, no muy largo
      */
-    setErrorLog(error) {
+    static setErrorLog(error) {
         document.getElementById("ErrorLogMessage").innerHTML = error;
     }
     update() {
@@ -389,7 +454,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
             this.transition = false;
-            this.scene.start("SceneMenu");
+            this.lista.hidden = true;
+            this.scene.start("SceneGameDisconect");
             return;
         }
         if (!this.userlist)
@@ -410,7 +476,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
             this.transition = false;
-            this.scene.start("SceneOverworld");
+            this.lista.hidden = true;
+            this.scene.start("SceneGameDisconect");
             return;
         }
     }
