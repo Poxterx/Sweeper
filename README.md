@@ -6,15 +6,16 @@
 [Integrantes](#integrantes)  
 
 ## Gameplay
-La partida consta de un mínimo de dos jugadores que explorarán el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar, recoger objetos, y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
+La partida se puede jugar en modo individual o modo cooperativo, en ambos modos se explorara el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
 
-El área jugable es un conjunto de salas interconectadas y agrupadas en múltiples zonas. Para avanzar por la zona, los jugadores deben desbloquear u obtener herramientas o poderes que permitan sortear ciertos obstáculos. Estos obstáculos bloquean el paso a varias secciones del juego que son inaccesibles hasta obtener dichas herramientas, efectivamente ofreciendo una experiencia más o menos lineal en un entorno que hay que explorar. Existe una zona central que, además de suponer un desafío similar al de las otras zonas, permite navegar entre las demás zonas del juego.
+Al principio planteamos el área jugable como un conjunto de salas interconectadas y agrupadas en múltiples zonas. Para avanzar por la zona, los jugadores deberían desbloquear u obtener herramientas o poderes que permitan sortear ciertos obstáculos. Estos obstáculos bloquearían el paso a varias secciones del juego que serían inaccesibles hasta obtener dichas herramientas, ofreciendo una experiencia más o menos lineal en un entorno que hay que explorar. Existiría una zona central que, además de suponer un desafío similar al de las otras zonas, permite navegar entre las demás zonas del juego.
 
-Los enemigos a eliminar se dividen en dos categorías: débiles y fuertes. Los enemigos débiles aparecen aleatoriamente en salas donde no haya jugadores y hay una cantidad indefinida de ellos, mientras que los enemigos fuertes sólo aparecen una vez por partida y es necesario derrotarlos para avanzar en el juego. Eliminar a un enemigo fuerte hace que ciertos tipos de enemigos débiles también dejen de aparecer.
+En el juego tal y como está actualmente es solo una de las zonas que habíamos pensado en un principio (las alcantarillas). En ella hay multitud de enemigos que aparecen alentoriamente por el mapa. El jugador deberá enfrentarse a los enemigos que se le interpongan en su camino, o evitarlos, para avanzar. 
 
-Los enemigos fuertes, así como ciertos obstáculos, exigen la cooperación de todos los jugadores en la partida. Los jugadores pueden ir por separado, pero deben estar en la misma zona en todo momento. Para pasar de una zona a otra es necesario que todos los jugadores estén juntos.
+Además, el jugador deberá desbloquear la parte del mapa que lleva a la meta accionando una palanca. Esto le obligará a recorrer el escenario y enontrarse con más enemigos. La salida es una escalera que desciende, esto viene de nuestro planteamiento inicial en el que el jugador debería descender para enfrentarse a un enemigo más fuerte que los demás y pasar a la siguiente zona.
 
-Las herramientas y las mejoras se obtienen principalmente de dos formas: Encontradas en un lugar predeterminado, o soltadas por un enemigo derrotado.
+La cooperación de los jugadores en la partida facilita el avance por el mapa. Los jugadores deberan ayudarse entre sí, ya que hay un mayor número de enemigos repartidos por el mapa en el modo multijugador. Los jugadores pueden ir por separado. Cuando un jugador llega a la meta ganan todos los jugadores de la partida.
+
 
 ## Temática
 
@@ -30,16 +31,13 @@ La estética estaría inspirada en Punch Club
 ![Metroid Samus Returns](https://vignette.wikia.nocookie.net/metroid/images/1/15/Metroid_Samus_Returns_area_2_map.png "Metroid Samus Returns")  
 El planteamiento del diseño de nivel para las distintas zonas del juego estarían basadas en juegos como Metroid o Hollow Knight  
 
-![Mario & Luigi: Superstar Saga](https://i.ytimg.com/vi/FyB2U2lIaLI/hqdefault.jpg "Mario & Luigi: Superstar Saga")  
-Los enemigos más fuertes y algunos obstáculos requerirán cooperación y compenetración por parte de los jugadores. Estarían planteados de forma similar a la saga Mario & Luigi, pero en multijugador y a tiempo real.  
-
 ## Diagrama de navegación de la página
-![diagramaestados](https://user-images.githubusercontent.com/43203588/48800662-b829c080-ed0a-11e8-995f-5384f5624463.PNG)
+![states](https://user-images.githubusercontent.com/43203588/50811697-d9249000-130f-11e9-808d-2d48f3143716.JPG)
 Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida multijugador se conectan. Cuando todos estén listos se empieza la partida.
 
 ## Diagrama de clases de la aplicación
-![diagramaclasesaplicacion](https://user-images.githubusercontent.com/43203588/48800493-36399780-ed0a-11e8-89d0-517ab8ade123.PNG)
-
+![diagf4](https://user-images.githubusercontent.com/43203588/50811643-aa0e1e80-130f-11e9-91f9-e02e4c798364.PNG)
+Se ha añadido la pantalla de victoria entre otras cosas.
 ## Instrucciones para ejecutar la aplicación
 Para compilar el proyecto, habría que instalar jdk y maven, configurar la herramienta spring-boot y ejecutar el comando mvn clean package en la carpeta del proyecto. 
 Para ejecutar el jar,  habría que entrar en la carpeta del proyecto y ejecutar el comando java -jar Sweeper-0.2.jar. Hace falta instalar en la máquina Java 8.
