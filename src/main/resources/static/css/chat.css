@@ -3,8 +3,8 @@
     height: 55%;
     width: 28%;
     text-align: left;
-    border: 2px solid #dedede;
-    background-color: #f1f1f1;
+    border: 2px solid rgba(0,0,0,0);
+    background-color:(0,0,0,0);
     border-radius: 5px;
     padding: 10px;
     margin: 10px 0;
@@ -17,4 +17,12 @@
 #gameContainer{
     position: relative;
     text-align: center;
+}
+
+.Row
+{
+    display: table;
+    width: 100%; /*Optional*/
+    table-layout: fixed; /*Optional*/
+    border-spacing: 10px; /*Optional*/
 }
