@@ -1,10 +1,13 @@
 package urjc.jr.sweeper;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,17 +23,19 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 class SocketManager extends TextWebSocketHandler {
 
     private class SessionData {
-        private WebSocketSession session;
-        private UUID userId;
-        private String hostname;
-        public SessionData(WebSocketSession session) {
+        WebSocketSession session;
+        UUID userId;
+        String hostname;
+        Integer lobby;
+
+        SessionData(WebSocketSession session) {
             this.session = session;
             this.hostname = session.getRemoteAddress().getHostName();
         }
-        public WebSocketSession getSession() {return this.session;}
-        public String getHostname() {return this.hostname;}
-        public UUID getUserId() {return this.userId;}
-        public void setUserId(UUID newId) {this.userId = newId;}
+
+        User getUser() {
+            return userId == null ? null : UserController.getUser(userId);
+        }
     }
 
     private static Map<String, SessionData> sessions = new ConcurrentHashMap<>();
@@ -47,26 +52,59 @@ class SocketManager extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 
         String hostname = session.getRemoteAddress().getHostName();
+        Integer lobby = sessionData(session).lobby;
         JsonNode node = mapper.readTree(message.getPayload());
         String operation = node.get("operation").asText();
         JsonNode value = node.get("value");
+        User user = sessionData(session).getUser();
+        ObjectNode reponse = null;
 
         switch(operation) {
             // Operación que permite relacionar a cada cliente con el usuario que usa. Esta
             // operación debe usarse inmediatamente al establecer la conexión.
             case "LINK_USER":
                 try {
-                    sessions.get(session.getId()).setUserId(UUID.fromString(value.asText()));
-                    if(UserController.getModId() == null) {
-                        UserController.setModId(UUID.fromString(value.asText()));
-                    }
+                    sessionData(session).userId = UUID.fromString(value.asText());
                 } catch(IllegalArgumentException e) {
                     System.out.println("El UUID recibido de " + hostname + " no es válido.");
                 }
                 break;
             case "SYNC_PLAYER":
             case "SYNC_NPC":
-                broadcastTextMessage(syncData(session, operation, mapper.readTree(value.asText())));
+                broadcastTextMessage(
+                    writeOperation(operation, mapper.readTree(value.asText())),
+                    sessionData(session).lobby
+                );
+                break;
+            case "ENTER_LOBBY":
+                sessionData(session).lobby = value.asInt();
+                sessionData(session).getUser().setLobby(value.asInt());
+                ChatMessageController.postServerMessage(user.getName() + " se ha conectado.",
+                sessionData(session).lobby);
+                if(UserController.getModId(value.asInt()) == null) {
+                    UserController.setModId(sessionData(session).userId, value.asInt());
+                }
+                break;
+            case "EXIT_LOBBY":
+                sessionData(session).lobby = null;
+                ChatMessageController.postServerMessage(user.getName() + " se ha desconectado.",
+                lobby);
+                if(UserController.getModId(lobby).equals(sessionData(session).userId)) {
+                    UserController.pickRandomMod(lobby);
+                }
+                break;
+            case "GET_USERS_IN_LOBBY":
+                reponse = mapper.createObjectNode();
+                reponse.put("operation", "READ_USERS_IN_LOBBY");
+                reponse.put("value", getUsersInLobby(lobby).toArray().toString());
+                session.sendMessage(new TextMessage(reponse.toString()));
+                break;
+            case "LOBBY_START":
+                reponse = mapper.createObjectNode();
+                reponse.put("operation", "START_GAME");
+                reponse.put("value", "");
+                broadcastTextMessage(reponse.toString(), lobby);
+                UserController.setLobbyPlaying(lobby, true);
                 break;
             // En caso de que se reciba una operación que no está descrita aquí:
             default:
@@ -75,31 +113,51 @@ class SocketManager extends TextWebSocketHandler {
         }
     }
 
-    private void broadcastTextMessage(String message) throws Exception {
-        for(String sessionId : sessions.keySet()) {
-            WebSocketSession session = sessions.get(sessionId).getSession();
-            synchronized(session) {
-                session.sendMessage(new TextMessage(message));
+    private void broadcastTextMessage(String message, Integer lobby) throws Exception {
+        try {
+            for(String sessionId : sessions.keySet()) {
+                WebSocketSession session = sessions.get(sessionId).session;
+                if(lobby != null && sessions.get(sessionId).lobby.equals(lobby))
+                synchronized(session) {
+                    session.sendMessage(new TextMessage(message));
+                }
             }
+        } catch(Exception e) {
+
         }
     }
 
-    private String syncData(WebSocketSession session, String operation, JsonNode data) throws Exception {
+    public static List<UUID> getUsersInLobby(Integer lobby) {
+        if(lobby == null) {
+            return null;
+        }
+
+        List<UUID> ret = new ArrayList<>();
+        for(SessionData session : sessions.values()) {
+            if(session.lobby != null && session.lobby.equals(lobby)) {
+                ret.add(session.userId);
+            }
+        }
+
+        return ret;
+    }
+
+    private String writeOperation(String operation, JsonNode data) throws Exception {
         ObjectNode reponse = mapper.createObjectNode();
         reponse.put("operation", operation);
         reponse.put("value", data.toString());
         return reponse.toString();
     }
 
-    public static void notifyMod(UUID id) throws Exception {
+    public static void notifyMod(UUID id, Integer lobby) throws Exception {
         ObjectNode notification = mapper.createObjectNode();
         notification.put("operation", "SET_MOD");
         notification.put("value", "");
 
         WebSocketSession session = null;
         for(String key : sessions.keySet()) {
-            if(sessions.get(key).getUserId().equals(id)) {
-                session = sessions.get(key).getSession();
+            if(sessions.get(key).userId.equals(id)) {
+                session = sessions.get(key).session;
             }
         }
 
@@ -107,8 +165,12 @@ class SocketManager extends TextWebSocketHandler {
             synchronized(session) {
                 session.sendMessage(new TextMessage(notification.toString()));
             }
-            System.out.println("El moderador es " + 
-            UserController.getUser(sessions.get(session.getId()).getUserId()).getName());
+            String lobbySpecification = "";
+            if(lobby != null) {
+                lobbySpecification = "del lobby " + lobby;
+            }
+            System.out.println("El moderador " + lobbySpecification + " es " + 
+            sessionData(session).getUser().getName());
         }   
     }
 
@@ -121,18 +183,23 @@ class SocketManager extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus code) throws Exception {
-        String hostname = session.getRemoteAddress().getHostName();
+        String hostname = sessionData(session).hostname;
         boolean needNewMod = false;
-        if(sessions.size() <= 1) {
-            UserController.setModId(null);
-        } else if(UserController.isModId(sessions.get(session.getId()).getUserId())) {
+        User user = sessionData(session).getUser();
+        Integer lobby = sessionData(session).lobby;
+        if(getUsersInLobby(lobby).size() <= 1) {
+            UserController.setModId(null, lobby);
+            UserController.setLobbyPlaying(lobby, false);
+        } else if(UserController.isModId(sessionData(session).userId, lobby)) {
            needNewMod = true;
         }
-        UserController.removeUser(sessions.get(session.getId()).getUserId());
+        UserController.removeUser(sessionData(session).userId);
         sessions.remove(session.getId());
         if(needNewMod) {
-            UserController.pickRandomMod();
+            UserController.pickRandomMod(lobby);
         }
+        ChatMessageController.postServerMessage(user.getName() + " se ha desconectado.",
+        lobby);
         System.out.println("Se ha cerrado la conexión con " + hostname
         + " -- Código de cierre " + code.getCode());
         // El código de cierre indica el motivo por el que se ha cerrado el WebSocket.
@@ -144,8 +211,12 @@ class SocketManager extends TextWebSocketHandler {
     public static Set<String> getConnectedClients() {
         Set<String> clients = new HashSet<>();
         for(String sessionId : sessions.keySet()) {
-            clients.add(sessions.get(sessionId).getHostname());
+            clients.add(sessions.get(sessionId).hostname);
         }
         return clients;
+    }
+
+    private static SessionData sessionData(WebSocketSession session) {
+        return sessions.get(session.getId());
     }
 }

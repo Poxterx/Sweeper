@@ -52,6 +52,9 @@ class Enemy extends Entity {
         if (!this.targetPlayer || Math.random() < 0.05) {
             let minDistance = Infinity;
             for (let entity of this.scene.entities) {
+                if (!entity.sprite || !entity.sprite.body) {
+                    continue;
+                }
                 let distance = this.sprite.body.center.distance(entity.sprite.body.center);
                 if (entity instanceof Player && distance < minDistance) {
                     this.targetPlayer = entity;

@@ -4,6 +4,7 @@ class RemotePlayer extends Player {
     private static map :Map<string, RemotePlayer> = new Map<string, RemotePlayer>();
     private uuid :string;
     private checkExistenceInterval :number;
+    private updateCooldown :number; 
 
     /**
      * Clase que representa los jugadores controlados remotamente desde otros clientes
@@ -26,7 +27,8 @@ class RemotePlayer extends Player {
             exists => {if(!exists) that.delete()}
         ), 250);
 
-        this.skipTarget = true;
+        this.skipTarget = false;
+        this.updateCooldown = 0;
     }
 
     /**
@@ -62,17 +64,21 @@ class RemotePlayer extends Player {
      */
     public receiveData(data :any) {
         this.setLife(data.life);
-        
-        if(!this.sprite) {
-            return;
+        this.arrayKeys = data.keys;
+        this.updateCooldown--;
+
+        if(this.sprite && this.sprite.anims) {
+            var animKeys = data.anim.split("@");
+            this.setMode(data.mode);
+            this.sprite.anims.play(this.name + "@" + animKeys[1] + "@" + animKeys[2], false);
+            this.sprite.anims.setCurrentFrame(this.sprite.anims.currentAnim.frames[data.frame]);
+            this.sprite.flipX = data.flip;
         }
 
-        this.sprite.setPosition(data.posX, data.posY);
-        this.sprite.setVelocity(data.velX, data.velY);
-        this.setMode(data.mode);
-        var animKeys = data.anim.split("@");
-        this.sprite.anims.play(this.name + "@" + animKeys[1] + "@" + animKeys[2], false);
-        this.sprite.anims.setCurrentFrame(this.sprite.anims.currentAnim.frames[data.frame]);
-        this.sprite.flipX = data.flip;   
+        if(this.updateCooldown <= 0 && this.sprite) {
+            this.sprite.setPosition(data.posX, data.posY);
+            this.sprite.setVelocity(data.velX, data.velY);
+            this.updateCooldown = 50;
+        }   
     }
 }

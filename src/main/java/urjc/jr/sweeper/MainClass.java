@@ -18,6 +18,7 @@ public class MainClass
             "| Disponible en " + HostManager.getAddress() + " ========");
 
         ChatMessageController.loadMessagesFromFile();
+        UserController.loadRegisteredUsers();
         // Inicializamos las tareas periódicas
         TaskScheduler.initialize();
     }

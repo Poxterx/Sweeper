@@ -13,6 +13,7 @@ class Connection {
     constructor(host) {
         // La dirección y el puerto vienen incluidos
         this.host = host;
+        this.lobby = null;
     }
     /**
      * Inicializa la conexión.
@@ -185,7 +186,10 @@ class Connection {
      */
     static readChatMessages(listener) {
         Connection.onInitialized(function () {
-            Connection.ajaxGet("/chat")
+            if (!Connection.instance.lobby) {
+                return;
+            }
+            Connection.ajaxGet("/chat/" + Connection.instance.lobby.toString())
                 .done(function (messages) {
                 listener(messages);
             }).fail(function () {
@@ -234,7 +238,10 @@ class Connection {
      */
     static getAllUsersId(listener) {
         Connection.onInitialized(function () {
-            Connection.ajaxGet("/users/uuid")
+            if (!Connection.instance.lobby) {
+                return;
+            }
+            Connection.ajaxGet("/users/uuid/" + Connection.instance.lobby)
                 .done(function (uuids) {
                 listener(uuids);
             }).fail(function () {
@@ -267,11 +274,11 @@ class Connection {
      * @param onFail La función a ejecutar si el servidor rechaza el nombre de usuario propuesto,
      * recibe por parámetro el error indicado por el servidor
      */
-    static tryCreateUser(username, onSuccess, onFail) {
+    static tryCreateUser(username, password, registration, onSuccess, onFail) {
         Connection.onInitialized(function () {
-            Connection.ajaxPost("/users", username)
+            Connection.ajaxPost("/users" + (registration ? "/register" : ""), { name: username, password: password })
                 .done(function (reponse) {
-                if (reponse.nameStatus == "OK") {
+                if (reponse.status == "OK") {
                     Connection.ajaxGet("/users/" + reponse.id)
                         .done(function (user) {
                         Connection.instance.user = user;
@@ -283,7 +290,7 @@ class Connection {
                 }
                 else {
                     if (onFail)
-                        onFail(reponse.nameStatus);
+                        onFail(reponse.status);
                 }
             }).fail(function () {
                 console.error("No se ha podido conectar con el servidor para iniciar sesión.");
@@ -313,6 +320,21 @@ class Connection {
                 console.error("No se ha podido cambiar el estado de ready en el servidor.");
             });
         }
+    }
+    static enterLobby(lobby) {
+        Connection.sendOperation("ENTER_LOBBY", lobby.toString());
+        Connection.instance.lobby = lobby;
+        chat = new Chat();
+        chat.startUpdating();
+    }
+    static exitLobby() {
+        Connection.sendOperation("EXIT_LOBBY", "");
+        Connection.instance.lobby = null;
+        chat.stopUpdating();
+        chat = null;
+    }
+    static getLobby() {
+        return Connection.instance.lobby;
     }
     /**
      * Si hay un usuario en este cliente, actualiza sus datos con la nueva información. Esta
@@ -386,6 +408,9 @@ class Connection {
                 break;
             case "SET_MOD":
                 Connection.setMod();
+                break;
+            case "START_GAME":
+                game.scene.start("SceneOverworld");
                 break;
             default:
                 console.error("La operación " + msgdata.operation + " recibida del servidor"

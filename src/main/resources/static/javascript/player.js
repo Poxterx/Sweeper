@@ -110,6 +110,9 @@ class Player extends Entity {
     }
     create() {
         super.create();
+        if (this instanceof RemotePlayer) {
+            return;
+        }
         //Se guarda al Player en that
         var that = this;
         // Cuando se pulsa una tecla, se pone a true el elemento del array al que va asociado.
@@ -209,7 +212,8 @@ class Player extends Entity {
             anim: animationinfo.toString(),
             frame: animationinfo.frame,
             flip: this.sprite.flipX,
-            life: this.getLife()
+            life: this.getLife(),
+            keys: this.arrayKeys
         });
     }
     /**

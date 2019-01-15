@@ -19,7 +19,7 @@ public class ChatMessageController {
     /**
      * Lista de mensajes de chat almacenados
      */
-    private static List<ChatMessage> messages = new ArrayList<>();
+    private static List<List<ChatMessage>> messages = new ArrayList<>();
     /**
      * Cantidad máxima de mensajes que se almacenarán en el servidor
      */
@@ -30,7 +30,16 @@ public class ChatMessageController {
      */
     @GetMapping
     public static Collection<ChatMessage> getMessages() {
-        return messages;
+        List<ChatMessage> ret = new ArrayList<>();
+        for(List<ChatMessage> list : messages) {
+            ret.addAll(list);
+        }
+        return ret;
+    }
+
+    @GetMapping("/{lobby}")
+    public static Collection<ChatMessage> getMessages(@PathVariable Integer lobby) {
+        return messages.get(lobby);
     }
 
     /**
@@ -39,12 +48,12 @@ public class ChatMessageController {
      */
     @PostMapping
     public static ChatMessage postMessage(@RequestBody ChatMessage msg) {
-        messages.add(msg);
-        System.out.println("["+msg.getUsername()+"] " + msg.getContent());
+        messages.get(msg.getLobby()).add(msg);
+        System.out.println("["+msg.getUsername()+"@"+msg.getLobby()+"] " + msg.getContent());
 
         // Si al recibir este mensaje la lista ya está llena, borramos el mensaje más antiguo
-        while(messages.size() > maxMessages) {
-            messages.remove(0);
+        while(messages.get(msg.getLobby()).size() > maxMessages) {
+            messages.get(msg.getLobby()).remove(0);
         }
         
         return msg;
@@ -54,8 +63,8 @@ public class ChatMessageController {
      * Publica en el chat un mensaje en nombre del servidor.
      * @param content El contenido del mensaje
      */
-    public static void postServerMessage(String content) {
-        postMessage(new ChatMessage("{{SERVER}}", content));
+    public static void postServerMessage(String content, Integer lobby) {
+        postMessage(new ChatMessage("{{SERVER}}", content, lobby));
     }
 
     /**
@@ -74,9 +83,11 @@ public class ChatMessageController {
             }
 
             BufferedWriter writer = new BufferedWriter(new FileWriter(chatFile, false));
-            for (ChatMessage msg : messages) {
-                writer.write(msg.getUsername() + "§" + msg.getContent());
-                writer.newLine();
+            for(List<ChatMessage> list : messages) {
+                for (ChatMessage msg : list) {
+                    writer.write(msg.getUsername() + "§" + msg.getContent() + "§" + msg.getLobby());
+                    writer.newLine();
+                }
             }
             writer.close();
         } catch(IOException e) {
@@ -88,6 +99,10 @@ public class ChatMessageController {
      * Carga a la lista de mensajes de esta clase los mensajes guardados en el archivo de chat
      */
     public static void loadMessagesFromFile() {
+        for(int i = 0; i < UserController.getLobbiesAmount(); i++) {
+            messages.add(new ArrayList<ChatMessage>());
+        }
+
         File chatFile = new File(getChatFilePath() + "/chat.txt");
         
         if(!chatFile.exists()) {
@@ -99,18 +114,18 @@ public class ChatMessageController {
             String line = reader.readLine();
             while(line != null) {
                 String[] parts = line.split("§");
-                if(parts.length != 2) {
+                if(parts.length != 3) {
                     System.out.println("El chat guardado está en un formato inválido.");
                     break;
                 }
-                messages.add(new ChatMessage(parts[0], parts[1]));
+                messages.get(Integer.parseInt(parts[2]))
+                .add(new ChatMessage(parts[0], parts[1], Integer.parseInt(parts[2])));
                 line = reader.readLine();
             }
             reader.close();
         } catch(IOException e) {
             System.out.println("No se ha podido cargar el chat (" + e.getMessage() + ").");
         }
-
     }
 
     /**

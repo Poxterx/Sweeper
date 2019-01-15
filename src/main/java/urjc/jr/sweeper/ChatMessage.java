@@ -11,6 +11,8 @@ public class ChatMessage {
      */
     private String content;
 
+    private Integer lobby;
+
     /**
      * Constructor predeterminado de rigor para Spring Boot
      */
@@ -19,9 +21,10 @@ public class ChatMessage {
     /**
      * Mensaje de chat firmado con el nombre de usuario especificado
      */
-    public ChatMessage(String username, String content) {
+    public ChatMessage(String username, String content, Integer lobby) {
         this.username = username;
         this.content = content;
+        this.lobby = lobby;
     }
 
     /**
@@ -54,7 +57,11 @@ public class ChatMessage {
         this.username = username;
     }
 
+    public Integer getLobby() {
+        return lobby;
+    }
 
-
-
+    public void setLobby(Integer lobby) {
+        this.lobby = lobby;
+    }
 }
