@@ -82,7 +82,11 @@ type User = {
     /**
      * Indica si el usuario considera que está listo para comenzar la partida
      */
-    ready :boolean
+    ready :boolean,
+
+    lobby :number,
+
+    password :string
 }
 /**
  * Mensaje de chat
@@ -95,7 +99,11 @@ type Message = {
     /**
      * Contenido del mensaje
      */
-    content :string
+    content :string,
+    /**
+     * Lobby al que se ha enviado el mensaje
+     */
+    lobby :number
 }
 
 /**
@@ -103,10 +111,12 @@ type Message = {
  * - OK: El nombre es válido y se puede usar
  * - EMPTY: El nombre debe contener al menos un carácter, sin contar espacios vacíos
  * - TOOLONG: El nombre tiene más caracteres de los permitidos por el servidor, sin contar espacios vacíos
- * - SAME: El nombre es igual que el que tenía el usuario antes
+ * - INVALID: El nombre contiene el carácter §
  * - TAKEN: Otro usuario ya existente tiene un nombre igual, sin contar espacios vacíos
+ * - NONEXISTENT: No hay ningún usuario registrado con ese nombre
+ * - WRONGPASS: La contraseña es incorrecta
  */
-type UsernameStatus = "OK" | "EMPTY" | "TOOLONG" | "SAME" | "TAKEN"
+type LoginStatus = "OK" | "EMPTY" | "TOOLONG" | "INVALID" | "TAKEN" | "NONEXISTENT" | "WRONGPASS"
 
 /**
  * Respuesta que envía el servidor al agregar un usuario
@@ -119,7 +129,7 @@ type UserCreationReponse = {
     /**
      * Posibilidad de usar el nombre propuesto para el nuevo usuario
      */
-    nameStatus :UsernameStatus
+    status :LoginStatus
 }
 
 /**

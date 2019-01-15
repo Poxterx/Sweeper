@@ -51,12 +51,11 @@ class Chat {
         else if (Connection.getUser()) {
             username = Connection.getUser().name;
         }
-        if (username && value != "") {
-            var mes = { username: username, content: value };
+        if (username && value != "" && !value.includes("§")) {
+            var mes = { username: username, content: value, lobby: Connection.getLobby() };
             Connection.sendChatMessage(mes);
             Chat.textField.value = "";
         }
-        return;
     }
     /**
      * Crea el mensaje en el servidor

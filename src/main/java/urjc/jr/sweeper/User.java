@@ -17,6 +17,10 @@ public class User {
      */
     private boolean ready;
 
+    private Integer lobby;
+
+    private String password;
+
     /**
      * Constructor predeterminado obligatorio para Springboot
      */
@@ -65,5 +69,21 @@ public class User {
      */
     public void setReady(boolean ready) {
         this.ready = ready;
+    }
+
+    public Integer getLobby() {
+        return this.lobby;
+    }
+
+    public void setLobby(Integer lobby) {
+        this.lobby = lobby;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

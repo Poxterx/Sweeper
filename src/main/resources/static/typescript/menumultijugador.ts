@@ -69,10 +69,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Método que carga la lista de jugadores y los controles pertinentes
      */
     playerReady(){
-        //Destruimos el botón de introducir nombre
+        // Destruimos el botón de introducir nombre
 
         var that = this;
-        Connection.tryCreateUser(this.userName.value,
+        Connection.tryCreateUser(this.userName.value, password, true,
         
         // El usuario se ha creado correctamente porque el nombre es válido para el servidor
         function(user :User) {
@@ -91,34 +91,22 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                     Connection.setUserReady(!Connection.getUser().ready);
                     that.buttonAnimation(that.statusReady,0.85,0.85)
                 });
-            //Asignamos el botón que llamará el botón Change Name
-            /* that.changeName = that.add.image(that.sWidth * 0.5, that.sHeight * 0.05, "changeName"); 
-            that.changeName.setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => that.changeUserName() ); */
 
             Connection.openSocket(user);
 
             that.userlist = new UsersList(that);
             that.userlist.create();
             that.userlist.startUpdating();
+
+            setTimeout(() => Connection.enterLobby(__lobby), 500);
         },
         
         // El usuario no se ha creado porque el nombre de usuario no es válido
-        function(error :UsernameStatus) {
+        function(error :LoginStatus) {
             console.log("El servidor no ha permitido usar este nombre. Error: " + error);
         }
         );
     }
-
-    // /**
-    //  * Método para cambiar el nombre del jugador
-    //  */
-    // changeUserName(){
-
-    //     Connection.changeUsername(this.userName.value);
-    //     //Tras gestionar el cambio de nombre se borra el contenido de la caja de texto
-    //     this.userName.value = "";
-    // }
 
     /**
      * Método que posiciona la caja de texto
@@ -231,12 +219,16 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.userlist = null;
             this.reset();
             this.userName.hidden = true;
-            this.getUuids(() => this.scene.start("SceneOverworld"));
-            return;
+            this.getUuidsFromLobby(() => {
+                if(Connection.isMod()) {
+                    Connection.sendOperation("LOBBY_START",
+                    Connection.getLobby().toString());
+                }
+            });
         }
     }
 
-    private getUuids(listener :() => void) {
+    private getUuidsFromLobby(listener :() => void) {
         RemotePlayer.pendingUuids = [];
         Connection.getAllUsersId(function(uuids) {
             for(let uuid of uuids) {
