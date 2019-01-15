@@ -36,7 +36,9 @@ const game = new Phaser.Game({
                 tileset: "tileset.png"
             })),
             new SceneGUI(),
-            new SceneGameOver()]
+            new SceneGameOver(),
+            new SceneGameVictory(),
+            new SceneGameDisconect()]
 });
 
 // Mostrar en la pestaña los datos del juego

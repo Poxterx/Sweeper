@@ -160,7 +160,7 @@ public class UserController {
             ret = "TOOLONG";
         } else if(name.contains("§")) {
             ret = "INVALID";
-        } else if(takenUsernames.contains(name)) {
+        } else if(passwords.containsKey(name)) {
             ret = "TAKEN";
         } else {
             ret = "OK";

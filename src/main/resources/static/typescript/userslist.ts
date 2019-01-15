@@ -71,7 +71,8 @@ class UsersList {
             // Aqui se rellenaria el array con lo que llega del backend
             that.usersArray.splice(0, that.usersArray.length);
             for(let user of users) {
-                that.usersArray.push(user);
+                if(user.lobby == Connection.getLobby())
+                    that.usersArray.push(user);
             }
 
             that.text.text = "";

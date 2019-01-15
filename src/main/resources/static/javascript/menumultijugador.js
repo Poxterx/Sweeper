@@ -18,10 +18,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.load.image("lobby", "assets/images/Menu_Multi/Multi_Lobby.png");
         this.load.image("connect", "assets/images/Menu_Multi/Connect.png");
         this.load.image("connectOn", "assets/images/Menu_Multi/ConnectOn.png");
-        this.load.image("backLobby", "assets/images/Menu_Multi/backLobby.png");
-        this.load.image("backLobbyOn", "assets/images/Menu_Multi/backLobbyOn.png");
-        this.load.image("exitMulti", "assets/images/Menu_Multi/exitMulti.png");
-        this.load.image("exitMultiOn", "assets/images/Menu_Multi/exitMultiOn.png");
+        this.load.image("backLobby", "assets/images/Menu_Multi/BackLobby.png");
+        this.load.image("backLobbyOn", "assets/images/Menu_Multi/BackLobbyOn.png");
+        this.load.image("exitMulti", "assets/images/Menu_Multi/ExitMulti.png");
+        this.load.image("exitMultiOn", "assets/images/Menu_Multi/ExitMultiOn.png");
         //Señal
         this.load.image("sign", "assets/images/Menu_Multi/Señal_Final.png");
         this.load.image("sign_exit", "assets/images/Menu_Multi/ExitSeñal_Button.png");
@@ -82,10 +82,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     /**
      * Método que carga la lista de jugadores y los controles pertinentes
      */
-    playerReady() {
+    playerReady(register) {
         // Destruimos el botón de introducir nombre
         var that = this;
-        Connection.tryCreateUser(this.userName.value, password, true, 
+        Connection.tryCreateUser(this.userName.value, this.userPassword.value, register, 
         // El usuario se ha creado correctamente porque el nombre es válido para el servidor
         function (user) {
             //Vaciamos la caja de texto
@@ -98,6 +98,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             //Indicamos la transicion
             that.transition = false;
             that.inLobby = true;
+            Connection.openSocket(user);
             //Asignamos el método que llamará el botón Ready
             that.readyOff.setVisible(true);
             that.readyOff.setInteractive({ useHandCursor: true })
@@ -114,8 +115,16 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         }, 
         // El usuario no se ha creado porque el nombre de usuario no es válido
         function (error) {
-            console.log("El servidor no ha permitido usar este nombre. Error: " + error);
+            SceneMultiplayerMenu.setErrorLog(error);
         });
+    }
+    /**
+     * Método que pasa los valores para el registro
+     */
+    playerSignUp() {
+        //this.userName.value;
+        //this.userPassword.value;
+        console.log("holi");
     }
     /**
      * Método que posiciona la caja de texto
@@ -172,6 +181,16 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 //Calculamos lo nuevo
                 this.angle = this.angle - 0.06;
                 this.signX = this.signX - 15;
+            }
+            //Activamos los botones en caso de que la transicion ya haya terminado.
+            if (this.angle <= -0.7853981634 && this.signX <= this.sWidth * 0.8) {
+                this.sign.setPosition(this.sWidth * 0.796, this.sHeight * 0.85);
+                this.userName.hidden = false;
+                this.userPassword.hidden = false;
+                this.errorLog.hidden = false;
+                this.sign_exit.setVisible(true);
+                this.sign_logIn.setVisible(true);
+                this.sign_signUp.setVisible(true);
             }
             //Activamos los botones en casoi de que la transicion ya haya terminado.
             if (this.angle <= -0.7853981634 && this.signX <= this.sWidth * 0.8) {
@@ -249,6 +268,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             width: this.game.config.width,
             height: this.game.config.height
         };
+        Connection.initialize();
         //Se guardan las dimensiones de la pantalla
         this.sWidth = screen.width;
         this.sHeight = screen.height;
@@ -288,6 +308,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.chat = document.getElementById("chat");
         this.currentLobby = document.getElementById("Lobby_name");
         this.errorLog = document.getElementById("ErrorLog");
+        this.lista = document.getElementById("lobbyList");
         //Hacemos invisible la caja de texto y el chat
         this.userName.hidden = true;
         this.userPassword.hidden = true;
@@ -329,76 +350,81 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         * sign_logIn: accedemos con nuestro usuario al menu multijugador
         * sign_sign_up: creamos un nuevo usuario y accedemos al menu multijugador
         */
-        this.back.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => {
-            Connection.dropUser();
-            this.userName.hidden = true;
-            this.userPassword.hidden = true;
-            this.currentLobby.hidden = true;
-            this.errorLog.hidden = true;
-            this.transition = false;
-            this.scene.start("SceneMenu");
-        });
+        var that = this;
         this.sign_exit.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             Connection.dropUser();
-            this.userName.hidden = true;
-            this.userPassword.hidden = true;
-            this.currentLobby.hidden = true;
-            this.errorLog.hidden = true;
-            this.transition = false;
-            this.scene.start("SceneMenu");
+            that.userName.hidden = true;
+            that.userPassword.hidden = true;
+            that.currentLobby.hidden = true;
+            that.errorLog.hidden = true;
+            that.transition = false;
+            that.scene.start("SceneMenu");
         })
-            .on('pointerover', () => this.buttonAnimation("sign_exitOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("sign_exit", 0.25, 0.5));
+            .on('pointerover', () => that.buttonAnimation("sign_exitOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("sign_exit", 0.25, 0.5));
         //////////////////////////
         this.sign_logIn.setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.playerReady())
-            .on('pointerover', () => this.buttonAnimation("logInOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("logIn", 0.25, 0.5));
+            .on('pointerdown', () => that.playerReady(false))
+            .on('pointerover', () => that.buttonAnimation("logInOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("logIn", 0.25, 0.5));
         this.sign_signUp.setInteractive({ useHandCursor: true })
-            .on('pointerover', () => this.buttonAnimation("signUpOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("signUp", 0.25, 0.5));
+            .on('pointerdown', () => that.playerReady(true))
+            .on('pointerover', () => that.buttonAnimation("signUpOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("signUp", 0.25, 0.5));
         this.connect.setInteractive({ useHandCursor: true })
-            .on('pointerover', () => this.buttonAnimation("connectOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("connect", 0.25, 0.5));
+            .on('pointerover', () => that.buttonAnimation("connectOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("connect", 0.25, 0.5));
         this.exitMulti.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             Connection.dropUser();
-            this.userName.hidden = true;
-            this.userPassword.hidden = true;
-            this.currentLobby.hidden = true;
-            this.errorLog.hidden = true;
-            this.transition = false;
-            this.scene.start("SceneMenu");
+            that.userName.hidden = true;
+            that.userPassword.hidden = true;
+            that.currentLobby.hidden = true;
+            that.errorLog.hidden = true;
+            that.transition = false;
+            Connection.close();
+            that.scene.start("SceneMenu");
         })
-            .on('pointerover', () => this.buttonAnimation("exitMultiOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("exitMulti", 0.25, 0.5));
+            .on('pointerover', () => that.buttonAnimation("exitMultiOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("exitMulti", 0.25, 0.5));
         this.backLobby.setInteractive({ useHandCursor: true })
-            .on('pointerover', () => this.buttonAnimation("backLobbyOn", 0.25, 0.5))
-            .on('pointerout', () => this.buttonAnimation("backLobby", 0.25, 0.5));
+            .on('pointerover', () => that.buttonAnimation("backLobbyOn", 0.25, 0.5))
+            .on('pointerout', () => that.buttonAnimation("backLobby", 0.25, 0.5));
         //////////////////////////
         //Activamos la transicion de entrada
         this.transition = true;
+        var hey = new Lobby("PEPE", 1);
+        this.lobbys = [];
+        this.lobbys.push(hey);
+        this.lobbys.push(hey);
     }
     reset() {
         this.logActive = true;
         this.readyOff.destroy();
+        this.userName.innerHTML = "";
+        this.userPassword.innerHTML = "";
     }
     gestionLobby() {
         //Actualizamos la pantalla de lobbys
         if (!this.logActive) {
             this.currentLobby.hidden = false;
-            //Recibe el lobby actual, si no hay dice no lobby
-            document.getElementById("NameText").innerText = "Lobby_1";
             //Si nos encontramos en seleccion de lobby o no.
-            this.inLobby = true;
             if (this.inLobby) {
+                this.lista.hidden = true;
                 this.backLobby.setVisible(true);
-                //El chat??
+                //Recibe el lobby actual, si no hay dice no lobby
+                document.getElementById("NameText").innerText = this.lobbyActual;
+                //El chat??//////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////
             }
             else {
                 this.backLobby.setVisible(false);
+                this.lista.hidden = false;
+                //Deshabilitar el chat//////////////
+                ////////////////////////////////////
+                //Ponemos que no hay lobby seleccionado
+                document.getElementById("NameText").innerText = "No lobby";
             }
         }
         else {
@@ -408,7 +434,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     /**
      * Metodo para poner un error, no muy largo
      */
-    setErrorLog(error) {
+    static setErrorLog(error) {
         document.getElementById("ErrorLogMessage").innerHTML = error;
     }
     update() {
@@ -428,6 +454,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.errorLog.hidden = true;
             this.transition = false;
             this.scene.start("SceneMenu");
+            Connection.close();
             return;
         }
         if (!this.userlist)

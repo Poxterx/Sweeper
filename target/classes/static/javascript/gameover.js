@@ -19,6 +19,7 @@ class SceneGameOver extends Phaser.Scene {
         text.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             this.scene.start("SceneMenu");
+            Connection.close();
         });
     }
 }
