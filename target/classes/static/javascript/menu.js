@@ -78,7 +78,7 @@ class SceneMenu extends Phaser.Scene {
         this.multiPlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             multiplayer = true;
-            this.scene.start("SceneOverworld");
+            this.scene.start("SceneMultiplayerMenu");
         })
             .on('pointerover', () => this.buttonAnimation("multiPlayerOn", 0.75, 0.5))
             .on('pointerout', () => this.buttonAnimation("multiPlayer", 0.75, 0.5));

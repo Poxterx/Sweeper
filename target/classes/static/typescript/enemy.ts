@@ -32,8 +32,9 @@ class Enemy extends Entity {
             name: "invisibleWeapon",
             damage: 20,
             path: "invisibleweapon.png",
-            frameWidth: 128,
-            frameHeight: 128,
+            //el tamaño es ligeramente mayor para poder atacar al jugador cuando es empujado
+            frameWidth: 130,
+            frameHeight: 130,
             animations: {
                 walk: {
                     up: [0, 0, 0, 0],
@@ -57,11 +58,14 @@ class Enemy extends Entity {
         if(!this.targetPlayer || Math.random() < 0.05) {
             let minDistance = Infinity;
             for(let entity of this.scene.entities) {
-                let distance = this.sprite.body.center.distance(entity.sprite.body.center);
-                if(entity instanceof Player && distance < minDistance) {
-                    this.targetPlayer = entity;
-                    minDistance = distance;
-                    this.path = null;
+                //Comprobamos la integridad de la entidad
+                if(entity != null){
+                    let distance = this.sprite.body.center.distance(entity.sprite.body.center);
+                    if(entity instanceof Player && distance < minDistance) {
+                        this.targetPlayer = entity;
+                        minDistance = distance;
+                        this.path = null;
+                    }
                 }
             }
         }
