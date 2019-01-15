@@ -374,6 +374,7 @@ class Connection {
     public static dropUser() {
         if(Connection.instance) {
             Connection.instance.user = null;
+            console.log("Este usuario ha abandonado el servidor.");
         }
     }
 

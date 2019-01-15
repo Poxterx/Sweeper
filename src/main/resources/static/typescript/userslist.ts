@@ -53,8 +53,8 @@ class UsersList {
 
 
         this.text.setPosition(
-            screen.width * 0.25,
-            SERVER ? screen.height * 0.25 : screen.height * 0.1
+            screen.width * 0.65,
+            SERVER ? screen.height * 0.2 : screen.height * 0.45
         )
     }
 
