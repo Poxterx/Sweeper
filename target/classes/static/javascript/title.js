@@ -6,28 +6,21 @@ class SceneTitle extends Phaser.Scene {
         super({ key: "SceneTitle" });
     }
     /**
+     * Carga la imagen necesaria
+     */
+    preload() {
+        this.load.image("logo", "assets/images/Logo.png");
+    }
+    /**
      * Inicializa la pantalla de título
      */
     create() {
-        // Creamos el logo
-        this.logo = this.add.text(0, 0, "Sweeper", {
-            fontFamily: "Impact",
-            fontSize: 46
-        });
-        // Creamos el texto que indica que hay que pulsar una tecla
-        this.start = this.add.text(0, 0, "Press any key to start", {
-            fontFamily: "Impact",
-            fontSize: 16,
-        });
         // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
         var screen = {
             width: this.game.config.width,
             height: this.game.config.height
         };
-        // Colocamos el logo verticalmente en el centro y horizontalmente a un 25% desde arriba
-        this.logo.setPosition(screen.width * 0.5 - this.logo.width * 0.5, screen.height * 0.25 - this.logo.height * 0.5);
-        // Colocamos el texto verticalmente en el centro y horizontalmente a un 25% desde abajo
-        this.start.setPosition(screen.width * 0.5 - this.start.width * 0.5, screen.height * 0.75 - this.start.height * 0.5);
+        this.logo = this.add.image(screen.width * 0.5, screen.height * 0.5, "logo");
         // Ponemos un evento al pulsar cualquier tecla que haga que empiece la siguiente escena
         this.input.keyboard.on("keydown", () => this.scene.start("SceneMenu"));
         // También ponemos la misma función en caso de que se reciba un evento de clic (o toque)
