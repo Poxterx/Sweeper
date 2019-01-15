@@ -19,13 +19,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Método que cambia de imagen el "toggle" button
      */
     buttonAnimation(status, widthPos, heightPos) {
-        this.ready.destroy();
-        if (status) {
-            this.ready = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5, this.sHeight * heightPos - this.menu.height * 0.5, "readyOff");
-        }
-        else {
-            this.ready = this.add.image(this.sWidth * widthPos - this.menu.width * 0.5, this.sHeight * heightPos - this.menu.height * 0.5, "readyOn");
-        }
+        this.ready.setVisible(!status);
+        this.notReady.setVisible(status);
         this.statusReady = !this.statusReady;
     }
     /**
@@ -45,8 +40,16 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
             that.centered = false;
             //Asignamos el método que llamará el botón Ready
-            that.ready = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOff");
+            that.ready = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOn");
             that.ready.setInteractive({ useHandCursor: true })
+                .on('pointerdown', () => {
+                Connection.setUserReady(!Connection.getUser().ready);
+                that.buttonAnimation(that.statusReady, 0.85, 0.85);
+            });
+            that.ready.setVisible(that.statusReady);
+            //Asignamos el método que llamará el botón notReady
+            that.notReady = that.add.image(that.sWidth * 0.85 - that.menu.width * 0.5, that.sHeight * 0.85 - that.menu.height * 0.5, "readyOff");
+            that.notReady.setInteractive({ useHandCursor: true })
                 .on('pointerdown', () => {
                 Connection.setUserReady(!Connection.getUser().ready);
                 that.buttonAnimation(that.statusReady, 0.85, 0.85);
