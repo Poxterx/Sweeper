@@ -90,8 +90,10 @@ Si en el menú eliges Solo, se inicia una partida con un solo jugador:
 Si en el menú eliges Coop, te manda a un menú en el que esperas hasta que los demás usuarios estén listos.
 Primero, el usuario debe iniciar sesión (si otro usuario ya ha iniciado la misma sesión no le dejará entrar):
 ![menumultijugadorsesion](https://user-images.githubusercontent.com/43203588/51443554-b9677180-1cea-11e9-869a-a9886d65a4be.JPG)
+
 Después el usuario se conecta en un lobby que no esté lleno (con menos de 4 jugadores) u ocupado (los usuarios están "Playing"):
 ![menumultijugadorlobbies](https://user-images.githubusercontent.com/43203588/51443563-ef0c5a80-1cea-11e9-9aea-6f371394ea2c.JPG)
+
 Tras elegir un lobby se puede ver acceder al chat y, cuando todos los jugadores del lobby esten listos(aparece con un tick), iniciar la partida:
 ![menumultijugadorchat](https://user-images.githubusercontent.com/43203588/51443569-03e8ee00-1ceb-11e9-82f6-7ed98a084265.JPG)
 
