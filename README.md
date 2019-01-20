@@ -92,9 +92,11 @@ Primero, el usuario debe iniciar sesión (si otro usuario ya ha iniciado la mism
 ![menumultijugadorsesion](https://user-images.githubusercontent.com/43203588/51443554-b9677180-1cea-11e9-869a-a9886d65a4be.JPG)
 
 Después el usuario se conecta en un lobby que no esté lleno (con menos de 4 jugadores) u ocupado (los usuarios están "Playing"):
+
 ![menumultijugadorlobbies](https://user-images.githubusercontent.com/43203588/51443563-ef0c5a80-1cea-11e9-9aea-6f371394ea2c.JPG)
 
 Tras elegir un lobby se puede ver acceder al chat y, cuando todos los jugadores del lobby esten listos(aparece con un tick), iniciar la partida:
+
 ![menumultijugadorchat](https://user-images.githubusercontent.com/43203588/51443569-03e8ee00-1ceb-11e9-82f6-7ed98a084265.JPG)
 
 Cuando todos los usuarios pulsen Ready (estén listos), se inicia una partida con hasta 4 jugadores:
