@@ -105,7 +105,9 @@ En Coop hay más enemigos para que cooperen los jugadores.
 
 Al morir el jugador local se acaba la partida y te lleva a la pantalla Game Over:
 ![game over](https://github.com/Poxterx/Sweeper/blob/master/src/main/resources/static/assets/images/GameOver.png?raw=true)
+
 Al ganar se acaba la partida y te lleva a la pantalla Victory (en Coop solo uno necesita llegar a la meta para que todos ganen):
+
 ![victory](https://github.com/Poxterx/Sweeper/blob/master/src/main/resources/static/assets/images/Victory.png?raw=true)
 
 Decidimos que al ganar o al perder se cierra la sesión del usuario.
