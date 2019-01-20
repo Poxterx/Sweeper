@@ -81,6 +81,7 @@ Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para e
 ![titulo](https://user-images.githubusercontent.com/43203588/51444411-7790f800-1cf7-11e9-98cf-62d069859779.JPG)
 
 Tras pulsar un tecla, la pantalla de inicio nos lleva al menu inicial que nos deja elegir el modo de juego. Options no esta implementada:
+
 ![menu](https://user-images.githubusercontent.com/43203588/51443539-74433f80-1cea-11e9-8cee-baec1185bc6f.JPG)
 
 Si en el menú eliges Solo, se inicia una partida con un solo jugador:
