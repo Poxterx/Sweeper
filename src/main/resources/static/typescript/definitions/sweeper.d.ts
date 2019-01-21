@@ -64,8 +64,87 @@ declare namespace DirectionalAnimation {
         down :Vector3[],
         side :Vector3[]
     }
-    
 }
+
+/**
+ * Tipo que representa a un usuario del juego
+ */
+type User = {
+    /**
+     * Id que identifica únicamente a cada usuario en el servidor
+     */
+    id :string,
+    /**
+     * Nombre del usuario
+     */
+    name :string,
+    /**
+     * Indica si el usuario considera que está listo para comenzar la partida
+     */
+    ready :boolean,
+
+    lobby :number,
+
+    password :string
+}
+/**
+ * Mensaje de chat
+ */
+type Message = {
+    /**
+     * Autor del mensaje
+     */
+    username :string,
+    /**
+     * Contenido del mensaje
+     */
+    content :string,
+    /**
+     * Lobby al que se ha enviado el mensaje
+     */
+    lobby :number
+}
+
+/**
+ * Mensaje de respuesta que envía el servidor cuando se le propone un nuevo nombre de usuario:
+ * - OK: El nombre es válido y se puede usar
+ * - EMPTY: El nombre debe contener al menos un carácter, sin contar espacios vacíos
+ * - TOOLONG: El nombre tiene más caracteres de los permitidos por el servidor, sin contar espacios vacíos
+ * - INVALID: El nombre contiene el carácter §
+ * - TAKEN: Otro usuario ya existente tiene un nombre igual, sin contar espacios vacíos
+ * - NONEXISTENT: No hay ningún usuario registrado con ese nombre
+ * - WRONGPASS: La contraseña es incorrecta
+ */
+type LoginStatus = "OK" | "EMPTY" | "TOOLONG" | "INVALID" | "TAKEN" | "NONEXISTENT" | "WRONGPASS" | "INSERVER"
+
+/**
+ * Respuesta que envía el servidor al agregar un usuario
+ */
+type UserCreationReponse = {
+    /**
+     * UUID que identifica al usuario en el servidor
+     */
+    id :string,
+    /**
+     * Posibilidad de usar el nombre propuesto para el nuevo usuario
+     */
+    status :LoginStatus
+}
+
+/**
+ * Operación de WebSocket recibida desde el servidor para ejecutar en Connection
+ */
+type WebSocketOperation = {
+    /**
+     * String que identifica la operación a realizar
+     */
+    operation :string,
+    /**
+     * String que contiene el valor con el que operar. A menudo está codificado en formato JSON
+     */
+    value :string
+}
+
 // JQUERY
 // A falta de archivos de definición adecuados para la versión actual de jQuery, hemos añadido
 // algunas definiciones que permitan usarlo sin errores de compilación.
@@ -74,7 +153,7 @@ declare namespace DirectionalAnimation {
  * Función de búsqueda de jQuery.
  * @param any
  */
-declare function $(element :any);
+declare function $(element :any): any;
 
 declare namespace $ {
 

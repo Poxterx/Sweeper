@@ -10,7 +10,7 @@ const TILE_SIZE = 128;
  * servidor, debe accederse al juego desde el mismo dispositivo donde se aloja el servidor
  * de Spring Boot, y es necesario entrar en localhost desde el navegador.
  */
-const SERVER = (location.hostname == "localhost");
+const SERVER = false;
 
 /**
  * Indica si estamos en una sesión de depuración para dibujar la información extra de las entidades
@@ -21,6 +21,11 @@ var DEBUG = false;
  * Indica si el juego está siendo jugado por una o varias personas
  */
 var multiplayer = false;
+
+/**
+ * Variable que contiene el chat
+ */
+var chat :Chat = null;
 
 /**
  * Registra una animación en el administrador de animaciones de Phaser
@@ -173,7 +178,3 @@ function tileToPixelPosition(tile :Vector2) :Vector2 {
         y: (tile.y + 0.5) * TILE_SIZE
     }
 }
-// Inicializamos la conexión cuando cargue el documento
-$(document).ready(function() {
-    Connection.initialize();
-});

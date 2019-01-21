@@ -1,5 +1,3 @@
-// CONFIGURACIÓN DEL JUEGO
-
 const game = new Phaser.Game({
 
     // Tamaño del lienzo
@@ -14,7 +12,7 @@ const game = new Phaser.Game({
 
     // Información sobre el juego
     title: "Sweeper",
-    version: "0.1.1",
+    version: "0.3.0",
 
     // Base de la física del juego. Usamos arcade pero sin gravedad porque es la base que más
     // se ajusta a la idea de exploración en vista cenital que buscamos.
@@ -32,12 +30,15 @@ const game = new Phaser.Game({
     scene: [new SceneServer(),
             new SceneTitle(),
             new SceneMenu(),
+            new SceneMultiplayerMenu(),
             new SceneOverworld(new Room("mainroom", {
                 tilemap: "Mapa.json",
                 tileset: "tileset.png"
             })),
             new SceneGUI(),
-            new SceneGameOver()]
+            new SceneGameOver(),
+            new SceneGameVictory(),
+            new SceneGameDisconect()]
 });
 
 // Mostrar en la pestaña los datos del juego
@@ -47,3 +48,5 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if(SERVER) {
     document.title += " (SERVER)";
 }
+
+var __lobby = 1;

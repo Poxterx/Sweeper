@@ -6,11 +6,12 @@
 [Integrantes](#integrantes)  
 
 ## Gameplay
-La partida se puede jugar en modo individual o modo cooperativo, en ambos modos se explorará el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar y accionar palancas, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
+
+La partida se puede jugar en modo individual o modo cooperativo, en ambos modos se explorara el área jugable a través de una vista cenital. Los jugadores pueden desplazarse, atacar y accionar palancas y otros mecanismos, así como recibir daño por parte de ataques enemigos o del ataque descuidado de otro jugador.
 
 Al principio planteamos el área jugable como un conjunto de salas interconectadas y agrupadas en múltiples zonas. Para avanzar por la zona, los jugadores deberían desbloquear u obtener herramientas o poderes que permitan sortear ciertos obstáculos. Estos obstáculos bloquearían el paso a varias secciones del juego que serían inaccesibles hasta obtener dichas herramientas, ofreciendo una experiencia más o menos lineal en un entorno que hay que explorar. Existiría una zona central que, además de suponer un desafío similar al de las otras zonas, permite navegar entre las demás zonas del juego.
 
-En el juego tal y como está actualmente es solo una de las zonas que habíamos pensado en un principio (las alcantarillas). En ella hay multitud de enemigos que aparecen aleatoriamente por el mapa. El jugador deberá enfrentarse a los enemigos que se le interpongan en su camino, o evitarlos, para avanzar. 
+En el juego tal y como está actualmente es solo una de las zonas que habíamos pensado en un principio (las alcantarillas). En ella hay multitud de enemigos que aparecen alentoriamente por el mapa. El jugador deberá enfrentarse a los enemigos que se le interpongan en su camino, o evitarlos, para avanzar. 
 
 Además, el jugador deberá desbloquear la parte del mapa que lleva a la meta accionando una palanca. Esto le obligará a recorrer el escenario y enontrarse con más enemigos. La salida es una escalera que desciende, esto viene de nuestro planteamiento inicial en el que el jugador debería descender para enfrentarse a un enemigo más fuerte que los demás y pasar a la siguiente zona.
 

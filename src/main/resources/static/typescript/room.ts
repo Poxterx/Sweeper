@@ -59,7 +59,8 @@ class Room {
      */
     public getColliderTileAt(tile :Vector2) {
         for (let l = 0; l < this.colliderLayers.length; l++) {
-            if(this.colliderLayers[l].getTileAt(tile.x, tile.y, true).index != -1)
+            var aux = this.colliderLayers[l].getTileAt(tile.x, tile.y, true);
+            if(aux && aux.index != -1)
                 return this.colliderLayers[l].getTileAt(tile.x, tile.y, true);
         }
         return this.colliderLayers[this.colliderLayers.length - 1].getTileAt(tile.x, tile.y, true);

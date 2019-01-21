@@ -101,6 +101,8 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Punto de la escena al que debe dirigirse esta entidad
      */
     protected target :Phaser.Math.Vector2;
+
+    protected skipTarget :boolean;
     /**
      * Modo de comportamiento de la entidad. Describe lo que está haciendo ahora y afecta a
      * la animación que está reproduciendo.
@@ -114,6 +116,8 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Vida máxima de la entidad
      */
     private maxLife :number;
+
+    public preventDeath :boolean
 
 
     /**
@@ -130,6 +134,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         this.maxLife = 100;
         this.dead = false;
         this.weapon = null;
+        this.skipTarget = false;
     }
 
     /**
@@ -196,15 +201,23 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     update() {
         // Reseteamos los gráficos del fotograma anterior para poder dibujar en este
         this.prepareGraphics();
-        
+        if(!this.sprite){
+            return;
+        }
         // Elegimos lo que hacer a continuación en base al modo de la entidad
         switch(this.mode) {
             case "walk":
+                if(this.skipTarget) {
+                    this.sprite.setVelocity(0, 0);
+                    break;
+                }
+
                 // Primero seleccionamos el nuevo target que la entidad debe perseguir en este fotograma
                 this.controlTarget();
                
                 // Elegimos la animación correspondiente para que la entidad mire hacia el target
                 this.turnToTarget();
+                
                 // Finalmente, movemos la entidad hacia el target
                 this.pursueTarget();
                 break;
@@ -334,7 +347,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     public setLife(newLife :number) {
         if((newLife<=this.maxLife)){
             this.life = newLife;
-            if(this.life <= 0){this.dead =true;}
+            if(this.life <= 0 && (!multiplayer || !this.preventDeath || (Connection.isMod() && !(this instanceof RemotePlayer)))){
+                this.dead =true;
+                if(this instanceof Player && multiplayer){
+                    (this as Player).stopSync();
+                }
+            }
         }    
     }
 
@@ -351,8 +369,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     /**
      * Devuelve la información de la animación que la entidad está usando en este momento
      */
-    public currentAnimationInfo() :AnimationInfo {
-        return AnimationInfo.current(this.sprite.anims);
+    public currentAnimationInfo() {
+        if(!this.sprite) {
+            return AnimationInfo.default();
+        } else {
+            return AnimationInfo.current(this.sprite.anims);
+        }
     }
 
     /**
@@ -455,7 +477,11 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // Calculamos el target respecto a la posición de la entidad. La llamada a 'clone()' se hace
         // porque en Phaser, las operaciones de vectores como 'add' o 'subtract' modifican el vector
         // base en lugar de devolver el resultado sin modificar los operandos, que es lo que uno esperaría
-        var targetDelta = this.target.clone().subtract(this.sprite.body.center);
+        var targetDelta = new Phaser.Math.Vector2(0,0);
+        if(this.target){
+            targetDelta = this.target.clone().subtract(this.sprite.body.center);
+        }
+        
         // Este cálculo puede dar resultados imprecisos con muchos decimales, por ello conviene
         // que redondeemos el vector y trabajemos sólo con enteros
         targetDelta.set(Math.round(targetDelta.x), Math.round(targetDelta.y));
@@ -552,6 +578,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      * Prepara el objeto gráficos para dibujar lo que corresponda a este fotograma
      */
     private prepareGraphics() {
+        if(!this.graphics) {
+            return;
+        }
         // Borramos todo lo dibujado en el frame anterior
         this.graphics.clear();
         // Nos colocamos justo en el target
@@ -619,7 +648,7 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     /**
      * Dibuja una barra de vida sobre el sprite de la entidad
      */
-    private drawLife(){
+    protected drawLife(){
         this.graphics.fillStyle(0x000000,1);
         this.graphics.fillRect(-27,-92,(54*this.getMaxLife())/this.getMaxLife(),14);
         this.graphics.fillStyle(0xFF0000,1);

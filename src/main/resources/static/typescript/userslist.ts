@@ -2,54 +2,99 @@ class UsersList {
     /**
      * Objeto Text que se utilizara para pintar la lista de usuarios que se envia desde el backend
      */
-    private user :Phaser.GameObjects.Text;
+    private text :Phaser.GameObjects.Text;
     /**
      * Array de strings con los nombres de cada usuario
      */
-    private usersArray :string[];
+    private usersArray :User[];
+    /**
+     * Identificador del intervalo que carga periódicamente los nombres de usuario
+     */
+    private updateInterval :number;
     /**
      * Escena en la que se pondran los usuaios conectados
      */
-    public scene :SceneServer;
+    public scene :Phaser.Scene;
 
     /**
      * Crea una lista de usuarios con las opciones pasadas como parámetro
      * @param scene Escena del servidor
      */
-    constructor(scene :SceneServer){
+    constructor(scene :Phaser.Scene){
         this.scene = scene;
         this.usersArray = [];
-    }
-    /**
-     * Actualiza la escena del servidor poniendo los usuarios conectados en el momento
-     */
-    update(){
-        // Se borran los nombres de los usuarios anteriores
-        this.usersArray.splice(0,this.usersArray.length);
-        // Aqui se rellenaria el array con lo que llega del backend
         
-        // De momento le ponemos unos nombres para probar 
-        this.usersArray=["manuela420","jorgejavier69","feliciano666","memelord65","tumadreylamiasonamigasseconocen3"];
+    }
+
+    /**
+     * Inicia las actualizaciones de la lista
+     */
+    public startUpdating() {
+        this.text.setVisible(true);
+        this.updateInterval = setInterval(() => this.update.call(this), 500);
+    }
+
+    /**
+     * Detiene las actualizaciones de la lista
+     */
+    public stopUpdating() {
+        this.text.setVisible(false);
+        clearInterval(this.updateInterval);
+    }
+
+    create() {
         // Obtenemos una forma más conveniente de referirnos a las dimensiones de la pantalla
         var screen = {
             width: game.config.width as number,
             height: game.config.height as number
         }
-        // Posicion vertical de la pantalla en la que ira cada nombre de usuario (inicialmente horizontalmente a un 25% desde arriba)
-        let vertPos = 0.25;
-        // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
-        for(let element of this.usersArray) {
-            this.user = this.scene.add.text(0, 0, element, {
-                fontFamily: "Arial",
-                fontSize: 20
-            });
-            // Colocamos los nombres verticalmente en el centro, horizontalmente depende del elemento
-            this.user.setPosition(
-                screen.width * 0.5 - this.user.width * 0.5,
-                screen.height * vertPos - this.user.height * 0.5
-            );
-            // Cada elemento se posiciona un poco mas abajo
-            vertPos +=0.1;
-        }    
+
+        this.text = this.scene.add.text(0, 0, "", {
+            fontFamily: "Arial",
+            fontSize: 20
+        });
+
+
+        this.text.setPosition(
+            screen.width * 0.65,
+            SERVER ? screen.height * 0.2 : screen.height * 0.45
+        )
+
+        this.text.active = false;
+    }
+
+    public getUsers() {
+        return clone(this.usersArray) as User[];
+    }
+
+    /**
+     * Actualiza la escena del servidor poniendo los usuarios conectados en el momento
+     */
+    private update(){
+        var that = this;
+        Connection.getAllUsers(function(users) {
+            // Aqui se rellenaria el array con lo que llega del backend
+            that.usersArray.splice(0, that.usersArray.length);
+            for(let user of users) {
+                if(user.lobby == Connection.getLobby())
+                    that.usersArray.push(user);
+            }
+
+            that.text.text = "";
+
+            // Cuando esta lleno el array, creamos el texto de cada elemento (nombre)
+            for(let user of that.usersArray) {
+                that.text.text += user.name;
+                if(user.ready) {
+                    that.text.text += " ✔️";
+                }
+                that.text.text += "\n";
+            }
+        });
+    }
+
+    destroy(){
+        this.stopUpdating();
+        this.text.destroy();
     }
 }
