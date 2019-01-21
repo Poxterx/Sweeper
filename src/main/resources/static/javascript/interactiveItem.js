@@ -4,7 +4,7 @@ class InteractiveItem extends Phaser.GameObjects.GameObject {
         this.name = config.name;
         this.config = config;
         this.scene = scene;
-        this.active = false;
+        this.open = false;
     }
     /**
      * Carga los recursos necesarios

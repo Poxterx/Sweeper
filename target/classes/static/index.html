@@ -14,10 +14,15 @@
         <canvas id="gameCanvas"></canvas>
 
         <!-- Div que contiene el chat -->
-        <div id='chat' class="chat" hidden>
-            <div id='ventana' class="ventana"></div>
-            <input id='inputMensaje' type='text'>
-            <button id='enviar-boton' onclick="Chat.onclickEnviar()">Enviar</button>
+        <div id='chat' class="chat" required hidden = "true">
+            <div style="position: relative; height:100%">
+                <div style="position: absolute; bottom: 10px"> 
+                    <input id='inputMensaje' type='text'>
+                    <button id='enviar-boton' onclick="Chat.onclickEnviar()">Enviar</button>
+                </div>
+                <div id='ventana' class="ventana" style="position:absolute;bottom:35px"></div>
+            </div>
+            
         </div>
         
         <input type="text" id="name" required hidden="true" style="
@@ -32,11 +37,14 @@
             text-align: center;
             z-index:1">
 
-        <div id="ErrorLog" style="text-align:center; position:absolute" required hidden = "true">
+        <div id="ErrorLog" style="text-align:center; position:absolute; pointer-events: none; height: 22px" required hidden = "true">
             <p id="ErrorLogMessage" style="
             font-family: Impact;
             font-size: 20px;
-            color:red">-</p>
+            pointer-events: none;
+            height: 22px;
+            transform:rotate(-10deg);
+            color:red"></p>
         </div>
         
         <div id="Lobby_name" style="text-align:center; position:absolute" required hidden = "true">
@@ -45,7 +53,7 @@
                 font-size: 30px">No Lobby</p>
         </div>
 
-        <div id="lobbyList" style="text-align:center; position: absolute" required hidden = true>
+        <div id="lobbyList" class="chat" style="text-align:center; position: absolute; background-color:rgba(0,0,0,0)" required hidden = true>
 
         </div>
             

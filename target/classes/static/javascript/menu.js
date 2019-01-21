@@ -4,10 +4,6 @@ class SceneMenu extends Phaser.Scene {
      */
     constructor() {
         super({ key: "SceneMenu" });
-        /**
-         * Boolean para saber si se ha caido la conexion
-         */
-        this.lostConex = false;
     }
     /**
     * Cargamos las imágenes de los botones
@@ -31,7 +27,7 @@ class SceneMenu extends Phaser.Scene {
         //Sombras
         this.load.image("shadowBackground", "assets/images/Menu_Principal/SombrasFinal.png");
         //Error
-        this.load.image("lostConex", "assets/images/Menu_Principal/ConexionPerdida.png");
+        this.load.image("disconect", "assets/images/Disconect.png");
     }
     /**
      * Método que cambia de imagen a la que se le pasa si entramos o salimos de ella
@@ -77,6 +73,9 @@ class SceneMenu extends Phaser.Scene {
         };
         // Creamos el menú
         this.add.image(screen.width * 0.5, screen.height * 0.5, "background");
+        // Añadimos la imagen del disconect
+        SceneGameDisconect.disconect = this.add.image(screen.width * 0.5, screen.height * 0.5, "disconect");
+        SceneGameDisconect.disconect.setVisible(false);
         //Se guardan las dimensiones de la pantalla
         this.sWidth = screen.width;
         this.sHeight = screen.height;
@@ -120,9 +119,6 @@ class SceneMenu extends Phaser.Scene {
         this.exitOn.setVisible(false);
         //Añadimos los detalles
         this.add.image(screen.width * 0.5, screen.height * 0.5, "shadowBackground");
-        //Añadimos el error
-        this.lostConexImg = this.add.image(screen.width * 0.75, screen.height * 0.8, "lostConex");
-        this.lostConexImg.setVisible(false);
         /**
         * Ponemos los siguientes eventos asociados a la imagen singlePlayer :
         * En caso de que se pulse se empieza a jugar
@@ -131,6 +127,8 @@ class SceneMenu extends Phaser.Scene {
         this.singlePlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             multiplayer = false;
+            this.destroy();
+            this.scene.stop("SceneMenu");
             this.scene.start("SceneOverworld");
         })
             .on('pointerover', () => this.buttonAnimation("singlePlayerOn", 0.25, 0.5))
@@ -143,6 +141,8 @@ class SceneMenu extends Phaser.Scene {
         this.multiPlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
             multiplayer = true;
+            this.destroy();
+            this.scene.stop("SceneMenu");
             this.scene.start("SceneMultiplayerMenu");
         })
             .on('pointerover', () => this.buttonAnimation("multiPlayerOn", 0.75, 0.5))
@@ -151,6 +151,7 @@ class SceneMenu extends Phaser.Scene {
         * Ponemos los siguientes eventos asociados a la imagen Options:
         */
         this.options.setInteractive({ useHandCursor: true })
+            //Sin Funcionalidad
             .on('pointerover', () => this.buttonAnimation("optionsOn", 0.75, 0.5))
             .on('pointerout', () => this.buttonAnimation("options", 0.75, 0.5));
         /**
@@ -160,21 +161,23 @@ class SceneMenu extends Phaser.Scene {
         */
         this.exit.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
+            this.destroy();
+            this.scene.stop("SceneMenu");
             this.scene.start("SceneTitle");
             console.log("Boom");
         })
             .on('pointerover', () => this.buttonAnimation("exitOn", 0.75, 0.5))
             .on('pointerout', () => this.buttonAnimation("exit", 0.75, 0.5));
     }
-    update() {
-        if (this.lostConex) {
-            this.lostConex = false;
-            this.lostConexImg.setVisible(true);
-            this.updateInterval = setInterval(() => this.update.call(this), 500);
-        }
-        else {
-            this.lostConexImg.setVisible(false);
-        }
+    destroy() {
+        this.singlePlayer.destroy();
+        this.singlePlayerOn.destroy();
+        this.multiPlayer.destroy();
+        this.multiPlayerOn.destroy();
+        this.options.destroy();
+        this.optionsOn.destroy();
+        this.exit.destroy();
+        this.exitOn.destroy();
     }
 }
 //# sourceMappingURL=menu.js.map

@@ -3,7 +3,7 @@
 */
 class Lobby {
     constructor(name, ID) {
-        this.Nombre = "Lobby_X";
+        this.Nombre = name;
         this.integrantes = [];
         this.id = ID;
     }

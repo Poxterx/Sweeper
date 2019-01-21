@@ -207,6 +207,9 @@ class Path {
      */
     static getNeighbourTiles(room, tile) {
         var ret = [];
+        if (tile == null) {
+            return [];
+        }
         var possibleNeighbours = [
             { x: tile.x, y: tile.y - 1 },
             { x: tile.x, y: tile.y + 1 },

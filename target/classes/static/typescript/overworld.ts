@@ -12,17 +12,19 @@ class SceneOverworld extends Phaser.Scene {
     /**
      * 
      */
-    public door :InteractiveItem;
+    public door :Door;
     
     /**
      * 
      */
-    public switch :InteractiveItem;
+    public switch :Switch;
 
     /**
      * Sala en la que tiene lugar esta escena
      */
     public room :Room;
+
+    public static instance:SceneOverworld;
 
     /**
      * Nueva escena que tiene lugar en la sala indicada
@@ -33,6 +35,7 @@ class SceneOverworld extends Phaser.Scene {
 
         this.room = room;
         this.room.scene = this;
+        
     }
 
     /**
@@ -52,13 +55,13 @@ class SceneOverworld extends Phaser.Scene {
             }, 384 + Math.random() * TILE_SIZE * 5, 1576 + Math.random() * TILE_SIZE)];
         if(multiplayer) {
             this.addRemotePlayers();
-            // this.entities.push(new Enemy(this, 4));
-            // this.entities.push(new Enemy(this, 5));
-            // this.entities.push(new Enemy(this, 6));
+            this.entities.push(new Enemy(this, 4));
+            this.entities.push(new Enemy(this, 5));
+            this.entities.push(new Enemy(this, 6));
         }
-        // this.entities.push(new Enemy(this, 1));
-        // this.entities.push(new Enemy(this, 2));
-        // this.entities.push(new Enemy(this, 3));
+        this.entities.push(new Enemy(this, 1));
+        this.entities.push(new Enemy(this, 2));
+        this.entities.push(new Enemy(this, 3));
         // Cargamos todas las entidades y la sala
         this.entities.forEach(e => e.preload());
         this.goal = new Goal(this);
@@ -80,6 +83,8 @@ class SceneOverworld extends Phaser.Scene {
         this.goal.create();
         this.door.create();
         this.switch.create();
+
+        SceneOverworld.instance = this;
 
         // Indicamos los límites del área jugable de acuerdo con la sala
         this.physics.world.setBounds(0, 0, this.room.size.x, this.room.size.y);
@@ -110,19 +115,23 @@ class SceneOverworld extends Phaser.Scene {
         this.input.keyboard.on("keydown_F2", () => DEBUG = !DEBUG);
         
         this.input.keyboard.on("keydown_E", () => this.interact());
-        this.input.keyboard.on("keydown_Q", () => {
-            this.room.colliderLayers= [];
-            this.scene.stop("SceneOverworld");
-            this.scene.stop("SceneGUI");
-            this.scene.start("SceneMenu");});
+        
+        var that = this;
+        Connection.onLost(function(){
+            NpcSync.deactivate();
+            that.scene.stop("SceneOverworld");
+            that.scene.start("SceneGameDisconect");
+            that.stopSync();
+        });
     }
 
     interact(){
         var mainPlayer = this.entities[0];
-        if(Phaser.Geom.Rectangle.Overlaps(mainPlayer.sprite.getBounds(), this.switch.sprite.getBounds()) && !this.door.active){
-            this.door.active = true;
+        if(Phaser.Geom.Rectangle.Overlaps(mainPlayer.sprite.getBounds(), this.switch.sprite.getBounds()) && !this.door.open){
+            this.door.open = true;
             this.door.update();
             this.switch.update();
+            Connection.sendOperation("LEVER_INTERACT","");
         }
         /*for(let e of this.entities){
             if(e.name === main){
@@ -160,17 +169,24 @@ class SceneOverworld extends Phaser.Scene {
         }
         if(this.entities.indexOf(mainPlayer) == -1){
             this.room.colliderLayers= [];
-            this.scene.stop("SceneOverworld");
-            this.scene.stop("SceneGUI");
-            this.scene.start("SceneGameOver");
-        }
-        if(Phaser.Geom.Rectangle.Overlaps(mainPlayer.sprite.getBounds(), this.goal.sprite.getBounds())){
-            this.room.colliderLayers= [];
+            NpcSync.deactivate();
             this.scene.stop("SceneOverworld");
             this.scene.stop("SceneGUI");
             this.scene.start("SceneGameOver");
             if(multiplayer) {
-                Connection.close();
+                this.stopSync();
+            }
+        }
+        if(Phaser.Geom.Rectangle.Overlaps(mainPlayer.sprite.getBounds(), this.goal.sprite.getBounds())){
+            this.room.colliderLayers= [];
+            NpcSync.deactivate();
+            Connection.sendOperation("LOBBY_WIN","");
+            this.scene.stop("SceneOverworld");
+            this.scene.stop("SceneGUI");
+            
+            this.scene.start("SceneGameVictory");
+            if(multiplayer) {
+                this.stopSync();
             }
         }
     }
@@ -180,9 +196,9 @@ class SceneOverworld extends Phaser.Scene {
      */
     public stopSync() {
         // Si estamos en single player, no hay sincronización en primer lugar
-        if(!multiplayer) {
-            return;
-        }
+        //if(!multiplayer) {
+        //    return;
+        //}
         for(let e of this.entities) {
             if(e instanceof Player) {
                 e.stopSync();

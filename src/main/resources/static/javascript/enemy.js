@@ -40,7 +40,7 @@ class Enemy extends Entity {
     }
     create() {
         super.create();
-        NpcSync.register(this);
+        NpcSync.register(this.config.name, this);
     }
     update() {
         if (this.dead) {
@@ -100,6 +100,9 @@ class Enemy extends Entity {
     }
     receiveData(data) {
         this.setLife(data.life);
+        if (data.life == 0) {
+            this.dead = true;
+        }
         if (!this.sprite) {
             return;
         }

@@ -3,23 +3,20 @@ class SceneGameOver extends Phaser.Scene {
         super({ key: "SceneGameOver" });
     }
     preload() {
-        this.load.image("backToMenu", "assets/images/SinglePlayer.png");
+        this.load.image("backToMenu", "assets/images/GameOver.png");
     }
     create() {
         var screen = {
             width: game.config.width,
             height: game.config.height
         };
-        var text = this.add.text(0, 0, "Game Over", {
-            fontFamily: "Impact",
-            fontSize: 46
-        });
-        text.setPosition(screen.width * 0.5 - text.width * 0.5, screen.height * 0.5 - text.height * 0.5);
-        //Vuelta al menú principal pulsando en el texto
-        text.setInteractive({ useHandCursor: true })
+        var image = this.add.image(screen.width * 0.5, screen.height * 0.5, "backToMenu");
+        Connection.close();
+        // También ponemos la misma función en caso de que se reciba un evento de clic (o toque)
+        image.setInteractive()
             .on('pointerdown', () => {
+            this.scene.stop("SceneGameOver");
             this.scene.start("SceneMenu");
-            Connection.close();
         });
     }
 }

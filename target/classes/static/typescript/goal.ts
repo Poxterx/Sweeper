@@ -11,7 +11,7 @@ class Goal extends InteractiveItem{
             }
         });
         //La meta se activa desde el principio
-        this.active = true;
+        this.open = true;
     }
 
     update() {

@@ -120,6 +120,23 @@ class Connection {
         Connection.onLost(() => console.error("Se ha perdido la conexión con el servidor"));
     }
 
+    public static ping(success :() => void, fail? :() => void) {
+        if(!Connection.instance) {
+            if(fail) {
+                fail();
+            }
+            return;
+        }
+        Connection.ajaxGet("/address")
+        .done(function() {
+            success();
+        }).fail(function() {
+            if(fail) {
+                fail();
+            }
+        });
+    }
+
     public static sendOperation(operation :string, value :object | string) {
         var data = value;
         if(typeof(data) !== "string") {
@@ -140,7 +157,11 @@ class Connection {
         if(Connection.instance && Connection.instance.websocket) {
             Connection.instance.websocket.close();
         }
+        Connection.listenersClose = [];
+        Connection.listenersLost = [];
+        Connection.listenersInit = [];
         Connection.dropUser();
+        NpcSync.deactivate();
         Connection.instance = null;
         console.log("Conexión finalizada");
     }
@@ -233,15 +254,14 @@ class Connection {
 
     public static setMod(mod = true) {
         Connection.instance.mod = mod;
-        if(mod && !NpcSync.isActive()) {
-            NpcSync.activate();
-        } else if(!mod && NpcSync.isActive()) {
-            NpcSync.deactivate();
-        }
     }
 
     public static isMod() {
-        return Connection.instance.mod;
+        if(!Connection.instance) {
+            return false;
+        } else {
+            return Connection.instance.mod;
+        }
     }
 
     /**
@@ -250,7 +270,7 @@ class Connection {
      */
     public static readChatMessages(listener :(messages :Message[]) => void) {
         Connection.onInitialized(function() {
-            if(!Connection.instance.lobby) {
+            if(Connection.instance.lobby == null) {
                 return;
             }
 
@@ -303,19 +323,27 @@ class Connection {
      * una función cuando se reciben
      * @param listener La función en cuestión
      */
-    public static getAllUsersId(listener :(uuids :string[]) => void) {
+    public static getAllUsersId(lobby : number,listener :(uuids :string[]) => void) {
         Connection.onInitialized(function() {
-            if(!Connection.instance.lobby) {
-                return;
-            }
-
-            Connection.ajaxGet("/users/uuid/" + Connection.instance.lobby)
+            Connection.ajaxGet("/users/uuid/" + lobby)
             .done(function(uuids) {
                 listener(uuids);
             }).fail(function() {
                 console.error("No se ha podido obtener los usuarios conectados");
             })
         })
+    }
+
+    /**
+     * Devuelve el numero maximo de lobbies 
+     */
+    public static getMaxLobbies(listener :(lobbies :number) => void) {
+        Connection.onInitialized(function() {
+            Connection.ajaxGet("/users/lobbies")
+            .done(function(lobbies :number) {
+                listener(lobbies);
+            }).fail(() => console.error("No se ha podido conectar con el servidor para obtener el número de lobbies del mismo"));
+        });
     }
 
     /**
@@ -374,6 +402,7 @@ class Connection {
     public static dropUser() {
         if(Connection.instance) {
             Connection.instance.user = null;
+            Connection.instance.lobby = null;
             console.log("Este usuario ha abandonado el servidor.");
         }
     }
@@ -398,22 +427,50 @@ class Connection {
         }
     }
 
+    public static getLobbyStatus(lobby :number, listener :(status :string) => void) {
+        Connection.ajaxGet("/users/lobbies/" + lobby)
+        .done(function(status :string) {
+            listener(status);
+        }).fail(() => console.error("No se ha podido conectar con el servidor para obtener el estado del lobby " + lobby));
+    }
+
     public static enterLobby(lobby :number) {
-        Connection.sendOperation("ENTER_LOBBY", lobby.toString());
-        Connection.instance.lobby = lobby;
-        chat = new Chat();
-        chat.startUpdating();
+        Connection.onInitialized(() => {
+            Connection.ajaxGet("/users/lobbies/" + lobby)
+            .done(function(reponse :string) {
+                switch(reponse) {
+                    case "FULL":
+                        console.error("Lobby " + lobby + " lleno");
+                    break;
+                    case "PLAYING":
+                        console.error("Lobby " + lobby + " playing");
+                    break;
+                    case "OK":
+                        Connection.sendOperation("ENTER_LOBBY", lobby.toString());
+                            Connection.instance.lobby = lobby;
+                            chat = new Chat();
+                            chat.startUpdating();
+                    break;
+                }	
+            }).fail(function() {console.error("No se ha podido conectar con el servidor para verificar el estado del lobby.")})
+        });
     }
 
     public static exitLobby() {
         Connection.sendOperation("EXIT_LOBBY", "");
         Connection.instance.lobby = null;
+        Connection.instance.mod = false;
         chat.stopUpdating();
         chat = null;
     }
 
     public static getLobby() {
-        return Connection.instance.lobby;
+        if(!Connection.instance){
+            return null;
+        }else{
+            return Connection.instance.lobby;
+        }
+        
     }
 
     /**
@@ -492,7 +549,43 @@ class Connection {
                 Connection.setMod();
                 break;
             case "START_GAME":
-                game.scene.start("SceneOverworld");
+                SceneMultiplayerMenu.getUuidsFromLobby(Connection.getLobby(), (uuids) => {
+                    RemotePlayer.pendingUuids = [];
+                    for(let uuid of uuids){
+                        if(Connection.getUser().id != uuid){
+                            RemotePlayer.pendingUuids.push(uuid);
+                        }
+                    }
+                    if(Connection.isMod()){
+                        NpcSync.activate();
+                    }
+                    game.scene.stop("SceneMenuMultiplayer");
+                    game.scene.start("SceneOverworld");
+                });
+                
+                break;
+            case "LOBBY_WIN":
+                if(Connection.instance){
+                    SceneOverworld.instance.room.colliderLayers= [];
+                    NpcSync.deactivate();
+                    SceneOverworld.instance.scene.stop("SceneOverworld");
+                    SceneOverworld.instance.scene.stop("SceneGUI");
+                    
+                    SceneOverworld.instance.scene.start("SceneGameVictory");
+                    if(multiplayer) {
+                        SceneOverworld.instance.stopSync();
+                    }
+                }
+                
+                break;
+            case "LEVER_INTERACT":
+                if(!SceneOverworld.instance.door.open){
+                    SceneOverworld.instance.door.open = true;
+                    SceneOverworld.instance.door.update();
+                    SceneOverworld.instance.switch.update();
+                }
+                
+                
                 break;
             default:
                 console.error("La operación " + msgdata.operation + " recibida del servidor"
@@ -513,9 +606,14 @@ class Connection {
             for(let listener of Connection.listenersLost) {
                 listener();
             }
+            //Connection.exitLobby();
             Connection.dropUser();
             Connection.instance = null;
             console.log("Conexión finalizada forzadamente");
         }
+        Connection.listenersClose = [];
+        Connection.listenersLost = [];
+        Connection.listenersInit = [];
+        NpcSync.deactivate();
     }
 }

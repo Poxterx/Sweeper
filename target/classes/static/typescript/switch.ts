@@ -1,4 +1,4 @@
-class Switch extends InteractiveItem {
+class Switch extends InteractiveItem implements INpcSyncable{
     //Interruptor al que está vinculado
     //public doorSwitch :switch;
 
@@ -15,14 +15,32 @@ class Switch extends InteractiveItem {
                 y: 11264
             }
         });
+        NpcSync.register("lever",this);
     }
 
     update(){
         super.update();
-        this.sprite = this.scene.physics.add.sprite(
-            this.config.startingPosition.x,
-            this.config.startingPosition.y,
-            this.name, 0).setFlip(true, false);
+        this.sprite.setFlip(true,false);
+    }
+
+    sendData(){
+        if(!this.sprite){
+            return{
+                flip:false
+            };
+        }else{
+            return{
+                flip:this.sprite.flipX
+            };
+        }
+        
+    }
+
+    receiveData(data :any){
+        if(this.sprite){
+             this.sprite.setFlip(data.flip, false);
+        }
+        
     }
 
 }

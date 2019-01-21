@@ -48,6 +48,9 @@ public class ChatMessageController {
      */
     @PostMapping
     public static ChatMessage postMessage(@RequestBody ChatMessage msg) {
+        if(msg.getLobby()==null){
+            return msg;
+        }
         messages.get(msg.getLobby()).add(msg);
         System.out.println("["+msg.getUsername()+"@"+msg.getLobby()+"] " + msg.getContent());
 

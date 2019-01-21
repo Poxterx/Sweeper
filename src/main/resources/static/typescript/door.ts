@@ -14,6 +14,7 @@ class Door extends InteractiveItem implements INpcSyncable {
             }
         });
         this.sprites = [];
+        this.open = false;
     }
 
     /**
@@ -36,7 +37,7 @@ class Door extends InteractiveItem implements INpcSyncable {
         // Le ponemos la caja de colisiones indicada en la configuración
         this.setCollisionBox();
         
-        NpcSync.register(this);
+        NpcSync.register("door",this);
     }
 
     private setDefaultValues() {
@@ -44,7 +45,7 @@ class Door extends InteractiveItem implements INpcSyncable {
         // una base cuadrada en la parte inferior del sprite para
         // cada bloque de la reja
         for(let i = 0; i < this.sprites.length; i++){
-            if(!this.config.collisionBox && this.active == false) {
+            if(!this.config.collisionBox && this.open == false) {
                 this.config.collisionBox = {
                     x: 0,
                     y: this.sprites[0].height - this.config.frameWidth,
@@ -59,7 +60,7 @@ class Door extends InteractiveItem implements INpcSyncable {
         super.update();
         
         // Se destruyen los sprites del centro
-        if(this.active === true){
+        if(this.open === true){
             this.sprites[2].destroy();
             this.sprites[3].destroy();
         }
@@ -73,7 +74,7 @@ class Door extends InteractiveItem implements INpcSyncable {
     private setCollisionBox() {
         for(let i = 0; i < this.sprites.length; i++){
             var body = this.sprites[i].body as Phaser.Physics.Arcade.Body;
-            if(!this.active){
+            if(!this.open){
                 body.immovable = true;
                 body.moves = false;
                 var collider = this.config.collisionBox;
@@ -85,11 +86,15 @@ class Door extends InteractiveItem implements INpcSyncable {
 
     public sendData() {
         return {
-            active: this.active
+            open: this.open
         }
     }
 
     public receiveData(data :any) {
-        this.active = data.active;
+        if(!this.open && data.open){
+            this.open = data.open;
+            this.update();
+        }
+        
     }
 }

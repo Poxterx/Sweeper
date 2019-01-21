@@ -5,7 +5,7 @@ class SceneGameVictory extends Phaser.Scene {
     }
 
     preload(){
-        this.load.image("backToMenu", "assets/images/Victory.png");
+        this.load.image("victory", "assets/images/Victory.png");
     }
 
     create() {
@@ -14,12 +14,14 @@ class SceneGameVictory extends Phaser.Scene {
             height: game.config.height as number
         }
 
-        this.add.image(screen.width*0.5,screen.height*0.5, "backToMenu");
+        var image = this.add.image(screen.width*0.5,screen.height*0.5, "victory");
+        Connection.close();
 
         // También ponemos la misma función en caso de que se reciba un evento de clic (o toque)
-        this.input.addDownCallback(() => {
+        image.setInteractive()
+            .on('pointerdown', () => {
+            this.scene.stop("SceneGameVictory");
             this.scene.start("SceneMenu");
-            Connection.close();
         });
     }
 }

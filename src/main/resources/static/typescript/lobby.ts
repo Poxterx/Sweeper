@@ -8,14 +8,12 @@ type ConnectButton = "connect" | "connectOn";
 */
 class Lobby  {
     //componentes
-    private connect:Phaser.GameObjects.Image;
-    private connectOn:Phaser.GameObjects.Image;
     public integrantes :User[];
     public Nombre : string;
     public id :number;
 
     constructor(name :string, ID :number) {
-        this.Nombre = "Lobby_X";
+        this.Nombre = name;
         this.integrantes = [];
         this.id = ID;
     }

@@ -117,6 +117,8 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
      */
     private maxLife :number;
 
+    public preventDeath :boolean
+
 
     /**
      * Crea una entidad basada en las opciones pasadas como parámetro
@@ -199,7 +201,9 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     update() {
         // Reseteamos los gráficos del fotograma anterior para poder dibujar en este
         this.prepareGraphics();
-        
+        if(!this.sprite){
+            return;
+        }
         // Elegimos lo que hacer a continuación en base al modo de la entidad
         switch(this.mode) {
             case "walk":
@@ -343,7 +347,12 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
     public setLife(newLife :number) {
         if((newLife<=this.maxLife)){
             this.life = newLife;
-            if(this.life <= 0){this.dead =true;}
+            if(this.life <= 0 && (!multiplayer || !this.preventDeath || (Connection.isMod() && !(this instanceof RemotePlayer)))){
+                this.dead =true;
+                if(this instanceof Player && multiplayer){
+                    (this as Player).stopSync();
+                }
+            }
         }    
     }
 
@@ -468,7 +477,11 @@ abstract class Entity extends Phaser.GameObjects.GameObject {
         // Calculamos el target respecto a la posición de la entidad. La llamada a 'clone()' se hace
         // porque en Phaser, las operaciones de vectores como 'add' o 'subtract' modifican el vector
         // base en lugar de devolver el resultado sin modificar los operandos, que es lo que uno esperaría
-        var targetDelta = this.target.clone().subtract(this.sprite.body.center);
+        var targetDelta = new Phaser.Math.Vector2(0,0);
+        if(this.target){
+            targetDelta = this.target.clone().subtract(this.sprite.body.center);
+        }
+        
         // Este cálculo puede dar resultados imprecisos con muchos decimales, por ello conviene
         // que redondeemos el vector y trabajemos sólo con enteros
         targetDelta.set(Math.round(targetDelta.x), Math.round(targetDelta.y));

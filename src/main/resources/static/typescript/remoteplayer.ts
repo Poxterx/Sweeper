@@ -20,6 +20,7 @@ class RemotePlayer extends Player {
         super(scene, control, xPos, yPos, config);
         this.uuid = uuid;
         RemotePlayer.map.set(uuid, this);
+        this.preventDeath = true;
 
         var that :RemotePlayer = this;
         this.checkExistenceInterval = setInterval(() => Connection.checkIfUserExists(
@@ -55,7 +56,7 @@ class RemotePlayer extends Player {
     public delete() {
         clearInterval(this.checkExistenceInterval);
         RemotePlayer.map.delete(this.uuid);
-        this.setLife(0);
+        this.dead=true;
     }
 
     /**
@@ -64,6 +65,9 @@ class RemotePlayer extends Player {
      */
     public receiveData(data :any) {
         this.setLife(data.life);
+        if(data.life == 0){
+            this.dead = true;
+        }
         this.arrayKeys = data.keys;
         this.updateCooldown--;
 

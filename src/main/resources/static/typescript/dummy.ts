@@ -32,7 +32,7 @@ class Dummy extends Entity implements INpcSyncable {
 
     create() {
         super.create();
-        NpcSync.register(this);
+        NpcSync.register("name", this);
     }
 
     /**

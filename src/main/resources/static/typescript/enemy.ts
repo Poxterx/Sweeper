@@ -47,7 +47,7 @@ class Enemy extends Entity implements INpcSyncable {
 
     create() {
         super.create();
-        NpcSync.register(this);
+        NpcSync.register(this.config.name,this);
     }
 
     update() {
@@ -116,6 +116,9 @@ class Enemy extends Entity implements INpcSyncable {
 
     receiveData(data: any): void {
         this.setLife(data.life);
+        if(data.life==0){
+            this.dead = true;
+        }
         if(!this.sprite) {
             return;
         }

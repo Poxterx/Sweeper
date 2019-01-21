@@ -1,10 +1,12 @@
 class NpcSync {
-    static register(npc) {
+    static register(id, npc) {
         if (!NpcSync.initialized) {
             NpcSync.initialize();
         }
-        var id = NpcSync.nextId++;
         NpcSync.map.set(id, npc);
+        if (npc instanceof Entity) {
+            npc.preventDeath = true;
+        }
     }
     static unregister(npc) {
         if (!NpcSync.initialized) {
@@ -14,6 +16,9 @@ class NpcSync {
             if (mapEntry[1] == npc) {
                 NpcSync.map.delete(mapEntry[0]);
             }
+        }
+        if (npc instanceof Entity) {
+            npc.preventDeath = false;
         }
     }
     static isRegistered(npc) {
@@ -32,9 +37,6 @@ class NpcSync {
     static initialize() {
         if (!NpcSync.map) {
             NpcSync.map = new Map();
-        }
-        if (NpcSync.nextId == null) {
-            NpcSync.nextId = 0;
         }
         NpcSync.initialized = true;
     }
@@ -62,12 +64,16 @@ class NpcSync {
         if (!NpcSync.initialized) {
             NpcSync.initialize();
         }
+        NpcSync.deactivate();
         NpcSync.interval = setInterval(NpcSync.sendData, 50);
         NpcSync.active = true;
     }
     static deactivate() {
         clearInterval(NpcSync.interval);
         NpcSync.active = false;
+        for (let value of NpcSync.map.values()) {
+            NpcSync.unregister(value);
+        }
     }
     static isActive() {
         return NpcSync.active;

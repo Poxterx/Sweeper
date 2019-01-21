@@ -65,7 +65,7 @@ class Chat {
     }
     update() {
         this.loadChat();
-        Chat.chatBox.hidden = Connection.getUser() == null && !SERVER;
+        //Chat.chatBox.hidden = Connection.getUser() == null && !SERVER;
     }
     startUpdating() {
         this.updateInterval = setInterval(() => this.update.call(this), 500);

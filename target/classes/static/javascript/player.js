@@ -178,6 +178,9 @@ class Player extends Entity {
      * de teclas del usuario
      */
     controlTarget() {
+        if (!this.sprite) {
+            return;
+        }
         // Vector para almacenar el desplazamiento del target
         var vector = { x: 0, y: 0 };
         // Magnitud en la que desplazar el target por cada coordenada

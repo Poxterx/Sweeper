@@ -30,7 +30,7 @@ class Dummy extends Entity {
     }
     create() {
         super.create();
-        NpcSync.register(this);
+        NpcSync.register("name", this);
     }
     /**
      * Intenta mantener el target en su posición original

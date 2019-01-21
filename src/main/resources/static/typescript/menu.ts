@@ -17,13 +17,6 @@ class SceneMenu extends Phaser.Scene {
     private exitOn:Phaser.GameObjects.Image;
 
     /**
-     * Boolean para saber si se ha caido la conexion
-     */
-    public lostConex:boolean = false;
-    private updateInterval :number;
-    private lostConexImg:Phaser.GameObjects.Image;
-
-    /**
      * Variables en las que se guardaran el tamaño de la pantalla.
      */
     private sWidth:number;
@@ -57,7 +50,7 @@ class SceneMenu extends Phaser.Scene {
         this.load.image("shadowBackground", "assets/images/Menu_Principal/SombrasFinal.png");
 
         //Error
-        this.load.image("lostConex", "assets/images/Menu_Principal/ConexionPerdida.png");
+        this.load.image("disconect", "assets/images/Disconect.png");
         
     }
     /**
@@ -108,6 +101,10 @@ class SceneMenu extends Phaser.Scene {
         // Creamos el menú
         this.add.image(screen.width*0.5,screen.height*0.5, "background");
 
+        // Añadimos la imagen del disconect
+        SceneGameDisconect.disconect = this.add.image(screen.width*0.5,screen.height*0.5, "disconect");
+        SceneGameDisconect.disconect.setVisible(false);
+
         //Se guardan las dimensiones de la pantalla
         this.sWidth=screen.width;
         this.sHeight=screen.height;
@@ -156,10 +153,6 @@ class SceneMenu extends Phaser.Scene {
         //Añadimos los detalles
         this.add.image(screen.width*0.5,screen.height*0.5,"shadowBackground");
 
-        //Añadimos el error
-        this.lostConexImg = this.add.image(screen.width*0.75,screen.height*0.8,"lostConex");
-        this.lostConexImg.setVisible(false);
-
         /**
         * Ponemos los siguientes eventos asociados a la imagen singlePlayer :
         * En caso de que se pulse se empieza a jugar
@@ -168,6 +161,8 @@ class SceneMenu extends Phaser.Scene {
         this.singlePlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 multiplayer = false;
+                this.destroy();
+                this.scene.stop("SceneMenu");
                 this.scene.start("SceneOverworld");
             })
             .on('pointerover', () => this.buttonAnimation("singlePlayerOn",0.25,0.5) )
@@ -181,6 +176,8 @@ class SceneMenu extends Phaser.Scene {
         this.multiPlayer.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
                 multiplayer = true;
+                this.destroy();
+                this.scene.stop("SceneMenu");
                 this.scene.start("SceneMultiplayerMenu");
             })
             .on('pointerover', () => this.buttonAnimation("multiPlayerOn",0.75,0.5) )
@@ -201,6 +198,8 @@ class SceneMenu extends Phaser.Scene {
         */
         this.exit.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
+                this.destroy();
+                this.scene.stop("SceneMenu");
                 this.scene.start("SceneTitle");
                 console.log("Boom");
             })
@@ -208,15 +207,15 @@ class SceneMenu extends Phaser.Scene {
             .on('pointerout', () => this.buttonAnimation("exit",0.75,0.5) )
         ;
     }
-    
-    update(){
 
-        if(this.lostConex){
-            this.lostConex = false;
-            this.lostConexImg.setVisible(true);
-            this.updateInterval = setInterval(() => this.update.call(this), 500);
-        }else{
-            this.lostConexImg.setVisible(false);
-        }
+    destroy(){
+        this.singlePlayer.destroy();
+        this.singlePlayerOn.destroy();
+        this.multiPlayer.destroy();
+        this.multiPlayerOn.destroy();
+        this.options.destroy();
+        this.optionsOn.destroy();
+        this.exit.destroy();
+        this.exitOn.destroy();
     }
 }

@@ -90,7 +90,11 @@ class SocketManager extends TextWebSocketHandler {
                 ChatMessageController.postServerMessage(user.getName() + " se ha desconectado.",
                 lobby);
                 if(UserController.getModId(lobby).equals(sessionData(session).userId)) {
-                    UserController.pickRandomMod(lobby);
+                    if(getUsersInLobby(lobby).size() > 0) {
+                        UserController.pickRandomMod(lobby);
+                    } else {
+                        UserController.setModId(null, lobby);
+                    }
                 }
                 break;
             case "GET_USERS_IN_LOBBY":
@@ -102,6 +106,20 @@ class SocketManager extends TextWebSocketHandler {
             case "LOBBY_START":
                 reponse = mapper.createObjectNode();
                 reponse.put("operation", "START_GAME");
+                reponse.put("value", "");
+                broadcastTextMessage(reponse.toString(), lobby);
+                UserController.setLobbyPlaying(lobby, true);
+                break;
+            case "LOBBY_WIN":
+                reponse = mapper.createObjectNode();
+                reponse.put("operation", "LOBBY_WIN");
+                reponse.put("value", "");
+                broadcastTextMessage(reponse.toString(), lobby);
+                UserController.setLobbyPlaying(lobby, true);
+                break;
+            case "LEVER_INTERACT":
+                reponse = mapper.createObjectNode();
+                reponse.put("operation", "LEVER_INTERACT");
                 reponse.put("value", "");
                 broadcastTextMessage(reponse.toString(), lobby);
                 UserController.setLobbyPlaying(lobby, true);
@@ -187,11 +205,13 @@ class SocketManager extends TextWebSocketHandler {
         boolean needNewMod = false;
         User user = sessionData(session).getUser();
         Integer lobby = sessionData(session).lobby;
-        if(getUsersInLobby(lobby).size() <= 1) {
-            UserController.setModId(null, lobby);
-            UserController.setLobbyPlaying(lobby, false);
-        } else if(UserController.isModId(sessionData(session).userId, lobby)) {
-           needNewMod = true;
+        if(lobby != null){
+            if(getUsersInLobby(lobby).size() <= 1) {
+                UserController.setModId(null, lobby);
+                UserController.setLobbyPlaying(lobby, false);
+            } else if(UserController.isModId(sessionData(session).userId, lobby)) {
+               needNewMod = true;
+            }
         }
         UserController.removeUser(sessionData(session).userId);
         sessions.remove(session.getId());
@@ -200,6 +220,8 @@ class SocketManager extends TextWebSocketHandler {
         }
         ChatMessageController.postServerMessage(user.getName() + " se ha desconectado.",
         lobby);
+        
+        
         System.out.println("Se ha cerrado la conexión con " + hostname
         + " -- Código de cierre " + code.getCode());
         // El código de cierre indica el motivo por el que se ha cerrado el WebSocket.

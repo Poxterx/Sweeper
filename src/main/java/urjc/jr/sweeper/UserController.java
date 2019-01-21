@@ -86,7 +86,7 @@ public class UserController {
         String ret;
         if(SocketManager.getUsersInLobby(lobby).size() >= maxPlayersPerLobby) {
             ret = "FULL";
-        } else if(lobbiesPlaying[lobby]) {
+        } else if(lobbiesPlaying[lobby] && SocketManager.getUsersInLobby(lobby).size() > 0) {
             ret = "PLAYING";
         } else {
             ret = "OK";
@@ -126,6 +126,8 @@ public class UserController {
             ret.status = "NONEXISTENT";
         } else if(!passwords.get(user.getName()).equals(user.getPassword())) {
             ret.status = "WRONGPASS";
+        } else if(takenUsernames.contains(user.getName())) {
+            ret.status = "INSERVER";    
         } else {
             ret.status = "OK";
         }

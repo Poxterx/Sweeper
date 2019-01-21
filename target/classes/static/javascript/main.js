@@ -39,6 +39,5 @@ document.title = game.config.gameTitle + " " + game.config.gameVersion;
 if (SERVER) {
     document.title += " (SERVER)";
 }
-var password = "5678";
 var __lobby = 1;
 //# sourceMappingURL=main.js.map

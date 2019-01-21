@@ -115,7 +115,7 @@ type Message = {
  * - NONEXISTENT: No hay ningún usuario registrado con ese nombre
  * - WRONGPASS: La contraseña es incorrecta
  */
-type LoginStatus = "OK" | "EMPTY" | "TOOLONG" | "INVALID" | "TAKEN" | "NONEXISTENT" | "WRONGPASS"
+type LoginStatus = "OK" | "EMPTY" | "TOOLONG" | "INVALID" | "TAKEN" | "NONEXISTENT" | "WRONGPASS" | "INSERVER"
 
 /**
  * Respuesta que envía el servidor al agregar un usuario

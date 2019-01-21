@@ -81,7 +81,7 @@ class Chat{
 
     private update() {
         this.loadChat();
-        Chat.chatBox.hidden = Connection.getUser() == null && !SERVER;
+        //Chat.chatBox.hidden = Connection.getUser() == null && !SERVER;
     }
 
     public startUpdating() {

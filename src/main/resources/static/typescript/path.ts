@@ -253,7 +253,9 @@ class Path {
      */
     private static getNeighbourTiles(room :Room, tile :Phaser.Tilemaps.Tile) {
         var ret :Phaser.Tilemaps.Tile[] = [];
-
+        if(tile == null){
+            return [];
+        }
         
         var possibleNeighbours = [
             {x: tile.x, y: tile.y-1},

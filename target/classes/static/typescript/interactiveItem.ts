@@ -52,7 +52,7 @@ abstract class InteractiveItem extends Phaser.GameObjects.GameObject {
     //Array de sprites del sistema de físicas de Phaser que maneja este item
     public sprites : Phaser.Physics.Arcade.Sprite[];
     //estado del item
-    public active: boolean;
+    public open: boolean;
     //referencia a la escena a la que pertenece esta entidad
     public scene: SceneOverworld;
 
@@ -61,7 +61,7 @@ abstract class InteractiveItem extends Phaser.GameObjects.GameObject {
         this.name = config.name;
         this.config = config;
         this.scene = scene;
-        this.active = false;
+        this.open = false;
 
     }
     /**

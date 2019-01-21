@@ -23,12 +23,14 @@ class UsersList {
     constructor(scene :Phaser.Scene){
         this.scene = scene;
         this.usersArray = [];
+        
     }
 
     /**
      * Inicia las actualizaciones de la lista
      */
     public startUpdating() {
+        this.text.setVisible(true);
         this.updateInterval = setInterval(() => this.update.call(this), 500);
     }
 
@@ -36,6 +38,7 @@ class UsersList {
      * Detiene las actualizaciones de la lista
      */
     public stopUpdating() {
+        this.text.setVisible(false);
         clearInterval(this.updateInterval);
     }
 
@@ -56,6 +59,8 @@ class UsersList {
             screen.width * 0.65,
             SERVER ? screen.height * 0.2 : screen.height * 0.45
         )
+
+        this.text.active = false;
     }
 
     public getUsers() {
@@ -86,5 +91,10 @@ class UsersList {
                 that.text.text += "\n";
             }
         });
+    }
+
+    destroy(){
+        this.stopUpdating();
+        this.text.destroy();
     }
 }

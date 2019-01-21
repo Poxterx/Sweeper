@@ -43,13 +43,13 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 this.sign_exitOn.setVisible(true);
                 break;
             case "playerReady":
-                if (this.statusReady) {
+                if (Connection.getUser().ready) {
                     this.readyOn.setVisible(false);
                 }
                 else {
                     this.readyOn.setVisible(true);
                 }
-                this.statusReady = !this.statusReady;
+                Connection.setUserReady(!Connection.getUser().ready);
                 break;
             case "logIn":
                 this.sign_logInOn.setVisible(false);
@@ -83,48 +83,50 @@ class SceneMultiplayerMenu extends Phaser.Scene {
      * Método que carga la lista de jugadores y los controles pertinentes
      */
     playerReady(register) {
-        // Destruimos el botón de introducir nombre
         var that = this;
-        Connection.tryCreateUser(this.userName.value, this.userPassword.value, register, 
-        // El usuario se ha creado correctamente porque el nombre es válido para el servidor
-        function (user) {
-            //Vaciamos la caja de texto
-            that.userName.value = "";
-            that.userPassword.value = "";
-            //Inicializamos el estado del toggle
-            that.statusReady = false;
-            //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
-            that.logActive = false;
-            //Indicamos la transicion
-            that.transition = false;
-            that.inLobby = true;
-            Connection.openSocket(user);
-            //Asignamos el método que llamará el botón Ready
-            that.readyOff.setVisible(true);
-            that.readyOff.setInteractive({ useHandCursor: true })
-                .on('pointerdown', () => {
-                Connection.setUserReady(!Connection.getUser().ready);
-                that.buttonAnimation("playerReady", 0.85, 0.85);
+        Connection.ping(function () {
+            // Destruimos el botón de introducir nombre
+            Connection.tryCreateUser(that.userName.value, that.userPassword.value, register, 
+            // El usuario se ha creado correctamente porque el nombre es válido para el servidor
+            function (user) {
+                //Vaciamos la caja de texto
+                that.userName.value = "";
+                that.userPassword.value = "";
+                //Inicializamos el estado del toggle
+                Connection.setUserReady(false);
+                //Indicamos que la caja y el botón se situarán más arriba, y aparecerá la lista
+                that.logActive = false;
+                //Indicamos la transicion
+                that.transition = false;
+                that.lista.hidden = false;
+                //Quitamos el boton de ready en lobby
+                that.readyOn.setVisible(false);
+                that.readyOff.setVisible(false);
+                //Quitamos el hover
+                that.sign_logInOn.setVisible(false);
+                that.sign_signUpOn.setVisible(false);
+                Connection.openSocket(user);
+                //that.getUuidsFromLobby(() =>{});
+                //setTimeout(() => Connection.enterLobby(1), 500)
+                //Asignamos el método que llamará el botón Ready
+                that.readyOff.setInteractive({ useHandCursor: true })
+                    .on('pointerdown', () => {
+                    Connection.setUserReady(!Connection.getUser().ready);
+                    that.buttonAnimation("playerReady", 0.85, 0.85);
+                });
+                that.exitMulti.setVisible(true);
+                that.userlist = new UsersList(that);
+                that.userlist.create();
+                that.generateLobbies();
+                //setTimeout(() => Connection.enterLobby(__lobby), 500);
+            }, 
+            // El usuario no se ha creado porque el nombre de usuario no es válido
+            function (error) {
+                SceneMultiplayerMenu.setErrorLog(error);
             });
-            that.exitMulti.setVisible(true);
-            that.userlist = new UsersList(that);
-            that.userlist.create();
-            that.userlist.startUpdating();
-            that.generateLobbies();
-            setTimeout(() => Connection.enterLobby(__lobby), 500);
-        }, 
-        // El usuario no se ha creado porque el nombre de usuario no es válido
-        function (error) {
-            SceneMultiplayerMenu.setErrorLog(error);
+        }, function () {
+            SceneMultiplayerMenu.setErrorLog("OFFLINE");
         });
-    }
-    /**
-     * Método que pasa los valores para el registro
-     */
-    playerSignUp() {
-        //this.userName.value;
-        //this.userPassword.value;
-        console.log("holi");
     }
     /**
      * Método que posiciona la caja de texto
@@ -136,8 +138,8 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             var posY_name = this.canvas.getBoundingClientRect().top + this.sHeight * 0.5 - 90;
             var posX_pass = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 - 60;
             var posY_pass = this.canvas.getBoundingClientRect().top + this.sHeight * 0.5 + 20;
-            var posX_error = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 + 60;
-            var posY_error = this.canvas.getBoundingClientRect().top + this.sHeight * 0.8 - 10;
+            var posX_error = this.canvas.getBoundingClientRect().left + this.sWidth * 0.5 + 45;
+            var posY_error = this.canvas.getBoundingClientRect().top + this.sHeight * 0.8 - 20;
         }
         else {
             var posX_chat = this.canvas.getBoundingClientRect().left + this.sWidth * 0.25 - 150;
@@ -153,6 +155,10 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.chat.style.top = posY_chat + "px";
         this.chat.style.width = this.sWidth * 0.46 + "px";
         this.chat.style.height = this.sHeight * 0.55 + "px";
+        this.lista.style.left = posX_chat + "px";
+        this.lista.style.top = posY_chat + "px";
+        this.lista.style.width = this.sWidth * 0.46 + "px";
+        this.lista.style.height = this.sHeight * 0.55 + "px";
         this.currentLobby.style.left = posX_lobby + "px";
         this.currentLobby.style.top = posY_lobby + "px";
         this.errorLog.style.left = posX_error + "px";
@@ -164,7 +170,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
     updateSign() {
         if (this.transition) {
             //Animación
-            if (this.angle > -0.7853981634 || this.signX > this.sWidth * 0.8) {
+            if (this.angle > -0.7853981634 || this.signX > this.sWidth * 0.8) { //-45º
                 //Posicionamos
                 if (this.angle > -0.7853981634) {
                     this.sign.setRotation(this.angle);
@@ -192,15 +198,6 @@ class SceneMultiplayerMenu extends Phaser.Scene {
                 this.sign_logIn.setVisible(true);
                 this.sign_signUp.setVisible(true);
             }
-            //Activamos los botones en casoi de que la transicion ya haya terminado.
-            if (this.angle <= -0.7853981634 && this.signX <= this.sWidth * 0.8) {
-                this.userName.hidden = false;
-                this.userPassword.hidden = false;
-                this.errorLog.hidden = false;
-                this.sign_exit.setVisible(true);
-                this.sign_logIn.setVisible(true);
-                this.sign_signUp.setVisible(true);
-            }
         }
         else {
             //Desactivamos botones
@@ -211,7 +208,7 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             this.sign_logIn.setVisible(false);
             this.sign_signUp.setVisible(false);
             //Animación
-            if (this.angle < 0 || this.signX < this.sWidth * 1.5) {
+            if (this.angle < 0 || this.signX < this.sWidth * 1.5) { //0º
                 //Posicionamos
                 if (this.angle < 0) {
                     this.sign.setRotation(this.angle);
@@ -242,19 +239,44 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             var aux = this.lobbys[i];
             //Construir el Wrap del lobby
             var NombreLobby = document.createElement("div");
-            NombreLobby.innerHTML = aux.Nombre;
+            NombreLobby.innerHTML = aux.Nombre + i;
             NombreLobby.setAttribute("style", "width:30%;align-self: left; font-size: 25px");
-            //var BotonConnect = document.createElement("image");
-            //BotonConnect.src = "assets/images/Menu_Multi/Connect.png";
+            var BotonConnect = document.createElement("input");
+            BotonConnect.setAttribute("type", "button");
+            BotonConnect.setAttribute("class", "connectButton");
+            BotonConnect.disabled = true;
+            BotonConnect.hidden = true;
             var numeroIntegrantes = document.createElement("div");
-            numeroIntegrantes.innerHTML = aux.integrantes.length.toString() + "/4";
+            var that = this;
+            (function (i, numeroIntegrantes, BotonConnect) {
+                BotonConnect.addEventListener("click", function () {
+                    Connection.enterLobby(i);
+                    that.userlist.startUpdating();
+                    if (Connection.getUser().ready) {
+                        that.readyOn.setVisible(true);
+                    }
+                    else {
+                        that.readyOff.setVisible(true);
+                    }
+                });
+                SceneMultiplayerMenu.getUuidsFromLobby(i, (uuids) => {
+                    Connection.getLobbyStatus(i, function (status) {
+                        numeroIntegrantes.innerText = status + " - " + uuids.length.toString() + "/4";
+                        if (status == "OK") {
+                            BotonConnect.disabled = false;
+                            BotonConnect.hidden = false;
+                        }
+                    });
+                });
+            })(i, numeroIntegrantes, BotonConnect);
+            BotonConnect.src = "assets/images/Menu_Multi/Connect.png";
             numeroIntegrantes.setAttribute("style", "float:right;top:50%");
             var wrapLobby = document.createElement("div");
             wrapLobby.setAttribute("class", "Row");
             wrapLobby.setAttribute("style", "background-color:lightgrey;margin-bottom:5px;font-family: Impact; font-size: 15px");
             //wrapLobby.setAttribute("style","position:absolute");
             wrapLobby.insertAdjacentElement('beforeend', NombreLobby);
-            //wrapLobby.insertAdjacentElement('beforeend', BotonConnect);
+            wrapLobby.insertAdjacentElement('beforeend', BotonConnect);
             wrapLobby.insertAdjacentElement('beforeend', numeroIntegrantes);
             this.lista.insertAdjacentElement('beforeend', wrapLobby);
         }
@@ -273,9 +295,9 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         this.sWidth = screen.width;
         this.sHeight = screen.height;
         //Metemos las imagenes de base
-        this.add.image(screen.width * 0.5, screen.height * 0.5, "backgroundMulti");
-        this.add.image(screen.width * 0.5, screen.height * 0.5, "lobby");
-        this.add.image(screen.width * 0.5, screen.height * 0.5, "backgroundMultiShadow");
+        this.backgroundMulti = this.add.image(screen.width * 0.5, screen.height * 0.5, "backgroundMulti");
+        this.backgroundLobby = this.add.image(screen.width * 0.5, screen.height * 0.5, "lobby");
+        this.backgroundMultiShadow = this.add.image(screen.width * 0.5, screen.height * 0.5, "backgroundMultiShadow");
         //Añadimos la señal
         //Señal
         this.sign = this.add.image(screen.width * 0.5, screen.height * 0.5, "sign");
@@ -353,12 +375,14 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         var that = this;
         this.sign_exit.setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
-            Connection.dropUser();
+            Connection.close();
             that.userName.hidden = true;
             that.userPassword.hidden = true;
             that.currentLobby.hidden = true;
             that.errorLog.hidden = true;
             that.transition = false;
+            that.destroy();
+            this.scene.stop("SceneMenuMultiplayer");
             that.scene.start("SceneMenu");
         })
             .on('pointerover', () => that.buttonAnimation("sign_exitOn", 0.25, 0.5))
@@ -383,21 +407,43 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             that.currentLobby.hidden = true;
             that.errorLog.hidden = true;
             that.transition = false;
+            that.lista.hidden = true;
+            that.chat.hidden = true;
+            that.destroy();
             Connection.close();
+            this.scene.stop("SceneMenuMultiplayer");
             that.scene.start("SceneMenu");
         })
             .on('pointerover', () => that.buttonAnimation("exitMultiOn", 0.25, 0.5))
             .on('pointerout', () => that.buttonAnimation("exitMulti", 0.25, 0.5));
         this.backLobby.setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => {
+            this.userlist.stopUpdating();
+            this.readyOn.setVisible(false);
+            this.readyOff.setVisible(false);
+            this.chat.hidden = true;
+            Connection.setUserReady(false);
+            Connection.exitLobby();
+            this.generateLobbies();
+        })
             .on('pointerover', () => that.buttonAnimation("backLobbyOn", 0.25, 0.5))
             .on('pointerout', () => that.buttonAnimation("backLobby", 0.25, 0.5));
         //////////////////////////
         //Activamos la transicion de entrada
         this.transition = true;
-        var hey = new Lobby("PEPE", 1);
         this.lobbys = [];
-        this.lobbys.push(hey);
-        this.lobbys.push(hey);
+        var that = this;
+        Connection.getMaxLobbies(function (lobbies) {
+            for (var i = 0; i < lobbies; i++) {
+                var hey = new Lobby("Lobby_", i);
+                that.lobbys.push(hey);
+            }
+        });
+        Connection.onLost(function () {
+            that.destroy();
+            that.scene.stop("SceneMenuMultiplayer");
+            that.scene.start("SceneGameDisconect");
+        });
     }
     reset() {
         this.logActive = true;
@@ -410,19 +456,19 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         if (!this.logActive) {
             this.currentLobby.hidden = false;
             //Si nos encontramos en seleccion de lobby o no.
-            if (this.inLobby) {
+            if (Connection.getLobby() != null) {
                 this.lista.hidden = true;
                 this.backLobby.setVisible(true);
                 //Recibe el lobby actual, si no hay dice no lobby
-                document.getElementById("NameText").innerText = this.lobbyActual;
-                //El chat??//////////////////////////////////////////////////////////////
-                /////////////////////////////////////////////////////////////////////////
+                document.getElementById("NameText").innerText = "Lobby_" + Connection.getLobby();
+                //El chat lo mostramos
+                this.chat.hidden = false;
             }
             else {
                 this.backLobby.setVisible(false);
                 this.lista.hidden = false;
-                //Deshabilitar el chat//////////////
-                ////////////////////////////////////
+                //El chat lo ocultamos
+                this.chat.hidden = true;
                 //Ponemos que no hay lobby seleccionado
                 document.getElementById("NameText").innerText = "No lobby";
             }
@@ -445,15 +491,15 @@ class SceneMultiplayerMenu extends Phaser.Scene {
         //Gestionamos los lobbys y sus elementos
         this.gestionLobby();
         if (Connection.getUser() == null && !this.logActive) {
-            this.userlist.stopUpdating();
-            this.userlist = null;
             this.reset();
             this.userName.hidden = true;
             this.userPassword.hidden = true;
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
+            this.lista.hidden = true;
             this.transition = false;
-            this.scene.start("SceneMenu");
+            $(".Row").remove();
+            this.destroy();
             Connection.close();
             return;
         }
@@ -467,30 +513,54 @@ class SceneMultiplayerMenu extends Phaser.Scene {
             }
         }
         if (allReady && users.length >= 2) {
-            this.userlist.stopUpdating();
-            this.userlist = null;
             this.reset();
             this.userName.hidden = true;
-            this.getUuidsFromLobby(() => {
-                if (Connection.isMod()) {
-                    Connection.sendOperation("LOBBY_START", Connection.getLobby().toString());
-                }
-            });
             this.userPassword.hidden = true;
             this.currentLobby.hidden = true;
             this.errorLog.hidden = true;
             this.transition = false;
+            this.lista.hidden = true;
+            this.chat.hidden = true;
+            this.destroy();
+            if (Connection.isMod()) {
+                Connection.sendOperation("LOBBY_START", Connection.getLobby().toString());
+            }
         }
     }
-    getUuidsFromLobby(listener) {
-        RemotePlayer.pendingUuids = [];
-        Connection.getAllUsersId(function (uuids) {
-            for (let uuid of uuids) {
-                if (uuid != Connection.getUser().id) {
-                    RemotePlayer.pendingUuids.push(uuid);
-                }
-            }
-            listener();
+    destroy() {
+        //Imagenes
+        this.readyOff.destroy();
+        this.readyOn.destroy();
+        this.back.destroy();
+        this.connect.destroy();
+        this.connectOn.destroy();
+        this.backLobby.destroy();
+        this.backLobbyOn.destroy();
+        this.exitMulti.destroy();
+        this.exitMultiOn.destroy();
+        this.sign.destroy();
+        this.sign_exit.destroy();
+        this.sign_exitOn.destroy();
+        this.sign_logIn.destroy();
+        this.sign_logInOn.destroy();
+        this.sign_signUp.destroy();
+        this.sign_signUpOn.destroy();
+        //Userlist
+        if (this.userlist) {
+            this.userlist.destroy();
+        }
+        this.userlist = null;
+        //Background
+        this.backgroundMulti.destroy();
+        this.backgroundLobby.destroy();
+        this.backgroundMultiShadow.destroy();
+        //Html boys
+        this.lista.hidden = true;
+        this.chat.hidden = true;
+    }
+    static getUuidsFromLobby(lobby, listener) {
+        Connection.getAllUsersId(lobby, function (uuids) {
+            listener(uuids);
         });
     }
 }

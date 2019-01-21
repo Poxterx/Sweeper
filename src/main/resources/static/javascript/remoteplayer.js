@@ -13,6 +13,7 @@ class RemotePlayer extends Player {
         super(scene, control, xPos, yPos, config);
         this.uuid = uuid;
         RemotePlayer.map.set(uuid, this);
+        this.preventDeath = true;
         var that = this;
         this.checkExistenceInterval = setInterval(() => Connection.checkIfUserExists(this.uuid, exists => { if (!exists)
             that.delete(); }), 250);
@@ -41,7 +42,7 @@ class RemotePlayer extends Player {
     delete() {
         clearInterval(this.checkExistenceInterval);
         RemotePlayer.map.delete(this.uuid);
-        this.setLife(0);
+        this.dead = true;
     }
     /**
      * Procesa los datos recibidos de otros jugadores para sincronizarlos en este cliente
@@ -49,6 +50,9 @@ class RemotePlayer extends Player {
      */
     receiveData(data) {
         this.setLife(data.life);
+        if (data.life == 0) {
+            this.dead = true;
+        }
         this.arrayKeys = data.keys;
         this.updateCooldown--;
         if (this.sprite && this.sprite.anims) {
