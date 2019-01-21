@@ -39,6 +39,9 @@ Se ha añadido el Menú Multijugador, en el que los usuarios que quieren partida
 ![diagf4](https://user-images.githubusercontent.com/43203588/50811643-aa0e1e80-130f-11e9-91f9-e02e4c798364.PNG)
 Se ha añadido la pantalla de victoria entre otras cosas.
 
+## Vídeo
+[![Video](https://user-images.githubusercontent.com/43203588/51444411-7790f800-1cf7-11e9-98cf-62d069859779.JPG)](https://www.youtube.com/watch?v=Gg_983Y46L8&feature=youtu.be)
+
 ## Implementación de WebSockets
 La clase SocketManager tiene un evento para cuando se establece el socket, otro para cuando se cierra, y otro para cuando recibe un mensaje. Los mensajes se usan de una manera muy concreta, se envían siempre pares así: {operation, value}.
 Cuando se recibe un mensaje, SocketManager procesa la petición del cliente y la respuesta del server. Las peticiones del cliente pueden ser las siguientes operaciones: LINK_USER, SYNC_NPC, SYNC_PLAYER, ENTER_LOBBY, EXIT_LOBBY, LOBBY_START. El servidor también puede mandar operaciones de ese tipo al cliente que sea necesario. Las opreaciones del server que los clientes pueden entender: SYNC_NPC, SYNC_PLAYER, SET_MOD, START_GAME. Esto se procesa en la clase Connection.
@@ -55,7 +58,7 @@ El procedimiento para conectar a un jugador es el siguiente:
 
 ENTER_LOBBY:
 Si la opción de conectarse a un lobby está disponible y el jugador se conecta, el cliente envia esta operación al servidor indicando cual es el lobby solicitado. El servidor asociará el usuario que ha enviado esa operación al lobby y, por tanto, empezará a recibir los datos emitidos a través del lobby, como por ejemplo el chat. Con EXIT_LOBBY se sale del lobby.
-El primer usuario en entrar en un lobby es considerado como el moderador de ese lobby. Esto implica que es el cliente que lleva el procesamiento de los npcs. Si el usuario abandona la partida por la razón que sea, el status de moderador se transfiere a otro usuario del mismo lobby al azar. El servidor notifica a un cliente que es el moderador mediante la operación SET_MOD.
+El primer usuario en entrar en un lobby es considerado como el moderador de ese lobby. Esto implica que es el cliente que lleva el procesamiento de los npcs. Si el usuario abandona la partida por la razón que sea, el status de moderador se transfiere a otro usuario del mismo lobby al azar. El servidor notifica a un cliente que es el moderador mediante la operación SET_MOD. Los juagadores no necesitan saber cual es el moderador para evitar trampas.
 
 SYNC_PLAYER (Se sincronizan los jugadores):
 La clase player está ejecutando cada intervalo de 50 ms una función que envía una operación SYNC_PLAYER(operación de servidor) al server con los datos relevantes (la posición, la animación, etc) y el server manda esos datos (en los que va incluido el usuario que lo ha mandado) a todos los demás clientes en otra operación SYNC_PLAYER(operación de cliente).
@@ -75,6 +78,12 @@ Para el cliente, se usa la url que sale en el terminal y el server.
 El juego no puede ejecutarse correctamente si la pantalla está minimizada o en una pestaña de fondo.
 La tecla F2 muestra información de depuración, a saber los targets de las entidades y las rutas de las entidades que utilicen IA.
 El juego te avisa si se pierde la conexión con el servidor mientras se está jugando, pero no se plantea la posiblidad de seguir jugando en este punto porque el cliente no se puede seguir descargando los assets necesarios para el juego.
+
+### Controles
+WASD: moverse por el escenario.
+R: atacar.
+E: activar palanca.
+F2: depuración.
 
 ## Páginas principales
 Al iniciar el juego se ve la pantalla inicial, la cual solicita una tecla para empezar:
